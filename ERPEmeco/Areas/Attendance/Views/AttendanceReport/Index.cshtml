@@ -1,0 +1,181 @@
+﻿@model IEnumerable<VM.ViewModels.EmployeeAttendanceVM>
+@{
+    ViewBag.Title = "تقرير الحضور اليومي";
+    Layout = "_Layout";
+
+    var firstRecord = Model.FirstOrDefault();
+    var today = firstRecord != null ? firstRecord.Date : DateOnly.FromDateTime(DateTime.Now);
+    var totalEmployees = Model.Count();
+    var laundryName = "المغسلة"; // أو اجلبه من ViewBag/Model
+}
+<script>
+    function printDiv(divId) {
+        var printContents = document.getElementById(divId).innerHTML;
+        var originalContents = document.body.innerHTML;
+
+        document.body.innerHTML = printContents;
+
+        window.print();
+
+        document.body.innerHTML = originalContents;
+    }
+</script>
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">الرئيسية/</span>الموظفين </h4>
+<div style="text-align:center; margin-bottom:20px;">
+    <button onclick="printDiv('div_print')">🖨️ طباعة التقرير</button>
+</div>
+
+<div id="div_print">
+
+    <!-- الهيدر للشاشة -->
+    <div id="reportHeaderScreen" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #000; padding-bottom: 10px;">
+        <div style="flex: 1; text-align: right;">
+            <img src="~/assets/img/logo/lg.png" style="height:60px;" />
+        </div>
+        <div style="flex: 1; text-align: center;">
+            <h3 style="margin: 0;">تقرير الحضور والانصراف عن @laundryName</h3>
+        </div>
+        <div style="flex: 1; text-align: left;">
+            <p style="margin: 0;">التاريخ: @today.ToString("yyyy-MM-dd")</p>
+        </div>
+    </div>
+
+    <!-- الهيدر للطباعة -->
+    <div id="reportHeader" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom:1px solid #000; padding-bottom:10px;">
+        <div style="flex: 1; text-align: right;">
+            <img src="~/assets/img/logo/lg.png" style="height:60px;" />
+        </div>
+        <div style="flex: 1; text-align: center;">
+            <h3 style="margin: 0;">تقرير الحضور والانصراف عن @laundryName</h3>
+        </div>
+        <div style="flex: 1; text-align: left;">
+            <p style="margin: 0;">التاريخ: @today.ToString("yyyy-MM-dd")</p>
+        </div>
+    </div>
+
+    <!-- جدول الإحصائيات -->
+    <table id="attendanceSummary" class="table table-bordered table-striped printTable" style="text-align:center; width:50%; margin:auto; margin-bottom:30px;">
+        <thead>
+            <tr>
+                <th>إجمالي الموظفين</th>
+                <th>الحضور</th>
+                <th>الغياب</th>
+                <th>التأخيرات</th>
+                <th>الإجازات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var totalPresent = Model.Count(x => x.Status == "حاضر" || x.Status.StartsWith("متأخر"));
+                var totalAbsent = Model.Count(x => x.Status == "غائب");
+                var totalLate = Model.Count(x => x.Status.StartsWith("متأخر"));
+                var totalLeave = Model.Count(x => x.Status == "أجازة");
+            }
+            <tr>
+                <td>@totalEmployees</td>
+                <td>@totalPresent</td>
+                <td>@totalAbsent</td>
+                <td>@totalLate</td>
+                <td>@totalLeave</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- تفاصيل حسب الوظيفة -->
+    @foreach (var group in Model.GroupBy(x => x.jopName))
+    {
+        int countUser = 1;
+        <table class="table table-bordered table-striped printTable" style="text-align:center; margin-top:20px;">
+            <thead>
+                <tr>
+                    <th colspan="5" style="text-align:center; background-color:#f0f0f0;">
+                        الوظيفة: @group.Key
+                    </th>
+                </tr>
+                <tr>
+                    <th>م</th>
+                    <th>الموظف</th>
+                    <th>الكود</th>
+                    <th>وقت الحضور</th>
+                    <th>وقت الانصراف</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in group)
+                {
+                    <tr>
+                        <td>@countUser</td>
+                        <td>@item.EmployeeName</td>
+                        <td>@item.EmpCode</td>
+
+                            @if (@item.Status == "أجازة" || @item.Status == "غائب")
+                            {
+                                <td colspan="3">@item.Status</td>
+                            }
+                            else
+                            {
+                                <td>@(item.CheckIn?.ToString(@"hh\:mm") ?? "-")</td>
+                                <td>@(item.CheckOut?.ToString(@"hh\:mm") ?? "-")</td>
+                                <td>@item.Status</td>
+                            }
+                        </tr>
+                    countUser ++;
+                }
+            </tbody>
+        </table>
+    }
+</div>
+</div>
+<style>
+    @@media print {
+        button
+    {
+        display: none;
+    }
+    /* إخفاء زر الطباعة */
+
+    /* إخفاء الهيدر للشاشة وإظهار الهيدر للطباعة */
+    #reportHeaderScreen {
+        display: none;
+    }
+
+    #reportHeader {
+        display: flex;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        page-break-inside: auto;
+        page-break-after: auto;
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 5px;
+        text-align: center;
+    }
+
+    /* محتوى الصفحة بعد الهيدر */
+    #div_print > table,
+    #div_print > div:not(#reportHeader) {
+        margin-top: 120px; /* ارتفاع الهيدر */
+    }
+
+    }
+</style>

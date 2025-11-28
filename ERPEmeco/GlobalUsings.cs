@@ -1,0 +1,9 @@
+﻿//global using ClosedXML.Excel;
+//global using DAL.Classes.Lookups;
+global using Microsoft.AspNetCore.Mvc;
+//global using Microsoft.AspNetCore.Mvc.Rendering;
+//global using System.Data;
+//global using VM.Extra;
+global using VM.ViewModels;
+global using  ERPNchr.HtmlHelpers;
+//global using WEB.Models;

@@ -1,0 +1,38 @@
+﻿@model VM.ViewModels.DepartmentVM
+@{
+    ViewBag.Title = "تسجيل إدارة ";
+    Layout = "_Layout";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">الرئيسية / </span><span class="text-muted fw-light">بيانات اساسية / </span>تسجيل إدارة </h4>
+
+    @using (Html.BeginForm("CreateEdite", "Department", new { area = "LookUP" }, FormMethod.Post, true, new { enctype = "multipart/form-data" }))
+    {
+        <div class="form-horizontal">
+            @Html.HiddenFor(m => m.Id)
+
+          
+            <!-- رصيد الإجازات -->
+            <div class="form-group mt-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>الاسم العربي</label>
+@*                         <input type="text" id="NameAr" name="NameAr" value="@model.NameAr" class="form-control text-center" />
+ *@                        <input asp-for="NameAr" class="form-control text-center" />
+
+
+                    </div>
+                    </div>
+            </div>
+            <!-- الأزرار -->
+            <div class="form-group mt-4">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="حفظ" class="btn btn-primary" />
+                    <a href="@Url.Action("Index", "Department", new { area = "LookUP" })" class="btn btn-default">رجوع</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

@@ -1,0 +1,84 @@
+﻿@model IEnumerable<VM.ViewModels.DepartmentVM>
+@{
+    ViewBag.Title = "قائمة الإدارات";
+    Layout = "_Layout";
+}
+
+<h2 class="text-center">قائمة الإدارات</h2>
+<hr />
+@* الموظف الواحد  *@
+<a href="@Url.Action("CreateEdite", "Department", new { TypePage = 1, area = "LookUP" })" class="btn btn-primary btn-sm">
+    إنشاء إدارة جديدة
+</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>الاسم</th>
+            <th>الحالة</th>
+            <th>الاجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.NameAr</td>
+                <td>
+                    @if (item.IsActive == false)
+                    {
+                        <span class="text-success">غير نشط</span>
+                        <input type="checkbox" class="activateLeave" data-id="@item.Id" />
+                    }
+                    else
+                    {
+                        <span class="text-success">نشط</span>
+                    }
+                </td>
+                <td>
+
+                    <a href="@Url.Action("CreateEdite", "Department", new { TypePage = 2, DepartmentID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
+                        تعديل
+                    </a>
+                    <a href="@Url.Action("CreateEdite", "Department", new { TypePage = 3, DepartmentID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
+                        عرض
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(".activateLeave").change(function () {
+                var checkbox = $(this);
+                var leaveId = checkbox.data("id");
+
+                if (confirm("هل أنت متأكد من تفعيل هذه الإجازة؟")) {
+                    $.ajax({
+                        url: '@Url.Action("ActivateLeave", "Leave", new { area = "Employee" })',
+                        type: 'POST',
+                        data: { id: leaveId },
+                        success: function (response) {
+                            if (response.success) {
+                                checkbox.replaceWith('<span class="text-success">تم القبول</span>');
+                            } else {
+                                alert("حدث خطأ أثناء تفعيل الإجازة");
+                                checkbox.prop("checked", false);
+                            }
+                        },
+                        error: function () {
+                            alert("حدث خطأ أثناء الاتصال بالخادم");
+                            checkbox.prop("checked", false);
+                        }
+                    });
+                } else {
+                    checkbox.prop("checked", false);
+                }
+            });
+        });
+    </script>
+}

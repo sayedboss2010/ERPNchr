@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EF\EF.csproj" />
+    <ProjectReference Include="..\VM\VM.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Classes\LookUp\" />
+  </ItemGroup>
+
+</Project>

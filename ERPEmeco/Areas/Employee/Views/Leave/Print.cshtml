@@ -1,0 +1,116 @@
+﻿ 
+
+
+@model VM.ViewModels.EmployeeLeaveVM
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-4" id="printArea">
+    <div class="text-center mb-4">
+        <h3 class="fw-bold">طلب إجازة</h3>
+    </div>
+
+    <table class="table table-bordered">
+        <tr>
+            <th style="width:20%">اسم الموظف</th>
+            <td style="width:30%">@Model.EmployeeName</td>
+            <th style="width:20%">كود الموظف</th>
+            <td style="width:30%">@Model.EmployeeId</td>
+        </tr>
+        <tr>
+            <th>تاريخ الطباعة</th>
+            <td>@DateTime.Now.ToString("yyyy/MM/dd")</td>
+            <th>الإدارة</th>
+            <td>المغسلة</td>
+        </tr>
+    </table>
+
+    <h5 class="mt-4 text-decoration-underline fw-bold">رصيد الإجازات السابق منحها</h5>
+    <table class="table table-bordered">
+        <tr>
+            <th>اعتيادي</th>
+            <td>21</td>
+            <th>عارضة</th>
+            <td>7</td>
+        </tr>
+    </table>
+
+    <h5 class="mt-4 text-decoration-underline fw-bold">بيانات الإجازة المطلوبة</h5>
+    <table class="table table-bordered">
+        <tr>
+            <th>نوع الإجازة</th>
+            <td>@Model.LeaveTypeName</td>
+            <th>من تاريخ</th>
+            <td>@Model.StartDate?.ToString("yyyy/MM/dd")</td>
+        </tr>
+        <tr>
+            <th>إلى تاريخ</th>
+            <td>@Model.EndDate?.ToString("yyyy/MM/dd")</td>
+            <th>سبب الإجازة</th>
+            <td>@Model.Reason</td>
+        </tr>
+    </table>
+
+    <div class="row text-center mt-5">
+        <div class="col-md-4"><div class="signature-box">توقيع الموظف</div></div>
+        <div class="col-md-4"><div class="signature-box">اعتماد المدير المباشر</div></div>
+        <div class="col-md-4"><div class="signature-box">شؤون العاملين</div></div>
+    </div>
+</div>
+
+<div class="text-center mt-4 no-print">
+    <button class="btn btn-primary" onclick="printDiv('printArea')">🖨️ طباعة</button>
+</div>
+
+<style>
+    .signature-box {
+        border-top: 1px solid #000;
+        margin-top: 50px;
+        padding-top: 10px;
+        font-weight: bold;
+    }
+
+    @@media print {
+        body *
+
+    {
+        visibility: hidden;
+    }
+
+    #printArea, #printArea * {
+        visibility: visible;
+    }
+
+    #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+    }
+
+    .no-print {
+        display: none;
+    }
+
+    .table {
+        border: 1px solid black !important;
+    }
+
+    th, td {
+        border: 1px solid black !important;
+    }
+
+    .signature-box {
+        border-top: 1px solid #000 !important;
+    }
+
+    }
+</style>
+
+<script>
+    function printDiv(divId) {
+        window.print();
+    }
+</script>

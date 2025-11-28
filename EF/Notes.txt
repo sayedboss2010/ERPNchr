@@ -1,0 +1,19 @@
+Scaffold-DbContext "Server=DESKTOP-NOQBEUP;Database=HR_Nchr;Trusted_Connection=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Context "AppDbContext" -ContextDir Data -Force
+
+
+
+   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        try
+        {
+            string c = Directory.GetCurrentDirectory();
+            IConfigurationRoot configuration =
+                new ConfigurationBuilder().SetBasePath(c).AddJsonFile("appsettings.json").Build();
+
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DBConnection"));
+        }
+        catch
+        {
+            //ignore
+        }
+    }
