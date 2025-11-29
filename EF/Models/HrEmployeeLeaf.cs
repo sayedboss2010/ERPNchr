@@ -41,6 +41,18 @@ public partial class HrEmployeeLeaf
 
     public long? HrEmployeeLeaveBalanceId { get; set; }
 
+    /// <summary>
+    /// موافقة المدير المباشر
+    /// </summary>
+    public bool DirectManagerApproval { get; set; }
+
+    /// <summary>
+    /// موافقة مدير الادارة
+    /// </summary>
+    public bool DepartmentManagerApproval { get; set; }
+
+    public int? LeaveDays { get; set; }
+
     public virtual HrEmployee? Employee { get; set; }
 
     public virtual HrEmployeeLeaveBalance? HrEmployeeLeaveBalance { get; set; }

@@ -65,28 +65,40 @@ namespace YourProjectName.Areas.Employee.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors)
-                                 .Select(e => e.ErrorMessage)
-                                 .ToList();
+                var detailedErrors = ModelState
+                    .Where(ms => ms.Value.Errors.Count > 0)
+                    .Select(ms => new
+                    {
+                        Field = ms.Key,                                      // اسم الحقل
+                        Errors = ms.Value.Errors.Select(e => e.ErrorMessage), // رسالة الخطأ
+                        AttemptedValue = ms.Value.AttemptedValue              // القيمة اللي دخلت وعملت مشكلة
+                    })
+                    .ToList();
 
-                Console.WriteLine(string.Join(", ", errors));
-                // إعادة تحميل القوائم المنسدلة
+                foreach (var error in detailedErrors)
+                {
+                    Console.WriteLine($"Field: {error.Field}");
+                    Console.WriteLine($"Attempted Value: {error.AttemptedValue}");
+                    Console.WriteLine($"Errors: {string.Join(", ", error.Errors)}");
+                    Console.WriteLine("----------------------------");
+                }
+
+                // إعادة تحميل القوائم
                 var Emplist = (from e in _context.HrEmployees
                                where e.IsActive == true
-                               //&& e.CurrentBranchDeptId == 5
                                select new
                                {
                                    e.Id,
                                    e.NameAr,
-                                   Display = e.NameAr + " (" + e.EmpCode + ")"  // نضيف النص المعروض بالاسم + الكود
+                                   Display = e.NameAr + " (" + e.EmpCode + ")"
                                }).ToList();
 
-                // هنا نخزن النص المعروض في ViewBag
                 ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
-
                 ViewBag.LeaveTypeId = new SelectList(_context.HrLeaveTypes.Where(a => a.IsActive == true), "Id", "NameAr", model.LeaveTypeId);
+
                 return View(model);
             }
+
             long HrEmployeeLeaves_ID = _context.Database
                 .SqlQueryRaw<long>("SELECT NEXT VALUE FOR dbo.HR_Employee_Leaves_SEQ")
                 .AsEnumerable()
@@ -99,6 +111,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 Reason = model.Reason,
+                LeaveDays = model.ActualDays,
                 CreatedDate = DateOnly.FromDateTime(DateTime.Now),
                 CreatedUserId = 1, // TODO: استبدلها بالمستخدم الحالي
                 IsActive = true
@@ -109,7 +122,7 @@ namespace YourProjectName.Areas.Employee.Controllers
 
             if (leaveBalance != null)
             {
-                leaveBalance.UsedDays = leaveBalance.UsedDays+ model.DaysFromBalance;  // new value
+                //leaveBalance.UsedDays = leaveBalance.UsedDays+ model.DaysFromBalance;  // new value
                 leaveBalance.UpdatedDate = DateTime.Now;
 
                 _context.SaveChanges(); // commits changes to the database

@@ -41,6 +41,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<HrJob> HrJobs { get; set; }
 
+    public virtual DbSet<HrJobGrade> HrJobGrades { get; set; }
+
     public virtual DbSet<HrLeaveType> HrLeaveTypes { get; set; }
 
     public virtual DbSet<HrMachineIp> HrMachineIps { get; set; }
@@ -241,6 +243,7 @@ public partial class AppDbContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.EmpCode).HasComment("كود الموظف");
             entity.Property(e => e.EmpCodeNew).HasMaxLength(50);
+            entity.Property(e => e.HrJobGradesId).HasColumnName("HR_JobGradesID");
             entity.Property(e => e.InsuranceNumber)
                 .HasMaxLength(50)
                 .HasComment("الرقم التأميني")
@@ -349,6 +352,8 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedUserId).HasColumnName("Created_UserId");
             entity.Property(e => e.DeletedDate).HasColumnName("Deleted_Date");
             entity.Property(e => e.DeletedUserId).HasColumnName("Deleted_UserId");
+            entity.Property(e => e.DepartmentManagerApproval).HasComment("موافقة مدير الادارة");
+            entity.Property(e => e.DirectManagerApproval).HasComment("موافقة المدير المباشر");
             entity.Property(e => e.EmployeeId).HasColumnName("Employee_ID");
             entity.Property(e => e.HrEmployeeLeaveBalanceId).HasColumnName("HR_Employee_LeaveBalanceID");
             entity.Property(e => e.LeaveTypeId).HasColumnName("LeaveType_ID");
@@ -444,6 +449,37 @@ public partial class AppDbContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("Title_EN");
             entity.Property(e => e.UpdatedDate).HasColumnName("Updated_Date");
+            entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
+        });
+
+        modelBuilder.Entity<HrJobGrade>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__HR_JobGr__3214EC271A6C9895");
+
+            entity.ToTable("HR_JobGrades");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("ID");
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("Created_Date");
+            entity.Property(e => e.CreatedUserId).HasColumnName("Created_UserId");
+            entity.Property(e => e.DeletedDate)
+                .HasColumnType("datetime")
+                .HasColumnName("Deleted_Date");
+            entity.Property(e => e.DeletedUserId).HasColumnName("Deleted_UserId");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.NameAr)
+                .HasMaxLength(200)
+                .HasColumnName("Name_AR");
+            entity.Property(e => e.NameEn)
+                .HasMaxLength(200)
+                .HasColumnName("Name_EN");
+            entity.Property(e => e.UpdatedDate)
+                .HasColumnType("datetime")
+                .HasColumnName("Updated_Date");
             entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
         });
 
@@ -672,6 +708,97 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("ID");
         });
+        modelBuilder.HasSequence("A__User_Login_SEQ")
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("DataUpdatesLogTb_SEQ")
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("ExceptionLogTb_SEQ")
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("HR_Branch_Department_SEQ")
+            .StartsAt(11L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("HR_Branches_SEQ")
+            .StartsAt(2L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("HR_Departments_SEQ")
+            .StartsAt(11L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence("HR_Employee_Attendance_SEQ")
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence("HR_Employee_Lateness_SEQ")
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence("HR_Employee_LeaveBalance_SEQ")
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence("HR_Employee_Leaves_SEQ")
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence("HR_Employees_SEQ")
+            .StartsAt(17L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("HR_JobGrades_SEQ")
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("HR_Jobs_SEQ")
+            .StartsAt(189L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<byte>("HR_LeaveTypes_SEQ")
+            .StartsAt(4L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<byte>("HR_Machine_IP_SEQ")
+            .StartsAt(2L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<byte>("HR_MachineMoves_SEQ")
+            .StartsAt(3L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("LogInHistoryTb_SEQ")
+            .StartsAt(110L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("PR_Group_SEQ")
+            .StartsAt(17L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("PR_GroupModuleMenu_SEQ")
+            .StartsAt(5046L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("PR_Menu_SEQ")
+            .StartsAt(63L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("PR_Module_SEQ")
+            .StartsAt(2L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("PR_System_SEQ")
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("PR_User_SEQ")
+            .StartsAt(3L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("PR_UserGroup_SEQ")
+            .StartsAt(239L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("UserType_SEQ")
+            .StartsAt(11L)
+            .HasMin(1L)
+            .IsCyclic();
 
         OnModelCreatingPartial(modelBuilder);
     }

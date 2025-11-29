@@ -59,10 +59,13 @@ public class EmployeeLeaveVM
     public int? RemainingAfter { get; set; } // بعد الخصم
     public bool? FinalApproval { get; set; } // موافقة المدير
 
-    public decimal UsedDaysMonth { get; set; } // ايام اجازات الشهر
-    public decimal DaysFromBalance { get; set; } // عدد الايام من الرصيد
+    public decimal? UsedDaysMonth { get; set; } // ايام اجازات الشهر
+    public decimal? DaysFromBalance { get; set; } // عدد الايام من الرصيد
     public int? DeductedDays { get; set; } // خصم من المرتب اليوم بيوم
-    public long LeaveBalanceID { get; set; } // HR_Employee_LeaveBalance كود جدول 
+    public long? LeaveBalanceID { get; set; } // HR_Employee_LeaveBalance كود جدول 
+    public bool? DirectManagerApproval { get; set; }   // موافقة المدير المباشر
+    public bool? DepartmentManagerApproval { get; set; } // موافقة مدير الادارة
+    public int? LeaveDays { get; set; }
 
 
 }

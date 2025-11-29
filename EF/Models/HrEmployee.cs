@@ -19,13 +19,15 @@ public partial class HrEmployee
 
     public string? NameEn { get; set; }
 
+    public string? Email { get; set; }
+
+    public string? Password { get; set; }
+
     public string? AddressAr { get; set; }
 
     public string? AddressEn { get; set; }
 
     public string? PhoneNumber { get; set; }
-
-    public string? Email { get; set; }
 
     public DateOnly? Birthdate { get; set; }
 
@@ -90,6 +92,8 @@ public partial class HrEmployee
     /// تاريخ التعيين
     /// </summary>
     public DateOnly? AppointmentDate { get; set; }
+
+    public int? HrJobGradesId { get; set; }
 
     public virtual HrBranchDepartment? CurrentBranchDept { get; set; }
 
