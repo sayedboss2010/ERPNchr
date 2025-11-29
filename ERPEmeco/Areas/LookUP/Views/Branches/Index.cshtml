@@ -6,7 +6,6 @@
 
 <h2 class="text-center">قائمة الفروع</h2>
 <hr />
-@* الموظف الواحد  *@
 <a href="@Url.Action("CreateEdite", "Branches", new { TypePage = 1, area = "LookUP" })" class="btn btn-primary btn-sm">
     إنشاء فرع جديدة
 </a>
@@ -32,6 +31,8 @@
                     }
                     else if (item.IsActive == true)
                     {
+                        <input type="checkbox" class="activateLeave" data-id="@item.Id" />
+
                         <span class="text-success">نشط</span>
                     }
                     else
