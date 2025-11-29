@@ -19,24 +19,31 @@
                     @Html.DropDownList("EmployeeId", null, "-- اختر الموظف --", new { @class = "form-control", id = "EmployeeId" })
                 </div>
             </div> *@
-            <div class="form-group">
-                @{
-                    var employees = ViewBag.EmployeeOptions as SelectList;
-                }
-                <label for="EmployeeOptions" class="control-label col-md-2">الموظفين</label>
-                <div class="col-md-6">
-                    <!-- input الذي يرى المستخدم -->
-                    <input class="form-control" list="datalistOptions" id="EmployeeOptions" placeholder="اختار موظف..." autocomplete="off" />
-
-                    <!-- hidden input لإرسال Id فقط -->
-                    <input type="hidden" name="EmployeeId" id="EmployeeId" />
-
-                    <datalist id="datalistOptions">
-                        @foreach (var emp in employees)
-                        {
-                            <option data-id="@emp.Value" value="@emp.Text"></option>
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-md-6">
+                        @{
+                            var employees = ViewBag.EmployeeOptions as SelectList;
                         }
-                    </datalist>
+                        <label for="EmployeeOptions" class="control-label col-md-2">الموظفين</label>
+
+                        <!-- input الذي يرى المستخدم -->
+                        <input class="form-control" list="datalistOptions" id="EmployeeOptions" placeholder="اختار موظف..." autocomplete="off" />
+
+                        <!-- hidden input لإرسال Id فقط -->
+                        <input type="hidden" name="EmployeeId" id="EmployeeId" />
+
+                        <datalist id="datalistOptions">
+                            @foreach (var emp in employees)
+                            {
+                                <option data-id="@emp.Value" value="@emp.Text"></option>
+                            }
+                        </datalist>
+                    </div>
+                    <div class="col-md-6">
+                        @Html.LabelFor(m => m.LeaveTypeId, "نوع الإجازة", htmlAttributes: new { @class = "control-label col-md-2" })
+                        @Html.DropDownList("LeaveTypeId", null, new { @class = "form-control" })
+                    </div>
                 </div>
             </div>
             <!-- رصيد الإجازات -->
@@ -63,10 +70,7 @@
             <!-- التواريخ -->
             <div class="form-group mt-3">
                 <div class="row">
-                    <div class="col-md-4">
-                        @Html.LabelFor(m => m.LeaveTypeId, "نوع الإجازة", htmlAttributes: new { @class = "control-label col-md-2" })
-                        @Html.DropDownList("LeaveTypeId", null, new { @class = "form-control" })
-                    </div>
+
                     <div class="col-md-4">
                         @Html.LabelFor(m => m.StartDate, htmlAttributes: new { @class = "control-label col-md-2" })
 
@@ -77,17 +81,21 @@
 
                         @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "EndDate" })
                     </div>
+
+                    <div class="col-md-4">
+                        <label>عدد أيام الاجازة</label>
+                        @Html.TextBoxFor(m => m.ActualDays, new { @class = "form-control", type = "text", id = "ActualDays" })
+
+                        @* <input type="text" id="ActualDays" name="ActualDays" class="form-control text-center" readonly /> *@
+                        <input type="hidden" id="LeaveBalanceID" name="LeaveBalanceID" class="form-control text-center" readonly />
+                    </div>
                 </div>
             </div>
 
             <!-- عدد الأيام المحسوبة -->
-            <div class="form-group mt-3">
+            <div class="form-group mt-3" hidden >
                 <div class="row">
-                    <div class="col-md-3">
-                        <label>عدد أيام الاجازة</label>
-                        <input type="text" id="ActualDays" name="ActualDays" class="form-control text-center" readonly />
-                        <input type="hidden" id="LeaveBalanceID" name="LeaveBalanceID" class="form-control text-center" readonly />
-                    </div>
+                  
                     <div class="col-md-3">
                         <label>عدد الايام من الرصيد</label>
                         <input type="text" id="DaysFromBalance" name="DaysFromBalance" class="form-control text-center" readonly />
@@ -237,7 +245,7 @@
                     $("#btnSave").prop("disabled", true);
                     return;
                 }
-                
+
                 // لو مفيش تداخل
                 $("#btnSave").prop("disabled", false);
             },
