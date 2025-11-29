@@ -191,7 +191,7 @@
         $("#StartDate, #EndDate").on("change", function () {
                    var startVal = $("#StartDate").val();
                    var endVal = $("#EndDate").val();
-                   var employeeId = $("#EndDate").val();
+                   var employeeId = $("#EmployeeId").val();
                    var RemainingDays = parseFloat($("#RemainingDays").val()) || 0;
 
                    if (!startVal || !endVal) return;
@@ -220,32 +220,30 @@
                        dayCountsByMonth[monthKey] = (dayCountsByMonth[monthKey] || 0) + 1;
                    }
                    // الايام المتداخلة
-                                 $.ajax({
-                                                url: '/Employee/Leave/CheckLeaveDate',
-                                         type: 'GET',
-                                         data: {
-                                                    employeeId: employeeId,
-                                                           startDate: start,
-                                                           endDate: end,
-                                         },
-                                         success: function (data) {
-                                             if (data) {
-                                                 console.log(data);  // هتشوف كل الداتا اللي جاية
+                                     $.ajax({
+            url: '/Employee/Leave/CheckLeaveDate',
+            type: 'Post',
+            data: {
+                employeeId: employeeId,
+                startDate: startVal,
+                endDate: endVal,
+            },
+            success: function (data) {
 
-                                                 $("#TotalDays").val(data.totalDays ?? data.TotalDays);
-                                                 $("#LeaveBalanceID").val(data.id ?? data.id);
-                                                 $("#UsedDaysMonth").val(data.usedDaysMonth ?? data.usedDaysMonth);
+                if (data.hasConflict) {
+                    // عرض رسالة التداخل
+                    alert(data.message);
+                    return; // وقف التنفيذ
+                }
 
-                                                 $("#UsedDays").val(data.usedDays ?? data.UsedDays);
-                                                 $("#RemainingDays").val(data.remainingDays ?? data.RemainingDays);
-                                             } else {
-                                                 $("#TotalDays, #UsedDays, #RemainingDays").val("");
-                                             }
-                                         },
-                                         error: function () {
-                                             alert("حدث خطأ أثناء تحميل بيانات الموظف");
-                                         }
-                                     });
+                // لو مفيش تداخل (تقدر تكمل باقي اللوجيك هنا)
+                console.log("لا يوجد تداخل");
+            },
+            error: function () {
+                alert("حدث خطأ أثناء تحميل بيانات الموظف");
+            }
+        });
+
 
                    // 2) قراءة الإجازات السابقة خلال الشهر من الحقل #UsedDaysMonth
                    // نتوقع شكل مثل: "10/2 : 11/1" أو "11/3" إلخ.
