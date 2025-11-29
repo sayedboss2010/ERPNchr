@@ -243,34 +243,22 @@ namespace YourProjectName.Areas.Employee.Controllers
             DateOnly start = DateOnly.Parse(startDate);
             DateOnly end = DateOnly.Parse(endDate);
 
-            // البحث عن أي إجازة متداخلة لنفس الموظف
             var overlappingLeaves = _context.HrEmployeeLeaves
                 .Where(l => l.EmployeeId == employeeId &&
                             l.IsActive &&
                             ((l.StartDate <= end) && (l.EndDate >= start)))
-                .Select(l => new
-                {
-                    l.Id,
-                    l.StartDate,
-                    l.EndDate,
-                    l.Reason
-                })
                 .ToList();
 
             if (overlappingLeaves.Any())
             {
-                // إنشاء رسالة تحتوي على الأيام المتداخلة
-                string message = "هناك إجازة موجودة بالفعل في الفترة المحددة:\n";
+                string message = "هناك إجازة موجودة بالفعل:\n";
+
                 foreach (var leave in overlappingLeaves)
                 {
-                    message += $"- من {leave.StartDate?.ToString("yyyy-MM-dd")} إلى {leave.EndDate?.ToString("yyyy-MM-dd")} الاسباب:  ({leave.Reason})\n";
+                    message += $"- من {leave.StartDate} إلى {leave.EndDate}\n";
                 }
 
-                return Json(new
-                {
-                    hasConflict = true,
-                    message = message
-                });
+                return Json(new { hasConflict = true, message });
             }
 
             return Json(new { hasConflict = false });

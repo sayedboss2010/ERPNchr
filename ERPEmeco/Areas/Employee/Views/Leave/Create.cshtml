@@ -118,7 +118,7 @@
             <!-- الأزرار -->
             <div class="form-group mt-4">
                 <div class="col-md-offset-2 col-md-10">
-                    <input type="submit" value="حفظ" class="btn btn-primary" />
+                    <input type="submit" value="حفظ" class="btn btn-primary" disabled />
                     <a href="@Url.Action("Index", "Leave", new { area = "Employee" })" class="btn btn-default">رجوع</a>
                 </div>
             </div>
@@ -220,9 +220,9 @@
                        dayCountsByMonth[monthKey] = (dayCountsByMonth[monthKey] || 0) + 1;
                    }
                    // الايام المتداخلة
-                                     $.ajax({
+                                            $.ajax({
             url: '/Employee/Leave/CheckLeaveDate',
-            type: 'Post',
+            type: 'POST',
             data: {
                 employeeId: employeeId,
                 startDate: startVal,
@@ -230,19 +230,22 @@
             },
             success: function (data) {
 
-                if (data.hasConflict) {
-                    // عرض رسالة التداخل
-                    alert(data.message);
-                    return; // وقف التنفيذ
-                }
+                console.log(data); // مهم جداً للتأكد
 
-                // لو مفيش تداخل (تقدر تكمل باقي اللوجيك هنا)
-                console.log("لا يوجد تداخل");
+                if (data.hasConflict === true) {
+                    alert(data.message);
+                    $("#btnSave").prop("disabled", true);
+                    return;
+                }
+                
+                // لو مفيش تداخل
+                $("#btnSave").prop("disabled", false);
             },
             error: function () {
                 alert("حدث خطأ أثناء تحميل بيانات الموظف");
             }
         });
+
 
 
                    // 2) قراءة الإجازات السابقة خلال الشهر من الحقل #UsedDaysMonth
