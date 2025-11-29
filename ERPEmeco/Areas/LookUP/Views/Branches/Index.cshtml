@@ -1,14 +1,14 @@
-﻿@model IEnumerable<VM.ViewModels.DepartmentVM>
+﻿@model IEnumerable<VM.ViewModels.BranchVM>
 @{
-    ViewBag.Title = "قائمة الإدارات";
+    ViewBag.Title = "قائمة الفروع";
     Layout = "_Layout";
 }
 
-<h2 class="text-center">قائمة الإدارات</h2>
+<h2 class="text-center">قائمة الفروع</h2>
 <hr />
 @* الموظف الواحد  *@
-<a href="@Url.Action("CreateEdite", "Department", new { TypePage = 1, area = "LookUP" })" class="btn btn-primary btn-sm">
-    إنشاء إدارة جديدة
+<a href="@Url.Action("CreateEdite", "Branches", new { TypePage = 1, area = "LookUP" })" class="btn btn-primary btn-sm">
+    إنشاء فرع جديدة
 </a>
 
 <table class="table table-bordered table-striped">
@@ -30,17 +30,22 @@
                         <span class="text-success">غير نشط</span>
                         <input type="checkbox" class="activateLeave" data-id="@item.Id" />
                     }
-                    else
+                    else if (item.IsActive == true)
                     {
                         <span class="text-success">نشط</span>
+                    }
+                    else
+                    {
+                        <span class="text-success">--</span>
                     }
                 </td>
                 <td>
 
-                    <a href="@Url.Action("CreateEdite", "Department", new { TypePage = 2, DepartmentID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
+                    <a href="@Url.Action("CreateEdite", "Branches", new { TypePage = 2, BranchID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
                         تعديل
                     </a>
-                    <a href="@Url.Action("CreateEdite", "Department", new { TypePage = 3, DepartmentID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
+                    
+                    <a href="@Url.Action("CreateEdite", "Branches", new { TypePage = 3, BranchID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
                         عرض
                     </a>
                 </td>
@@ -57,16 +62,16 @@
                 var checkbox = $(this);
                 var leaveId = checkbox.data("id");
 
-                if (confirm("هل أنت متأكد من تفعيل  هذه الادارة ؟")) {
+                if (confirm("هل أنت متأكد من تفعيل هذا الفرع / هذه المحافظة ؟")) {
                     $.ajax({
-                        url: '@Url.Action("ActivateDepartment", "Department", new { area = "LookUP" })',
+                        url: '@Url.Action("ActivateBranch", "Branches", new { area = "LookUP" })',
                         type: 'POST',
                         data: { id: leaveId },
                         success: function (response) {
                             if (response.success) {
                                   window.location.href = response.redirectUrl;
                             } else {
-                                alert(response.message || "حدث خطأ أثناء تفعيل هذه الادارة");
+                                alert(response.message || "حدث خطأ أثناء تفعيل هذا الفرع / هذه المحافظة");
                                 checkbox.prop("checked", false);
                             }
                         },

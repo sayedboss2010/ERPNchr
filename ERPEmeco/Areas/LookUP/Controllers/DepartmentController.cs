@@ -15,7 +15,7 @@ namespace ERPNchr.Areas.LookUP.Controllers
         public IActionResult Index()
         {
             var data = (from l in _context.HrDepartments                     
-                        where l.IsActive == true
+                        //where l.IsActive == true
                         orderby l.Id descending
                         select new DepartmentVM
                         {
@@ -44,7 +44,7 @@ namespace ERPNchr.Areas.LookUP.Controllers
                              NameAr = l.NameAr,
                              NameEn = l.NameEn,
                              IsActive = l.IsActive,
-                         }).FirstOrDefault();
+                         }).Where(a=>a.Id== DepartmentID).FirstOrDefault();
 
                 if (model == null)
                     return NotFound();
@@ -53,23 +53,82 @@ namespace ERPNchr.Areas.LookUP.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> ActivateDepartment(int? id)
+        {
+            if (id == null)
+            {
+                return Json(new { success = false, message = "Invalid ID" });
+            }
 
+            var entityold = await _context.HrDepartments.FindAsync(id);
+
+            if (entityold == null)
+            {
+                return Json(new { success = false, message = "Not found" });
+            }
+
+            entityold.IsActive = true;
+            entityold.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+            entityold.UpdatedUserId = 1;
+
+            _context.HrDepartments.Update(entityold);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, redirectUrl = Url.Action("Index", "Department", new { area = "LookUP" }) });
+
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> CreateEdite(DepartmentVM Departments)
         {
-            int _hR_Departments = _context.Database.SqlQueryRaw<int>("SELECT NEXT VALUE FOR dbo.HR_Departments_SEQ").AsEnumerable().First();
-            var entity = new HrDepartment
+            if (!ModelState.IsValid)
             {
-                Id = _hR_Departments,
-                NameAr = Departments.NameAr,               
-                CreatedDate = DateOnly.FromDateTime(DateTime.Now),
-                CreatedUserId = 1, 
-                IsActive = true
-            };
-            _context.HrDepartments.Add(entity);
-            return RedirectToAction("Index", "Department", new { area = "LookUP"});
+                return View(Departments);
+            }
+
+            if (Departments.Id == 0)   // CREATE
+            {
+                int newId = _context.Database
+                    .SqlQueryRaw<int>("SELECT NEXT VALUE FOR dbo.HR_Departments_SEQ")
+                    .AsEnumerable()
+                    .First();
+
+                var entity = new HrDepartment
+                {
+                    Id = newId,
+                    NameAr = Departments.NameAr,
+                    NameEn = Departments.NameEn,
+                    CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+                    CreatedUserId = 1,
+                    IsActive = true
+                };
+
+                _context.HrDepartments.Add(entity);
+            }
+            else                      // UPDATE
+            {
+                var entityold = _context.HrDepartments.Find(Departments.Id);
+
+                if (entityold == null)
+                {
+                     return NotFound(); ;
+                }
+
+                entityold.NameAr = Departments.NameAr;
+                entityold.NameEn = Departments.NameEn;
+
+                entityold.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+                entityold.UpdatedUserId = 1;
+
+                _context.HrDepartments.Update(entityold);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Department", new { area = "LookUP" });
         }
+
     }
 }
