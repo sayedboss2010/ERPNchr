@@ -265,23 +265,11 @@ namespace YourProjectName.Areas.Employee.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetLeaveBalance(long employeeId)
+        public IActionResult GetLeaveBalance(long employeeId,int LeaveTypeId)
         {
             int currentYear = DateTime.Now.Year;
 
-            //var balance = _context.HrEmployeeLeaveBalances
-            //                .Where(b => b.EmployeeId == employeeId 
-            //                && b.Year == currentYear)
-            //                .Select(b => new
-            //                {
-            //                    b.Id,
-            //                    b.TotalDays,
-            //                    b.UsedDays,
-            //                    b.RemainingDays
-            //                }).FirstOrDefault();
-            // تعريف DTO مؤقت للتعامل مع النتائج
-
-            // جلب الرصيد والإجازات
+            // جلب الرصيد العارضة
             var balance = _context.HrEmployeeLeaveBalances
                 .Where(b => b.EmployeeId == employeeId && b.Year == currentYear)
                 .Select(b => new EmployeeLeaveBalanceDto
@@ -290,53 +278,55 @@ namespace YourProjectName.Areas.Employee.Controllers
                     TotalDays = b.TotalDays,
                     UsedDays = b.UsedDays,
                     RemainingDays = b.RemainingDays,
-                    Leaves = _context.HrEmployeeLeaves
-                                .Where(l => l.HrEmployeeLeaveBalanceId == b.Id
-                                            && l.StartDate.HasValue
-                                            && l.EndDate.HasValue)
-                                .ToList()
+                    CasualTotalDays = b.CasualTotalDays,
+                    CasualUsedDays = b.CasualUsedDays,
+                    //Leaves = _context.HrEmployeeLeaves
+                    //            .Where(l => l.HrEmployeeLeaveBalanceId == b.Id
+                    //                        && l.StartDate.HasValue
+                    //                        && l.EndDate.HasValue)
+                    //            .ToList()
                 })
                 .FirstOrDefault();
 
-            if (balance != null)
-            {
-                // حساب الأيام المستخدمة لكل شهر حتى لو الإجازة تمتد بين شهور
-                var usedDaysPerMonth = balance.Leaves
-                    .SelectMany(l =>
-                    {
-                        var daysList = new List<(int Month, int Days)>();
-                        var start = l.StartDate.Value;
-                        var end = l.EndDate.Value;
+            //if (balance != null)
+            //{
+            //    // حساب الأيام المستخدمة لكل شهر حتى لو الإجازة تمتد بين شهور
+            //    var usedDaysPerMonth = balance.Leaves
+            //        .SelectMany(l =>
+            //        {
+            //            var daysList = new List<(int Month, int Days)>();
+            //            var start = l.StartDate.Value;
+            //            var end = l.EndDate.Value;
 
-                        while (start <= end)
-                        {
-                            // آخر يوم في الشهر الحالي
-                            var endOfMonth = new DateOnly(start.Year, start.Month, DateTime.DaysInMonth(start.Year, start.Month));
-                            var currentEnd = end < endOfMonth ? end : endOfMonth;
+            //            while (start <= end)
+            //            {
+            //                // آخر يوم في الشهر الحالي
+            //                var endOfMonth = new DateOnly(start.Year, start.Month, DateTime.DaysInMonth(start.Year, start.Month));
+            //                var currentEnd = end < endOfMonth ? end : endOfMonth;
 
-                            // عدد الأيام في هذا الشهر
-                            int daysInMonth = currentEnd.DayNumber - start.DayNumber + 1;
-                            daysList.Add((start.Month, daysInMonth));
+            //                // عدد الأيام في هذا الشهر
+            //                int daysInMonth = currentEnd.DayNumber - start.DayNumber + 1;
+            //                daysList.Add((start.Month, daysInMonth));
 
-                            // الانتقال للشهر التالي
-                            start = currentEnd.AddDays(1);
-                        }
+            //                // الانتقال للشهر التالي
+            //                start = currentEnd.AddDays(1);
+            //            }
 
-                        return daysList;
-                    })
-                    .GroupBy(x => x.Month)
-                    .Select(g => new
-                    {
-                        Month = g.Key,
-                        UsedDays = g.Sum(x => x.Days)
-                    })
-                    .OrderBy(x => x.Month)
-                    .Select(x => $"{x.Month}/{x.UsedDays}");
+            //            return daysList;
+            //        })
+            //        .GroupBy(x => x.Month)
+            //        .Select(g => new
+            //        {
+            //            Month = g.Key,
+            //            UsedDays = g.Sum(x => x.Days)
+            //        })
+            //        .OrderBy(x => x.Month)
+            //        .Select(x => $"{x.Month}/{x.UsedDays}");
 
-                // تحويل النتيجة إلى نص
-                balance.UsedDaysMonth = string.Join(" : ", usedDaysPerMonth);
+            //    // تحويل النتيجة إلى نص
+            //    balance.UsedDaysMonth = string.Join(" : ", usedDaysPerMonth);
 
-            }
+            //}
             return Json(balance);
         }
 
@@ -348,6 +338,15 @@ namespace YourProjectName.Areas.Employee.Controllers
             public decimal? RemainingDays { get; set; }
             public List<HrEmployeeLeaf> Leaves { get; set; }
             public string UsedDaysMonth { get; set; }
+
+            /// إجمالي الإجازات العارضة في السنة
+            /// </summary>
+            public decimal CasualTotalDays { get; set; }
+
+            /// <summary>
+            /// ايام العارضة المستخدمة
+            /// </summary>
+            public decimal CasualUsedDays { get; set; }
         }
 
     }
