@@ -31,7 +31,11 @@ namespace YourProjectName.Areas.Employee.Controllers
                             LeaveTypeName = t.NameAr,
                             StartDate = l.StartDate,
                             EndDate = l.EndDate,
-                            Reason = l.Reason
+                            LeaveDays = l.LeaveDays,
+                            Reason = l.Reason,
+                            DirectManagerApproval = l.DirectManagerApproval,
+                            DepartmentManagerApproval = l.DepartmentManagerApproval,
+
                         }).ToList();
 
             return View(data);
@@ -122,7 +126,7 @@ namespace YourProjectName.Areas.Employee.Controllers
 
             if (leaveBalance != null)
             {
-                //leaveBalance.UsedDays = leaveBalance.UsedDays+ model.DaysFromBalance;  // new value
+                leaveBalance.UsedDays =decimal.Parse(model.ActualDays.ToString()) ;  // new value
                 leaveBalance.UpdatedDate = DateTime.Now;
 
                 _context.SaveChanges(); // commits changes to the database

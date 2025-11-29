@@ -44,12 +44,12 @@ public partial class HrEmployeeLeaf
     /// <summary>
     /// موافقة المدير المباشر
     /// </summary>
-    public bool DirectManagerApproval { get; set; }
+    public bool? DirectManagerApproval { get; set; }
 
     /// <summary>
     /// موافقة مدير الادارة
     /// </summary>
-    public bool DepartmentManagerApproval { get; set; }
+    public bool? DepartmentManagerApproval { get; set; }
 
     public int? LeaveDays { get; set; }
 

@@ -14,8 +14,9 @@
             <th>نوع الإجازة</th>
             <th>من</th>
             <th>إلى</th>
+            <th>عدد الايام</th>
             <th>السبب</th>
-            <th>تفعيل الإجازة</th>
+            <th>حالة الاجازة</th>
             <th>خيارات</th>
         </tr>
     </thead>
@@ -28,15 +29,24 @@
                 <td>@item.StartDate?.ToString("yyyy/MM/dd")</td>
                 <td>@item.EndDate?.ToString("yyyy/MM/dd")</td>
                
+                <td>@item.LeaveDays</td>
                 <td>@item.Reason</td>
                 <td>
-                    @if (item.FinalApproval == false)
+                    <span>: المدير المباشر</span>
+                    @if (item.DirectManagerApproval == true)
                     {
+                        <span class="text-success">تم القبول</span>
+
                         <input type="checkbox" class="activateLeave" data-id="@item.Id" />
+                    }
+                    else if (item.DirectManagerApproval == false)
+                    {
+                        <span class="text-success">تم رفض الاجازة</span>
                     }
                     else
                     {
-                        <span class="text-success">تم القبول</span>
+                        <span class="text-success">لم يتم النظر</span>
+
                     }
                 </td>
                 <td>
