@@ -54,29 +54,28 @@ namespace ERPNchr.Areas.LookUP.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ActivateDepartment(int? id)
+      
+        public async Task<IActionResult> ActivateDepartment(int id, bool isActive)
         {
-            if (id == null)
-            {
-                return Json(new { success = false, message = "Invalid ID" });
-            }
+            var entity = await _context.HrDepartments.FindAsync(id);
 
-            var entityold = await _context.HrDepartments.FindAsync(id);
+            if (entity == null)
+                return Json(new { success = false, message = "Department not found" });
 
-            if (entityold == null)
-            {
-                return Json(new { success = false, message = "Not found" });
-            }
+            // يمكنك استخدام isActive هنا إذا أردت
+            // مثال: تفعيل إذا كان غير نشط، أو العكس
+            entity.IsActive = isActive; // أو استخدم قيمة isActive
 
-            entityold.IsActive = true;
-            entityold.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
-            entityold.UpdatedUserId = 1;
+            entity.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+            entity.UpdatedUserId = 1;
 
-            _context.HrDepartments.Update(entityold);
             await _context.SaveChangesAsync();
 
-            return Json(new { success = true, redirectUrl = Url.Action("Index", "Department", new { area = "LookUP" }) });
-
+            return Json(new
+            {
+                success = true,
+                redirectUrl = Url.Action("Index", "Department", new { area = "LookUP" })
+            });
         }
 
         [HttpPost]

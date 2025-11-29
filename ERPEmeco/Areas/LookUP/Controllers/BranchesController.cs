@@ -114,31 +114,30 @@ namespace ERPNchr.Areas.LookUP.Controllers
 
        
 
+     
         [HttpPost]
-        public async Task<IActionResult> ActivateBranch(int? id)
+        public async Task<IActionResult> ActivateBranch(int id, bool isActive)
         {
-            if (id == null)
-            {
-                return Json(new { success = false, message = "Invalid ID" });
-            }
+            var entity = await _context.HrBranches.FindAsync(id);
 
-            var entityold = await _context.HrBranches.FindAsync(id);
-
-            if (entityold == null)
-            {
+            if (entity == null)
                 return Json(new { success = false, message = "Not found" });
-            }
 
-            entityold.IsActive = true;
-            entityold.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
-            entityold.UpdatedUserId = 1;
+            // عكس الحالة (Toggle)
+            entity.IsActive = !isActive;
 
-            _context.HrBranches.Update(entityold);
+            entity.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+            entity.UpdatedUserId = 1;
+
             await _context.SaveChangesAsync();
 
-            return Json(new { success = true, redirectUrl = Url.Action("Index", "Branches", new { area = "LookUP" }) });
-
+            return Json(new
+            {
+                success = true,
+                redirectUrl = Url.Action("Index", "Branches", new { area = "LookUP" })
+            });
         }
+
 
     }
 }

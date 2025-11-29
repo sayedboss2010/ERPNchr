@@ -24,16 +24,20 @@
             <tr>
                 <td>@item.NameAr</td>
                 <td>
-                    @if (item.IsActive == false)
+                    @if (!item.IsActive)
                     {
-                        <span class="text-success">غير نشط</span>
-                        <input type="checkbox" class="activateLeave" data-id="@item.Id" />
+                        <span class="text-danger activateLeave"
+                              data-id="@item.Id"
+                              data-isactive="true">غير نشط</span>
                     }
                     else
                     {
-                        <span class="text-success">نشط</span>
+                        <span class="text-success activateLeave"
+                              data-id="@item.Id"
+                              data-isactive="false">نشط</span>
                     }
                 </td>
+
                 <td>
 
                     <a href="@Url.Action("CreateEdite", "Department", new { TypePage = 2, DepartmentID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
@@ -51,34 +55,60 @@
 
 @section Scripts {
     <script>
-          $(document).ready(function () {
-            $(".activateLeave").change(function () {
-                var checkbox = $(this);
-                var leaveId = checkbox.data("id");
+           $(document).ready(function () {
+            $(".activateLeave").click(function () {
 
-                if (confirm("هل أنت متأكد من تفعيل  هذه الادارة ؟")) {
+                var spanItem = $(this);
+                var leaveId = spanItem.data("id");
+                var isActive = spanItem.data("isactive"); // <-- هنا
+                if(isActive==true){
+                      if (confirm("هل أنت متأكد من تفعيل هذه الادارة ؟")) {
                     $.ajax({
                         url: '@Url.Action("ActivateDepartment", "Department", new { area = "LookUP" })',
                         type: 'POST',
-                        data: { id: leaveId },
+                        data: {
+                            id: leaveId,
+                            isActive: isActive     // <-- إرسال IsActive
+                        },
                         success: function (response) {
                             if (response.success) {
-                                  window.location.href = response.redirectUrl;
+                                window.location.href = response.redirectUrl;
                             } else {
-                                alert(response.message || "حدث خطأ أثناء تفعيل هذه الادارة");
-                                checkbox.prop("checked", false);
+                                alert(response.message || "حدث خطأ أثناء التفعيل");
                             }
                         },
                         error: function () {
                             alert("حدث خطأ أثناء الاتصال بالخادم");
-                            checkbox.prop("checked", false);
                         }
                     });
-                } else {
-                    checkbox.prop("checked", false);
                 }
+                } 
+                else    {
+                       if (confirm("هل أنت متأكد من عدم تفعيل هذه الادارة ؟")) {
+                    $.ajax({
+                        url: '@Url.Action("ActivateDepartment", "Department", new { area = "LookUP" })',
+                        type: 'POST',
+                        data: {
+                            id: leaveId,
+                            isActive: isActive     // <-- إرسال IsActive
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                window.location.href = response.redirectUrl;
+                            } else {
+                                alert(response.message || "حدث خطأ أثناء عدم التفعيل");
+                            }
+                        },
+                        error: function () {
+                            alert("حدث خطأ أثناء الاتصال بالخادم");
+                        }
+                    });
+                }
+                }
+             
             });
         });
+
 
     </script>
 }

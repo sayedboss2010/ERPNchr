@@ -24,22 +24,26 @@
             <tr>
                 <td>@item.NameAr</td>
                 <td>
-                    @if (item.IsActive == false)
+                    @if (!item.IsActive)
                     {
-                        <span class="text-success">غير نشط</span>
-                        <input type="checkbox" class="activateLeave" data-id="@item.Id" />
-                    }
-                    else if (item.IsActive == true)
-                    {
-                        <input type="checkbox" class="activateLeave" data-id="@item.Id" />
-
-                        <span class="text-success">نشط</span>
+                        <span class="text-danger activateLeave"
+                              data-id="@item.Id"
+                              data-isactive="@item.IsActive"
+                              style="cursor:pointer;">
+                            غير نشط
+                        </span>
                     }
                     else
                     {
-                        <span class="text-success">--</span>
+                        <span class="text-success activateLeave"
+                              data-id="@item.Id"
+                              data-isactive="@item.IsActive"
+                              style="cursor:pointer;">
+                            نشط
+                        </span>
                     }
                 </td>
+
                 <td>
 
                     <a href="@Url.Action("CreateEdite", "Branches", new { TypePage = 2, BranchID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
@@ -58,34 +62,65 @@
 
 @section Scripts {
     <script>
-          $(document).ready(function () {
-            $(".activateLeave").change(function () {
-                var checkbox = $(this);
-                var leaveId = checkbox.data("id");
+                $(document).ready(function () {
+            $(".activateLeave").click(function () {
 
-                if (confirm("هل أنت متأكد من تفعيل هذا الفرع / هذه المحافظة ؟")) {
+                var span = $(this);
+                var leaveId = span.data("id");
+                var isActive = span.data("isactive");
+                if(isActive==true){
+                        if (confirm("هل أنت متأكد من تفعيل حالة هذا الفرع / هذه المحافظة ؟")) {
+
                     $.ajax({
                         url: '@Url.Action("ActivateBranch", "Branches", new { area = "LookUP" })',
                         type: 'POST',
-                        data: { id: leaveId },
+                        data: {
+                            id: leaveId,
+                            isActive: isActive
+                        },
                         success: function (response) {
                             if (response.success) {
-                                  window.location.href = response.redirectUrl;
+                                window.location.href = response.redirectUrl;
                             } else {
-                                alert(response.message || "حدث خطأ أثناء تفعيل هذا الفرع / هذه المحافظة");
-                                checkbox.prop("checked", false);
+                                alert(response.message || "حدث خطأ أثناء تغيير الحالة");
                             }
                         },
                         error: function () {
                             alert("حدث خطأ أثناء الاتصال بالخادم");
-                            checkbox.prop("checked", false);
                         }
                     });
-                } else {
-                    checkbox.prop("checked", false);
+
                 }
+                }
+                else{
+                      if (confirm("هل أنت متأكد من عدم تفعيل حالة هذا الفرع / هذه المحافظة ؟")) {
+
+                    $.ajax({
+                        url: '@Url.Action("ActivateBranch", "Branches", new { area = "LookUP" })',
+                        type: 'POST',
+                        data: {
+                            id: leaveId,
+                            isActive: isActive
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                window.location.href = response.redirectUrl;
+                            } else {
+                                alert(response.message || "حدث خطأ أثناء تغيير الحالة");
+                            }
+                        },
+                        error: function () {
+                            alert("حدث خطأ أثناء الاتصال بالخادم");
+                        }
+                    });
+
+                }
+                }
+              
+
             });
         });
+
 
     </script>
 }
