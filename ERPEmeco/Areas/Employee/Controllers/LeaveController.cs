@@ -238,14 +238,14 @@ namespace YourProjectName.Areas.Employee.Controllers
             return View(data);
         }
         [HttpPost]
-        public JsonResult CheckLeaveDate(long id, string startDate, string endDate)
+        public JsonResult CheckLeaveDate(long employeeId, string startDate, string endDate)
         {
             DateOnly start = DateOnly.Parse(startDate);
             DateOnly end = DateOnly.Parse(endDate);
 
             // البحث عن أي إجازة متداخلة لنفس الموظف
             var overlappingLeaves = _context.HrEmployeeLeaves
-                .Where(l => l.EmployeeId == id &&
+                .Where(l => l.EmployeeId == employeeId &&
                             l.IsActive &&
                             ((l.StartDate <= end) && (l.EndDate >= start)))
                 .Select(l => new
