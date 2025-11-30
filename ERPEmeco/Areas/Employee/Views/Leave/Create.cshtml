@@ -5,336 +5,253 @@
 }
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">الرئيسية / </span>تسجيل إجازة موظف</h4>
 
-    @using (Html.BeginForm("Create", "Leave", new { area = "Employee" }, FormMethod.Post, true, new { enctype = "multipart/form-data" }))
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">الرئيسية / </span> تسجيل إجازة موظف
+    </h4>
+
+    @using (Html.BeginForm("Create", "Leave", new { area = "Employee" }, FormMethod.Post, null,new { @enctype = "multipart/form-data" }))
     {
         <div class="form-horizontal">
             @Html.HiddenFor(m => m.Id)
+            <input type="hidden" id="LeaveBalanceID" name="LeaveBalanceID" />
 
             <!-- اختيار الموظف -->
-            @*  <div class="form-group">
-                @Html.LabelFor(m => m.EmployeeId, "الموظف", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="row mt-3">
                 <div class="col-md-6">
-                    @Html.DropDownList("EmployeeId", null, "-- اختر الموظف --", new { @class = "form-control", id = "EmployeeId" })
-                </div>
-            </div> *@
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-6">
-                        @{
-                            var employees = ViewBag.EmployeeOptions as SelectList;
+                    <label class="control-label">الموظف</label>
+
+                    <input class="form-control" list="datalistOptions" id="EmployeeOptions" placeholder="اختار موظف..." autocomplete="off" />
+                    <input type="hidden" name="EmployeeId" id="EmployeeId" />
+
+                    <datalist id="datalistOptions">
+                        @foreach (var emp in ViewBag.EmployeeOptions as SelectList)
+                        {
+                            <option data-id="@emp.Value" value="@emp.Text"></option>
                         }
-                        <label for="EmployeeOptions" class="control-label col-md-2">الموظفين</label>
-
-                        <!-- input الذي يرى المستخدم -->
-                        <input class="form-control" list="datalistOptions" id="EmployeeOptions" placeholder="اختار موظف..." autocomplete="off" />
-
-                        <!-- hidden input لإرسال Id فقط -->
-                        <input type="hidden" name="EmployeeId" id="EmployeeId" />
-
-                        <datalist id="datalistOptions">
-                            @foreach (var emp in employees)
-                            {
-                                <option data-id="@emp.Value" value="@emp.Text"></option>
-                            }
-                        </datalist>
-                    </div>
-                    <div class="col-md-6">
-                        @Html.LabelFor(m => m.LeaveTypeId, "نوع الإجازة", htmlAttributes: new { @class = "control-label col-md-2" })
-                        @Html.DropDownList("LeaveTypeId", null, new { @class = "form-control" })
-                    </div>
+                    </datalist>
                 </div>
-            </div>
-            <!-- رصيد الإجازات -->
-            <div class="form-group mt-3">
-                <div class="row">
-                    <div class="col-md-4">
-                        <label>اجمالي الاجازات السنوي</label>
-                        <input type="text" id="TotalDays" class="form-control text-center" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label>الاجازات السابق منحهاخلال السنة</label>
-                        <input type="text" id="UsedDays" class="form-control text-center" readonly />
-                    </div>
 
-                    <div class="col-md-4">
-                        <label>الرصيد المتبقي</label>
-                        <input type="text" id="RemainingDays" class="form-control text-center" readonly />
-                    </div>
-                </div>
-            </div>
-
-            <!-- التواريخ -->
-            <div class="form-group mt-3">
-                <div class="row">
-
-                    <div class="col-md-4">
-                        @Html.LabelFor(m => m.StartDate, htmlAttributes: new { @class = "control-label col-md-2" })
-
-                        @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "StartDate" })
-                    </div>
-                    <div class="col-md-4">
-                        @Html.LabelFor(m => m.EndDate, htmlAttributes: new { @class = "control-label col-md-2" })
-
-                        @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "EndDate" })
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>عدد أيام الاجازة</label>
-                        @Html.TextBoxFor(m => m.ActualDays, new { @class = "form-control", type = "text", id = "ActualDays" })
-
-                        @* <input type="text" id="ActualDays" name="ActualDays" class="form-control text-center" readonly /> *@
-                        <input type="hidden" id="LeaveBalanceID" name="LeaveBalanceID" class="form-control text-center" readonly />
-                    </div>
-                </div>
-            </div>
-
-            <!-- عدد الأيام المحسوبة -->
-            <div class="form-group mt-3" hidden >
-                <div class="row">
-                  
-                    <div class="col-md-3">
-                        <label>عدد الايام من الرصيد</label>
-                        <input type="text" id="DaysFromBalance" name="DaysFromBalance" class="form-control text-center" readonly />
-                    </div>
-                    <div class="col-md-3">
-                        <label>الاجازات السابق منحها خلال الشهر</label>
-                        <input type="text" id="UsedDaysMonth" name="UsedDaysMonth" class="form-control text-center" readonly />
-                    </div>
-                    <div class="col-md-3">
-                        <label>أيام تخصم من المرتب</label>
-                        <input type="text" id="DeductedDays" name="DeductedDays" class="form-control text-center" readonly />
-                    </div>
-                    <div class="col-md-3">
-                        <label>المتبقي بعد الخصم</label>
-                        <input type="text" id="NewRemaining" class="form-control text-center" readonly />
-                    </div>
-                </div>
-            </div>
-
-            <!-- السبب -->
-            <div class="form-group mt-3">
-                @Html.LabelFor(m => m.Reason, htmlAttributes: new { @class = "control-label col-md-2" })
                 <div class="col-md-6">
-                    @Html.TextAreaFor(m => m.Reason, new { @class = "form-control", rows = 3 })
-                </div>
-            </div>
-
-            <!-- الأزرار -->
-            <div class="form-group mt-4">
-                <div class="col-md-offset-2 col-md-10">
-                    <input type="submit" value="حفظ" class="btn btn-primary" disabled />
-                    <a href="@Url.Action("Index", "Leave", new { area = "Employee" })" class="btn btn-default">رجوع</a>
-                </div>
+                    <label class="control-label">نوع الإجازة</label>
+                    @Html.DropDownListFor(m => m.LeaveTypeId,
+                    (SelectList)ViewBag.LeaveTypes,
+                                "-- اختر نوع الإجازة --",
+                                new { @class = "form-control", id = "LeaveTypeId" })
             </div>
         </div>
-    }
 
+        <!-- رصيد الإجازات -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <label>إجمالي الإجازات</label>
+                <input type="text" id="TotalDays" class="form-control text-center" readonly />
+            </div>
+            <div class="col-md-4">
+                <label>المستخدم</label>
+                <input type="text" id="UsedDays" class="form-control text-center" readonly />
+            </div>
+            <div class="col-md-4">
+                <label>المتبقي</label>
+                <input type="text" id="RemainingDays" class="form-control text-center" readonly />
+            </div>
+        </div>
+
+        <!-- التواريخ -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                @Html.LabelFor(m => m.StartDate)
+                @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "StartDate" })
+            </div>
+
+            <div class="col-md-4">
+                @Html.LabelFor(m => m.EndDate)
+                @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "EndDate" })
+            </div>
+
+            <div class="col-md-4">
+                <label>عدد أيام الإجازة</label>
+                <input type="text" name="ActualDays" id="ActualDays" class="form-control text-center" readonly />
+          @*       @Html.TextBoxFor(m => m.ActualDays, new { @class = "form-control", id = "ActualDays" }) *@
+            </div>
+        </div>
+
+        <!-- خصم الرصيد -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <label>من الرصيد</label>
+                <input type="text" id="DaysFromBalance" name="DaysFromBalance" class="form-control text-center" readonly />
+            </div>
+            <div class="col-md-4">
+                <label>خصم من المرتب</label>
+                <input type="text" id="DeductedDays" name="DeductedDays" class="form-control text-center" readonly />
+            </div>
+            <div class="col-md-4">
+                <label>المتبقي بعد الخصم</label>
+                <input type="text" id="NewRemaining" class="form-control text-center" readonly />
+            </div>
+        </div>
+
+        <!-- السبب -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                @Html.LabelFor(m => m.Reason)
+                @Html.TextAreaFor(m => m.Reason, new { @class = "form-control", rows = 3 })
+            </div>
+        </div>
+        <div class="row mt-3" id="AttachmentSection" style="display:none;">
+            <div class="col-md-6">
+                <label class="control-label">ارفاق ملف (PDF / صورة)</label>
+                <input type="file" name="AttachmentFile" id="AttachmentFile" class="form-control" />
+            </div>
+        </div>
+
+        <!-- زر الحفظ -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <button type="submit" id="btnSave" class="btn btn-primary" disabled>حفظ</button>
+                <a href="@Url.Action("Index", "Leave", new { area = "Employee" })" class="btn btn-secondary">رجوع</a>
+            </div>
+        </div>
+    </div>
+        }
 </div>
 
 @section Scripts {
+
     <script>
-                      $(document).ready(function () {
-                          let remainingDays = 0;
 
-                          // تحميل رصيد الموظف
-                         $("#EmployeeOptions").on("input", function () {
-                          const input = $(this).val(); // اسم الموظف اللي كتبه المستخدم
-                          const hidden = $("#EmployeeId"); // الحقل المخفي
-                          const options = $("#datalistOptions option");
+        $(document).ready(function () {
 
-                          let selectedId = "";
+            // ============================
+            // 1) اختيار الموظف → جلب الرصيد
+            // ============================
+            $("#EmployeeOptions").on("input", function () {
+                const input = $(this).val();
+                const hidden = $("#EmployeeId");
+                const options = $("#datalistOptions option");
+                let selectedId = "";
 
-                          options.each(function () {
-                              if ($(this).val() === input) { // لما الاسم يطابق
-                                  selectedId = $(this).data("id"); // خد الـ id
-                                  return false; // اكسر اللوب
-                              }
-                          });
+                options.each(function () {
+                    if ($(this).val() === input) {
+                        selectedId = $(this).data("id");
+                        return false;
+                    }
+                });
 
-                          hidden.val(selectedId); // حط الـ id في الحقل المخفي
+                hidden.val(selectedId);
 
-                          if (selectedId) {
-                              $.ajax({
-                                  url: '/Employee/Leave/GetLeaveBalance',
-                                  type: 'GET',
-                                  data: { employeeId: selectedId },
-                                  success: function (data) {
-                                      if (data) {
-                                          console.log(data);  // هتشوف كل الداتا اللي جاية
+                loadLeaveBalance();
+            });
 
-                                          $("#TotalDays").val(data.totalDays ?? data.TotalDays);
-                                          $("#LeaveBalanceID").val(data.id ?? data.id);
-                                          $("#UsedDaysMonth").val(data.usedDaysMonth ?? data.usedDaysMonth);
+            // عند تغيير نوع الإجازة
+            $("#LeaveTypeId").change(function () {
+               let type = $(this).val();
+                     if (type == "3") {   // مرضي
+            $("#AttachmentSection").show();
+        } else {
+            $("#AttachmentSection").hide();
+            $("#AttachmentFile").val("");
+        }
+                loadLeaveBalance();
+            });
 
-                                          $("#UsedDays").val(data.usedDays ?? data.UsedDays);
-                                          $("#RemainingDays").val(data.remainingDays ?? data.RemainingDays);
-                                      } else {
-                                          $("#TotalDays, #UsedDays, #RemainingDays").val("");
-                                      }
-                                  },
-                                  error: function () {
-                                      alert("حدث خطأ أثناء تحميل بيانات الموظف");
-                                  }
-                              });
-                          } else {
-                              $("#TotalDays, #UsedDays, #RemainingDays").val("");
-                          }
-                      });
+            function loadLeaveBalance() {
+                let employeeId = $("#EmployeeId").val();
+                let leaveTypeId = $("#LeaveTypeId").val();
 
+                if (employeeId && leaveTypeId) {
 
-                          // تحديد الحد الأدنى للتواريخ
-                          var today = new Date().toISOString().split('T')[0];
-                          $("#StartDate, #EndDate").attr("min", today);
-
-                          $("#StartDate").on("change", function () {
-                              $("#EndDate").attr("min", $(this).val());
-                          });
-
-                          //***************************** */
-                          // حساب عدد الأيام تلقائيًا
-        $("#StartDate, #EndDate").on("change", function () {
-                   var startVal = $("#StartDate").val();
-                   var endVal = $("#EndDate").val();
-                   var employeeId = $("#EmployeeId").val();
-                   var RemainingDays = parseFloat($("#RemainingDays").val()) || 0;
-
-                   if (!startVal || !endVal) return;
-
-                   var start = new Date(startVal);
-                   var end = new Date(endVal);
-
-                   if (end < start) {
-                       alert("تاريخ النهاية يجب أن يكون بعد تاريخ البداية");
-                       $("#ActualDays, #DaysFromBalance, #DeductedDays, #NewRemaining, #MonthBreakdown").val("");
-                       return;
-                   }
-
-                   // إجازات رسمية (عدل المصفوفة أو اجلبها ديناميكياً)
-                   // var officialHolidays = ["2025-11-23", "2025-12-25"];
-
-                   // 1) حساب الأيام الفعلية وتوزيعها حسب الشهر (مع استثناء الجمعة والإجازات الرسمية)
-                   var totalDays = 0;
-                   var dayCountsByMonth = {}; // key: "YYYY-M" لضمان اختلاف السنوات
-                   for (var d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                       var dayStr = d.toISOString().split("T")[0]; // YYYY-MM-DD
-                       if (d.getDay() === 5) continue; // استبعاد يوم الجمعة (getDay()===5 لأن الأحد=0)
-                       // if (officialHolidays.indexOf(dayStr) !== -1) continue; // استبعاد العطلات الرسمية
-                       totalDays++;
-                       var monthKey = d.getFullYear() + "-" + (d.getMonth() + 1); // مثال: "2025-11"
-                       dayCountsByMonth[monthKey] = (dayCountsByMonth[monthKey] || 0) + 1;
-                   }
-                   // الايام المتداخلة
-                                            $.ajax({
-            url: '/Employee/Leave/CheckLeaveDate',
-            type: 'POST',
-            data: {
-                employeeId: employeeId,
-                startDate: startVal,
-                endDate: endVal,
-            },
-            success: function (data) {
-
-                console.log(data); // مهم جداً للتأكد
-
-                if (data.hasConflict === true) {
-                    alert(data.message);
-                    $("#btnSave").prop("disabled", true);
-                    return;
+                    $.ajax({
+                        url: '/Employee/Leave/GetLeaveBalance',
+                        type: 'GET',
+                        data: { employeeId: employeeId, leaveTypeId: leaveTypeId },
+                        success: function (data) {
+                            if (data) {
+                                $("#LeaveBalanceID").val(data.id);
+                                $("#TotalDays").val(data.totalDays);
+                                $("#UsedDays").val(data.usedDays);
+                                $("#RemainingDays").val(data.remainingDays);
+                            }
+                        }
+                    });
                 }
-
-                // لو مفيش تداخل
-                $("#btnSave").prop("disabled", false);
-            },
-            error: function () {
-                alert("حدث خطأ أثناء تحميل بيانات الموظف");
             }
+
+            // ============================
+            // 2) التاريخ → حساب الأيام
+            // ============================
+                 $("#StartDate, #EndDate").change(function () {
+
+            var startVal = $("#StartDate").val();
+            var endVal = $("#EndDate").val();
+
+            // لو أي واحد فاضي
+            if (!startVal || !endVal) return;
+
+            var start = new Date(startVal);
+            var end = new Date(endVal);
+
+            // ❌ منع تاريخ نهاية قبل البداية
+            if (end < start) {
+                alert("❌ تاريخ النهاية يجب أن يكون بعد تاريخ البداية");
+
+                $("#EndDate").val(""); // تفريغ التاريخ الخطأ
+                $("#ActualDays").val("");
+                $("#DaysFromBalance").val("");
+                $("#DeductedDays").val("");
+                $("#NewRemaining").val("");
+
+                $("#btnSave").prop("disabled", true);
+                return;
+            }
+
+            // لو التاريخ صحيح → نسمح بالحفظ
+            $("#btnSave").prop("disabled", false);
+
+            var employeeId = $("#EmployeeId").val();
+
+            // فحص التداخل مع إجازة سابقة
+            $.post('/Employee/Leave/CheckLeaveDate',
+                { employeeId: employeeId, startDate: startVal, endDate: endVal },
+                function (response) {
+
+                    if (response.hasConflict) {
+                        alert(response.message);
+                        $("#btnSave").prop("disabled", true);
+                        return;
+                    }
+
+                    $("#btnSave").prop("disabled", false);
+
+                    // حساب عدد الأيام
+                    calculateDays();
+                });
         });
 
+            // الحسابات الخاصة بالأيام
+            function calculateDays() {
 
+                let start = new Date($("#StartDate").val());
+                let end = new Date($("#EndDate").val());
 
-                   // 2) قراءة الإجازات السابقة خلال الشهر من الحقل #UsedDaysMonth
-                   // نتوقع شكل مثل: "10/2 : 11/1" أو "11/3" إلخ.
-                   // سنفترض الأشهر هي أرقام (1-12) من نفس السنة - نربطها بالسنة الموجودة في فترات الإجازة.
-                   var usedStr = $("#UsedDaysMonth").val() || "";
-                   var usedDaysByMonth = {}; // key: month number as string "M" or "YYYY-M"
-                   // نحاول دعم الشكل "10/2 : 11/1" أو "2025-10/2" لو كان موجوداً
-                   usedStr.split(":").forEach(function (part) {
-                       part = part.trim();
-                       if (!part) return;
-                       // ممكن يكون "M/N" أو "YYYY-M/N"
-                       var m = part.split("/")[0].trim();
-                       var n = parseFloat(part.split("/")[1]) || 0;
-                       if (m.indexOf("-") !== -1) {
-                           // "YYYY-M"
-                           usedDaysByMonth[m] = n;
-                       } else {
-                           // مجرد شهر رقم - نحتسبه لكل سنة ممكنة لاحقاً. سنعيّن السنة الافتراضية = سنة بداية الإجازة
-                           var monthKey = start.getFullYear() + "-" + parseInt(m, 10);
-                           usedDaysByMonth[monthKey] = n;
-                       }
-                   });
+                var diff = (end - start) / (1000 * 3600 * 24) + 1;
+                $("#ActualDays").val(diff);
 
-                   // 3) توزيع الأيام شهر بشهر مع قاعدة: أقصى حد من الشركة لكل شهر = 2 يوم ناقص ما تم منحه سابقاً
-                   var MAX_COMPANY_PER_MONTH = 2;
+                let remaining = parseFloat($("#RemainingDays").val());
 
-                   // نحتاج معالجة الأشهر بترتيب تصاعدي زمني
-                   var monthKeys = Object.keys(dayCountsByMonth).sort(function (a, b) {
-                       // مقارنة YYYY-M
-                       var pa = a.split("-"), pb = b.split("-");
-                       if (pa[0] !== pb[0]) return parseInt(pa[0]) - parseInt(pb[0]);
-                       return parseInt(pa[1]) - parseInt(pb[1]);
-                   });
+                if (remaining >= diff) {
+                    $("#DaysFromBalance").val(diff);
+                    $("#DeductedDays").val(0);
+                    $("#NewRemaining").val(remaining - diff);
+                } else {
+                    $("#DaysFromBalance").val(remaining);
+                    $("#DeductedDays").val(diff - remaining);
+                    $("#NewRemaining").val(0);
+                }
+            }
 
-                   var remainingBalance = RemainingDays;
-                   var totalCompany = 0;
-                   var totalFromBalance = 0;
-                   var totalSalaryDeduct = 0;
-                   var monthDeductions = [];
-
-                   monthKeys.forEach(function (monthKey) {
-                       var daysInMonth = dayCountsByMonth[monthKey] || 0;
-                       // ما تم استخدامه سابقاً في هذا الشهر (إذا موجود)
-                       var usedPrev = usedDaysByMonth[monthKey] || 0;
-                       // حساب ما تبقى للشركة في هذا الشهر
-                       var availableCompany = Math.max(0, MAX_COMPANY_PER_MONTH - usedPrev);
-                       var companyCover = Math.min(daysInMonth, availableCompany);
-
-                       var afterCompany = daysInMonth - companyCover;
-
-                       // تغطية من الرصيد المتبقي (بترتيب الأشهر)
-                       var balanceCover = Math.min(afterCompany, remainingBalance);
-                       remainingBalance -= balanceCover;
-
-                       // الباقي يتحول لخصم من المرتب
-                       var salaryDeduct = afterCompany - balanceCover;
-
-                       totalCompany += companyCover;
-                       totalFromBalance += balanceCover;
-                       totalSalaryDeduct += salaryDeduct;
-
-                       monthDeductions.push(`${monthKey}/شركة:${companyCover},رصيد:${balanceCover},خصم:${salaryDeduct}`);
-                   });
-
-                   // 4) تحديث الحقول
-                   $("#ActualDays").val(totalDays);
-                   $("#DaysFromBalance").val(totalFromBalance);
-                   $("#DeductedDays").val(totalSalaryDeduct);
-                   $("#NewRemaining").val(remainingBalance);
-                   // حقل جديد لعرض تفصيل شهري (لو تحب تسجله في حقل Hidden أو textarea)
-                   // لو عندك حقل معرّف معين لعرض التفصيل استخدمه، هنا سأستخدم DeductedDays لعرضه أيضاً أو تضيف حقل #MonthBreakdown
-                   if ($("#MonthBreakdown").length) {
-                       $("#MonthBreakdown").val(monthDeductions.join(" : "));
-                   } else {
-                       // إن أردت عرض التفصيل داخل DeductedDays مع الحقول الأخرى يمكن uncomment السطر التالي:
-                       // $("#DeductedDays").val(totalSalaryDeduct + "  (تفصيل: " + monthDeductions.join(" : ") + ")");
-                   }
-               });
-
-
-                                   //**************** */
-
-               });
+        });
     </script>
+
 }

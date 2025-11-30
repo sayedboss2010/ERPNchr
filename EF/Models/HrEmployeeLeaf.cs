@@ -53,6 +53,8 @@ public partial class HrEmployeeLeaf
 
     public int? LeaveDays { get; set; }
 
+    public string? AttachmentPath { get; set; }
+
     public virtual HrEmployee? Employee { get; set; }
 
     public virtual HrEmployeeLeaveBalance? HrEmployeeLeaveBalance { get; set; }

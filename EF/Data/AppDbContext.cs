@@ -1,8 +1,7 @@
-﻿using EF.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using EF.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EF.Data;
 
@@ -68,20 +67,9 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<UserType> UserTypes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        try
-        {
-            string c = Directory.GetCurrentDirectory();
-            IConfigurationRoot configuration =
-                new ConfigurationBuilder().SetBasePath(c).AddJsonFile("appsettings.json").Build();
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=DESKTOP-R5ET6G3;Database=HR_Nchr;Trusted_Connection=True;TrustServerCertificate=True;");
 
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DBConnection"));
-        }
-        catch
-        {
-            //ignore
-        }
-    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AUserLogin>(entity =>
@@ -348,6 +336,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("ID");
+            entity.Property(e => e.AttachmentPath).HasMaxLength(500);
             entity.Property(e => e.CreatedDate).HasColumnName("Created_Date");
             entity.Property(e => e.CreatedUserId).HasColumnName("Created_UserId");
             entity.Property(e => e.DeletedDate).HasColumnName("Deleted_Date");
@@ -378,15 +367,20 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<HrEmployeeLeaveBalance>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__HR_Emplo__3214EC2767886B5D");
+            entity.HasKey(e => e.Id).HasName("PK__HR_Emplo__3214EC272A44A34F");
 
             entity.ToTable("HR_Employee_LeaveBalance", tb => tb.HasComment("رصيد الإجازات السنوي (اعتيادي + عارضة)"));
 
             entity.Property(e => e.Id).HasColumnName("ID");
-            entity.Property(e => e.CasualRemainingDays)
-                .HasComputedColumnSql("([CasualTotalDays]-[CasualUsedDays])", true)
-                .HasComment("باقي الايام العارضة")
-                .HasColumnType("decimal(6, 2)");
+            entity.Property(e => e.AnnualRemainingDays).HasComment("باقي الايام العارضة");
+            entity.Property(e => e.AnnualTotalDays)
+                .HasDefaultValue(7m)
+                .HasComment("إجمالي الإجازات العارضة في السنة")
+                .HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.AnnualUsedDays)
+                .HasComment("ايام العارضة المستخدمة")
+                .HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.CasualRemainingDays).HasComment("باقي الايام العارضة");
             entity.Property(e => e.CasualTotalDays)
                 .HasDefaultValue(7m)
                 .HasComment("إجمالي الإجازات العارضة في السنة")
@@ -404,10 +398,6 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("Employee_ID");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsAnnualBalanceCalculated).HasComment("تم احتساب الإجازة على باقي الرصيد الاعتيادي (0 = لا، 1 = نعم)");
-            entity.Property(e => e.RemainingDays)
-                .HasComputedColumnSql("([TotalDays]-[UsedDays])", true)
-                .HasComment("فرق الايام")
-                .HasColumnType("decimal(6, 2)");
             entity.Property(e => e.TotalDays)
                 .HasDefaultValue(30m)
                 .HasComment("إجمالي الإجازات الاعتيادية في السنة")

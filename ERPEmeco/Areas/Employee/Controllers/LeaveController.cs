@@ -12,8 +12,12 @@ namespace YourProjectName.Areas.Employee.Controllers
 
     public class LeaveController : Controller
     {
+        private readonly IWebHostEnvironment _env;
         private readonly AppDbContext _context = new AppDbContext();
-
+        public LeaveController(IWebHostEnvironment env)
+        {
+            _env = env;
+        }
         // 🧾 عرض كل الإجازات
         public ActionResult Index()
         {
@@ -62,51 +66,77 @@ namespace YourProjectName.Areas.Employee.Controllers
             return View();
         }
 
-        // 💾 حفظ الإجازة
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(EmployeeLeaveVM model)
+        public ActionResult Create(EmployeeLeaveVM model, IFormFile AttachmentFile)
         {
-            if (!ModelState.IsValid)
-            {
-                var detailedErrors = ModelState
-                    .Where(ms => ms.Value.Errors.Count > 0)
-                    .Select(ms => new
-                    {
-                        Field = ms.Key,                                      // اسم الحقل
-                        Errors = ms.Value.Errors.Select(e => e.ErrorMessage), // رسالة الخطأ
-                        AttemptedValue = ms.Value.AttemptedValue              // القيمة اللي دخلت وعملت مشكلة
-                    })
-                    .ToList();
+            //if (!ModelState.IsValid)
+            //{
+            //    var detailedErrors = ModelState
+            //        .Where(ms => ms.Value.Errors.Count > 0)
+            //        .Select(ms => new
+            //        {
+            //            Field = ms.Key,                                      // اسم الحقل
+            //            Errors = ms.Value.Errors.Select(e => e.ErrorMessage), // رسالة الخطأ
+            //            AttemptedValue = ms.Value.AttemptedValue              // القيمة اللي دخلت وعملت مشكلة
+            //        })
+            //        .ToList();
 
-                foreach (var error in detailedErrors)
+            //    foreach (var error in detailedErrors)
+            //    {
+            //        Console.WriteLine($"Field: {error.Field}");
+            //        Console.WriteLine($"Attempted Value: {error.AttemptedValue}");
+            //        Console.WriteLine($"Errors: {string.Join(", ", error.Errors)}");
+            //        Console.WriteLine("----------------------------");
+            //    }
+
+            //    // إعادة تحميل القوائم
+            //    var Emplist = (from e in _context.HrEmployees
+            //                   where e.IsActive == true
+            //                   select new
+            //                   {
+            //                       e.Id,
+            //                       e.NameAr,
+            //                       Display = e.NameAr + " (" + e.EmpCode + ")"
+            //                   }).ToList();
+
+            //    ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
+            //    ViewBag.LeaveTypeId = new SelectList(_context.HrLeaveTypes.Where(a => a.IsActive == true), "Id", "NameAr", model.LeaveTypeId);
+
+            //    return View(model);
+            //}
+            string attachmentPath = null;
+
+            if (AttachmentFile != null && AttachmentFile.Length > 0)
+            {
+                var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                string uploadFolder = Path.Combine(webRoot, "uploads", "MedicalLeaves");
+
+                Directory.CreateDirectory(uploadFolder);
+
+
+                if (!Directory.Exists(uploadFolder))
+                    Directory.CreateDirectory(uploadFolder);
+
+                // اسم ملف فريد
+                string fileName = $"{Guid.NewGuid()}_{AttachmentFile.FileName}";
+                string filePath = Path.Combine(uploadFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    Console.WriteLine($"Field: {error.Field}");
-                    Console.WriteLine($"Attempted Value: {error.AttemptedValue}");
-                    Console.WriteLine($"Errors: {string.Join(", ", error.Errors)}");
-                    Console.WriteLine("----------------------------");
+                    AttachmentFile.CopyTo(stream);
                 }
 
-                // إعادة تحميل القوائم
-                var Emplist = (from e in _context.HrEmployees
-                               where e.IsActive == true
-                               select new
-                               {
-                                   e.Id,
-                                   e.NameAr,
-                                   Display = e.NameAr + " (" + e.EmpCode + ")"
-                               }).ToList();
-
-                ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
-                ViewBag.LeaveTypeId = new SelectList(_context.HrLeaveTypes.Where(a => a.IsActive == true), "Id", "NameAr", model.LeaveTypeId);
-
-                return View(model);
+                // المسار الذي يُخزن في الداتابيز
+                attachmentPath = $"/uploads/MedicalLeaves/{fileName}";
             }
 
             long HrEmployeeLeaves_ID = _context.Database
                 .SqlQueryRaw<long>("SELECT NEXT VALUE FOR dbo.HR_Employee_Leaves_SEQ")
                 .AsEnumerable()
                 .First();
+
             var entity = new HrEmployeeLeaf
             {
                 Id = HrEmployeeLeaves_ID,
@@ -115,29 +145,69 @@ namespace YourProjectName.Areas.Employee.Controllers
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 Reason = model.Reason,
+                HrEmployeeLeaveBalanceId=model.LeaveBalanceID,
                 LeaveDays = model.ActualDays,
                 CreatedDate = DateOnly.FromDateTime(DateTime.Now),
                 CreatedUserId = 1, // TODO: استبدلها بالمستخدم الحالي
-                IsActive = true
+                IsActive = true,
+                AttachmentPath = attachmentPath  // ← هنا الحفظ
             };
+        
             _context.HrEmployeeLeaves.Add(entity);
             // HR_Employee_LeaveBalance اجمالى الاجازة للموظف
             var leaveBalance = _context.HrEmployeeLeaveBalances.FirstOrDefault(e => e.Id == model.LeaveBalanceID);
 
             if (leaveBalance != null)
             {
-                leaveBalance.UsedDays =decimal.Parse(model.ActualDays.ToString()) ;  // new value
+                // زيادة مجموع المستخدم من كل الأنواع
+                leaveBalance.UsedDays += (int)model.ActualDays;
+
+                // =============================
+                // 1) إجازة عارضة (ID = 1)
+                // =============================
+                if (model.LeaveTypeId == 1)
+                {
+                    leaveBalance.CasualUsedDays += (int)model.ActualDays;
+                    leaveBalance.CasualRemainingDays =
+                        (int)(leaveBalance.CasualTotalDays - leaveBalance.CasualUsedDays);
+                }
+
+                // =============================
+                // 2) إجازة اعتيادي (ID = 2)
+                // =============================
+                if (model.LeaveTypeId == 2)
+                {
+                    leaveBalance.UsedDays += (int)model.ActualDays;
+                    leaveBalance.TotalDaysReminig =
+                        (int)(leaveBalance.TotalDays - leaveBalance.UsedDays);
+                }
+
+                //// =============================
+                //// 3) إجازة سنوي (ID = 5)
+                //// = نفس حساب الاعتيادي
+                //// =============================
+                if (model.LeaveTypeId == 5)
+                {
+                    leaveBalance.AnnualUsedDays += (int)model.ActualDays;
+                    leaveBalance.AnnualRemainingDays =
+                        (int)(leaveBalance.AnnualTotalDays - leaveBalance.AnnualUsedDays);
+                }
+
+                //// =============================
+                //// تحديث الإجمالي العام
+                //// =============================
+                //leaveBalance.TotalDaysReminig =
+                //    (int)(leaveBalance.TotalDays - leaveBalance.UsedDays);
+
                 leaveBalance.UpdatedDate = DateTime.Now;
+                leaveBalance.UpdatedUserId = 1;
 
-                _context.SaveChanges(); // commits changes to the database
-            }
-            //HR_Employee_Monthly_effects تأثيرات المرتب
-            if(model.DeductedDays > 0)
-            {
-
+                
             }
             _context.SaveChanges();
-            return RedirectToAction("PrintNew", "Leave", new { area = "Employee", id = entity.Id });
+            
+                 return RedirectToAction("index", "Leave", new { area = "Employee" });
+            //return RedirectToAction("PrintNew", "Leave", new { area = "Employee", id = entity.Id });
         }
 
         // 🖨️ عرض نموذج الطباعة
@@ -192,7 +262,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                             // ✅ استخدم 0 لو مفيش سجل رصيد
                             RemainingBefore = (t.NameAr ?? "").Contains("عرض")
                                 ? (tb != null ? (int)tb.CasualRemainingDays : 0)
-                                : (tb != null ? (int)tb.RemainingDays : 0),
+                                : (tb != null ? (int)tb.TotalDaysReminig : 0),
 
                             UsedDays = (t.NameAr ?? "").Contains("عرض")
                                 ? (tb != null ? (int)tb.CasualUsedDays : 0)
@@ -265,70 +335,107 @@ namespace YourProjectName.Areas.Employee.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetLeaveBalance(long employeeId,int LeaveTypeId)
+        [HttpGet]
+        public JsonResult GetLeaveBalance(long employeeId, int leaveTypeId)
         {
-            int currentYear = DateTime.Now.Year;
+            int year = DateTime.Now.Year;
 
-            // جلب الرصيد العارضة
             var balance = _context.HrEmployeeLeaveBalances
-                .Where(b => b.EmployeeId == employeeId && b.Year == currentYear)
-                .Select(b => new EmployeeLeaveBalanceDto
-                {
-                    Id = b.Id,
-                    TotalDays = b.TotalDays,
-                    UsedDays = b.UsedDays,
-                    RemainingDays = b.RemainingDays,
-                    CasualTotalDays = b.CasualTotalDays,
-                    CasualUsedDays = b.CasualUsedDays,
-                    //Leaves = _context.HrEmployeeLeaves
-                    //            .Where(l => l.HrEmployeeLeaveBalanceId == b.Id
-                    //                        && l.StartDate.HasValue
-                    //                        && l.EndDate.HasValue)
-                    //            .ToList()
-                })
+                .Where(b => b.EmployeeId == employeeId && b.Year == year)
                 .FirstOrDefault();
 
-            //if (balance != null)
-            //{
-            //    // حساب الأيام المستخدمة لكل شهر حتى لو الإجازة تمتد بين شهور
-            //    var usedDaysPerMonth = balance.Leaves
-            //        .SelectMany(l =>
-            //        {
-            //            var daysList = new List<(int Month, int Days)>();
-            //            var start = l.StartDate.Value;
-            //            var end = l.EndDate.Value;
+            if (balance == null)
+                return Json(null);
 
-            //            while (start <= end)
-            //            {
-            //                // آخر يوم في الشهر الحالي
-            //                var endOfMonth = new DateOnly(start.Year, start.Month, DateTime.DaysInMonth(start.Year, start.Month));
-            //                var currentEnd = end < endOfMonth ? end : endOfMonth;
+            var dto = new EmployeeLeaveBalanceDto
+            {
+                Id = balance.Id,
 
-            //                // عدد الأيام في هذا الشهر
-            //                int daysInMonth = currentEnd.DayNumber - start.DayNumber + 1;
-            //                daysList.Add((start.Month, daysInMonth));
+                // السنوي
+                AnnualTotalDays = balance.AnnualTotalDays,
+                AnnualUsedDays = balance.AnnualUsedDays,
+                AnnualRemainingDays = balance.AnnualRemainingDays,
 
-            //                // الانتقال للشهر التالي
-            //                start = currentEnd.AddDays(1);
-            //            }
+                // العارضة
+                CasualTotalDays = balance.CasualTotalDays,
+                CasualUsedDays = balance.CasualUsedDays,
+                CasualRemainingDays = balance.CasualRemainingDays,
 
-            //            return daysList;
-            //        })
-            //        .GroupBy(x => x.Month)
-            //        .Select(g => new
-            //        {
-            //            Month = g.Key,
-            //            UsedDays = g.Sum(x => x.Days)
-            //        })
-            //        .OrderBy(x => x.Month)
-            //        .Select(x => $"{x.Month}/{x.UsedDays}");
+                // الاعتيادي
+                TotalDays = balance.TotalDays,
+                UsedDays = balance.UsedDays,
+                RemainingDays = balance.TotalDaysReminig,
+            };
 
-            //    // تحويل النتيجة إلى نص
-            //    balance.UsedDaysMonth = string.Join(" : ", usedDaysPerMonth);
+            // --------------------------------------------------------------------
+            // تحديد نوع الإجازة المطلوب وإرجاع بياناته فقط
+            // --------------------------------------------------------------------
+            if (leaveTypeId == 2) // 2= إجازة اعتيادي
+            {
+                dto.RemainingDays = balance.TotalDaysReminig;
+                dto.TotalDays= balance.TotalDays;
+                dto.UsedDays = balance.UsedDays;
+            }
+            else if (leaveTypeId == 1) // 1 = إجازة عارضة
+            {
+                dto.RemainingDays = balance.CasualRemainingDays;
+                dto.TotalDays = balance.CasualTotalDays;
+                dto.UsedDays = balance.CasualUsedDays;
+            }
+            else if (leaveTypeId == 5)// 5 = إجازة سنوي
+            {
+                dto.RemainingDays = balance.AnnualRemainingDays;
+                dto.TotalDays = balance.AnnualTotalDays;
+                dto.UsedDays = balance.AnnualUsedDays;
+            }
 
-            //}
-            return Json(balance);
+            // --------------------------------------------------------------------
+            // جلب جميع الإجازات لهذا الرصيد لكي نحسب الأيام لكل شهر
+            // --------------------------------------------------------------------
+            dto.Leaves = _context.HrEmployeeLeaves
+                .Where(l => l.HrEmployeeLeaveBalanceId == balance.Id
+                            && l.StartDate != null
+                            && l.EndDate != null)
+                .ToList();
+
+            // --------------------------------------------------------------------
+            // حساب الأيام لكل شهر
+            // --------------------------------------------------------------------
+            if (dto.Leaves.Any())
+            {
+                var usedDaysPerMonth = dto.Leaves
+                    .SelectMany(l =>
+                    {
+                        var list = new List<(int Month, int Days)>();
+                        var start = l.StartDate.Value;
+                        var end = l.EndDate.Value;
+
+                        while (start <= end)
+                        {
+                            var endOfMonth = new DateOnly(start.Year, start.Month,
+                                DateTime.DaysInMonth(start.Year, start.Month));
+
+                            var currentEnd = end < endOfMonth ? end : endOfMonth;
+
+                            int days = currentEnd.DayNumber - start.DayNumber + 1;
+
+                            list.Add((start.Month, days));
+
+                            start = currentEnd.AddDays(1);
+                        }
+
+                        return list;
+                    })
+                    .GroupBy(x => x.Month)
+                    .Select(g => $"{g.Key}/{g.Sum(x => x.Days)}")
+                    .ToList();
+
+                dto.UsedDaysMonth = string.Join(" : ", usedDaysPerMonth);
+            }
+
+            return Json(dto);
         }
+
 
         public class EmployeeLeaveBalanceDto
         {
@@ -347,6 +454,15 @@ namespace YourProjectName.Areas.Employee.Controllers
             /// ايام العارضة المستخدمة
             /// </summary>
             public decimal CasualUsedDays { get; set; }
+            public decimal AnnualTotalDays { get; set; }
+
+            public decimal AnnualUsedDays { get; set; }
+            public int? AnnualRemainingDays { get; set; }
+
+           
+            public int? CasualRemainingDays { get; set; }
+
+            public int? TotalDaysReminig { get; set; }
         }
 
     }
