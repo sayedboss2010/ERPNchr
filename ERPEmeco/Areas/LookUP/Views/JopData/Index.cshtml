@@ -1,0 +1,126 @@
+﻿@model IEnumerable<VM.ViewModels.BranchVM>
+@{
+    ViewBag.Title = "قائمة الفروع";
+    Layout = "_Layout";
+}
+
+<h2 class="text-center">قائمة الفروع</h2>
+<hr />
+<a href="@Url.Action("CreateEdite", "HRJob", new { TypePage = 1, area = "LookUP" })" class="btn btn-primary btn-sm">
+    إنشاء فرع جديدة
+</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>الاسم</th>
+            <th>الحالة</th>
+            <th>الاجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.TitleAr</td>
+                <td>
+                    @if (!item.IsActive)
+                    {
+                        <span class="text-danger activateLeave"
+                              data-id="@item.Id"
+                              data-isactive="@item.IsActive"
+                              style="cursor:pointer;">
+                            غير نشط
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-success activateLeave"
+                              data-id="@item.Id"
+                              data-isactive="@item.IsActive"
+                              style="cursor:pointer;">
+                            نشط
+                        </span>
+                    }
+                </td>
+
+                <td>
+
+                    <a href="@Url.Action("CreateEdite", "HRJob", new { TypePage = 2, JobID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
+                        تعديل
+                    </a>
+                    
+                    <a href="@Url.Action("CreateEdite", "HRJob", new { TypePage = 3, JobID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
+                        عرض
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+                $(document).ready(function () {
+            $(".activateLeave").click(function () {
+
+                var span = $(this);
+                var leaveId = span.data("id");
+                var isActive = span.data("isactive");
+                if(isActive==true){
+                        if (confirm("هل أنت متأكد من تفعيل حالة هذا الفرع / هذه المحافظة ؟")) {
+
+                    $.ajax({
+                        url: '@Url.Action("ActivateBranch", "HRJob", new { area = "LookUP" })',
+                        type: 'POST',
+                        data: {
+                            id: leaveId,
+                            isActive: isActive
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                window.location.href = response.redirectUrl;
+                            } else {
+                                alert(response.message || "حدث خطأ أثناء تغيير الحالة");
+                            }
+                        },
+                        error: function () {
+                            alert("حدث خطأ أثناء الاتصال بالخادم");
+                        }
+                    });
+
+                }
+                }
+                else{
+                      if (confirm("هل أنت متأكد من عدم تفعيل حالة هذا الفرع / هذه المحافظة ؟")) {
+
+                    $.ajax({
+                        url: '@Url.Action("ActivateBranch", "HRJob", new { area = "LookUP" })',
+                        type: 'POST',
+                        data: {
+                            id: leaveId,
+                            isActive: isActive
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                window.location.href = response.redirectUrl;
+                            } else {
+                                alert(response.message || "حدث خطأ أثناء تغيير الحالة");
+                            }
+                        },
+                        error: function () {
+                            alert("حدث خطأ أثناء الاتصال بالخادم");
+                        }
+                    });
+
+                }
+                }
+              
+
+            });
+        });
+
+
+    </script>
+}
