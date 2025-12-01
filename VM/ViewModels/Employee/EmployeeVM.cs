@@ -10,10 +10,8 @@ namespace VM.ViewModels.Employee
     public class EmployeeVM
     {
         public long Id { get; set; }
-        public Nullable<int> Year { get; set; }
-        public Nullable<int> Month { get; set; }
-        public string DepartmentName { get; set; }
-        public string JobName { get; set; }
+   
+       
         /// <summary>
         /// كود الموظف
         /// </summary>
@@ -52,7 +50,7 @@ namespace VM.ViewModels.Employee
 
         public int? CreatedUserId { get; set; }
 
-        public DateOnly? CreatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
 
         public int? UpdatedUserId { get; set; }
 

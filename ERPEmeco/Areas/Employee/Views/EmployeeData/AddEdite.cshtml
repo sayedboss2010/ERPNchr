@@ -40,7 +40,7 @@
                                     <span id="Name_AR2" class="input-group-text">
                                         <i class="bx bx-user"></i>
                                     </span>
-                                    <input type="text" name="Name_AR" id="Name_AR" value="@Model.NameAr" class="form-control" placeholder="John Doe" aria-label="John Doe" aria-describedby="Name_AR2" />
+                                    <input type="text" name="NameAr" id="Name_AR" value="@Model.NameAr" class="form-control" placeholder="John Doe" aria-label="John Doe" aria-describedby="Name_AR2" />
                                 </div>
                             </div>
                         </div>
@@ -58,9 +58,9 @@
                         </div>
 
                         <div class="row mb-3">
-                            <label for="formFile" class="col-sm-2 col-form-label">تحميل القومي</label>
+                            <label for="NID_Path" class="col-sm-2 col-form-label">تحميل القومي</label>
                             <div class="col-sm-10">
-                                <input class="form-control" type="file" id="formFile" />
+                                <input class="form-control" name="NID_Path" type="file" id="NID_Path" />
                             </div>
                         </div>
 
@@ -79,7 +79,17 @@
                                 <div class="form-text">يمكنك استخدام الحروف، الأرقام والنقاط (.)</div>
                             </div>
                         </div>
-
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="Password">الرقم السري</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text"><i class="bx bx-lock"></i></span>
+                                    <input type="password" name="Password" id="Password"
+                                           class="form-control" placeholder="ادخل كلمة السر (اختياري)" />
+                                </div>
+                                <small class="text-muted">اتركه فارغًا إذا لا تريد تغيير كلمة السر</small>
+                            </div>
+                        </div>
                         <div class="row mb-3">
                             <label class="col-sm-2 form-label" for="PhoneNumber">الهاتف</label>
                             <div class="col-sm-10">
@@ -132,14 +142,18 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label for="BranchId" class="col-sm-2 col-form-label">الإدارة</label>
+                            <label for="DepartmentId" class="col-sm-2 col-form-label">الإدارة</label>
                             <div class="col-sm-10">
-                                <!-- الحقل اللي المستخدم بيكتب فيه -->
-                                <input class="form-control" list="CurrentBranchDeptdatalistCurrentBranchDeptdatalist" id="CurrentBranchDeptText"
-                                       placeholder="اكتب للبحث..." value="@Model.DepartmentName" />
 
-                                <!-- الحقل الخفي اللي بيخزن الـ Id الفعلي -->
-                                <input type="hidden" id="CurrentBranchDeptId" name="BranchId" value="@Model.BranchId" />
+                                <input class="form-control"
+                                       id="CurrentBranchDeptText"
+                                       list="CurrentBranchDeptdatalist"
+                                       placeholder="اكتب للبحث..." />
+
+                                <input type="hidden"
+                                       id="CurrentBranchDeptId"
+                                       name="DepartmentId"
+                                       value="@Model.DepartmentId" />
 
                                 <datalist id="CurrentBranchDeptdatalist">
                                     @foreach (var item in ViewBag.ListHrDepartment)
@@ -147,6 +161,31 @@
                                         <option value="@item.Text" data-id="@item.Value"></option>
                                     }
                                 </datalist>
+
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="BranchId" class="col-sm-2 col-form-label">المحافظة / الفرع</label>
+                            <div class="col-sm-10">
+
+                                <input class="form-control"
+                                       id="CurrentBranchText"
+                                       list="CurrentBranchlist"
+                                       placeholder="اكتب للبحث..." />
+
+                                <input type="hidden"
+                                       id="CurrentBranchId"
+                                       name="BranchId"
+                                       value="@Model.BranchId" />
+
+                                <datalist id="CurrentBranchlist">
+                                    @foreach (var item in ViewBag.ListHrBranch)
+                                    {
+                                        <option value="@item.Text" data-id="@item.Value"></option>
+                                    }
+                                </datalist>
+
                             </div>
                         </div>
 
@@ -155,12 +194,15 @@
                             <label for="CurrentJobId" class="col-sm-2 col-form-label">الوظيفة الحالية</label>
                             <div class="col-sm-10">
                                 <!-- المستخدم يكتب ويبحث هنا -->
-                                <input class="form-control" list="ListHrJobsDatalistOptions"
-                                       id="CurrentJobText" placeholder="اكتب للبحث..."
-                                       value="@Model.JobName" />
+                                <input class="form-control"
+                                       id="CurrentJobText"
+                                       list="ListHrJobsDatalistOptions"
+                                       placeholder="اكتب للبحث..." />
 
-                                <!-- الـ Id الفعلي اللي هيتبعت في الفورم -->
-                                <input type="hidden" id="CurrentJobId" name="CurrentJobId" value="@Model.CurrentJobId" />
+                                <input type="hidden"
+                                       id="CurrentJobId"
+                                       name="CurrentJobId"
+                                       value="@Model.CurrentJobId" />
 
                                 <datalist id="ListHrJobsDatalistOptions">
                                     @foreach (var item in ViewBag.ListHrJobs)
@@ -168,6 +210,7 @@
                                         <option value="@item.Text" data-id="@item.Value"></option>
                                     }
                                 </datalist>
+
                             </div>
                         </div>
                         <!-- نوع الموظف -->
@@ -201,22 +244,16 @@
                             </div>
                         </div>
 
-                        <!-- الحالة -->
-                        <div class="row mb-3">
-                            <div class="card-body">
+                        <input name="IsActive"
+                               id="IsActive"
+                               class="form-check-input"
+                               type="checkbox"
+                               value="true"
+                               @(Model.IsActive ? "checked" : "") />
 
-                                <div class="form-check form-switch mb-2">
-                                    <input name="IsActive"
-                                           id="IsActive"
-                                           class="form-check-input"
-                                           type="checkbox"
-                                           @(Model.IsActive ? "checked" : "") />
+                        <input type="hidden" name="IsActive" value="false" />
 
-                                    <label class="form-label" for="IsActive">الحالة</label>
-                                </div>
 
-                            </div>
-                        </div>
 
                     </div>
                 </div>
@@ -231,60 +268,36 @@
     }
 
 </div>
+@section Scripts {
+    <script>
 
-<script src="~/modules/employeedata-module.js"></script>
+        // DepartmentId
+        document.getElementById("CurrentBranchDeptText").addEventListener("input", function () {
+            const val = this.value.trim();
+            const opts = document.querySelectorAll("#CurrentBranchDeptdatalist option");
 
-<script>
+            let match = Array.from(opts).find(o => o.value.trim() === val);
+            document.getElementById("CurrentBranchDeptId").value = match ? match.dataset.id : "";
+        });
 
-    //الوظيفة الحالية
-    const jobInput = document.getElementById("CurrentJobText");
-    const hiddenJobInput = document.getElementById("CurrentJobId");
-    const jobOptions = document.querySelectorAll("#ListHrJobsDatalistOptions option");
+        // BranchId
+        document.getElementById("CurrentBranchText").addEventListener("input", function () {
+            const val = this.value.trim();
+            const opts = document.querySelectorAll("#CurrentBranchlist option");
 
-    jobInput.addEventListener("input", function () {
-        const val = this.value;
-        const option = Array.from(jobOptions).find(opt => opt.value === val);
-        if (option) {
-            hiddenJobInput.value = option.getAttribute("data-id");
-        } else {
-            hiddenJobInput.value = ""; // لو المستخدم كتب حاجة مش موجودة
-        }
-    });
+            let match = Array.from(opts).find(o => o.value.trim() === val);
+            document.getElementById("CurrentBranchId").value = match ? match.dataset.id : "";
+        });
 
-    //الشهر
-    const modelMonth = parseInt("@Model.Month"); // الرقم القادم من الكنترولر
-    const months = [
-        "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-        "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
-    ];
+        // CurrentJobId
+        document.getElementById("CurrentJobText").addEventListener("input", function () {
+            const val = this.value.trim();
+            const opts = document.querySelectorAll("#ListHrJobsDatalistOptions option");
 
-    const monthSelect = document.getElementById("Month");
-    for (let i = 0; i < months.length; i++)
-    {
-        const opt = document.createElement("option");
-        opt.value = i + 1; // 1 إلى 12
-        opt.textContent = months[i];
-        if (modelMonth === i + 1) {
-            opt.selected = true; // يختار الشهر القادم من الكنترولر
-        }
-        monthSelect.appendChild(opt);
-    }
+            let match = Array.from(opts).find(o => o.value.trim() === val);
+            document.getElementById("CurrentJobId").value = match ? match.dataset.id : "";
+        });
 
-    // السنة
-    // القيمة القادمة من الكنترولر
-    const modelYear = @Model.Year;
-    const select = document.getElementById("Year");
-    const currentYear = new Date().getFullYear();
+    </script>
 
-    for (let y = currentYear; y >= 1980; y--)
-    {
-        const opt = document.createElement("option");
-        opt.value = y;
-        opt.textContent = y;
-        if (y === modelYear) {
-            opt.selected = true; // اختيار السنة القادمة من الكنترولر
-        }
-        select.appendChild(opt);
-    }
-
-</script>
+}

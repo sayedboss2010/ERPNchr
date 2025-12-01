@@ -20,6 +20,7 @@ namespace DAL.Classes.DroupDowen
                        select new HrDepartment
                        {
                            NameAr = emp.NameAr,
+                           Id=emp.Id
                            //Id = bd.Id
                        }).Distinct().OrderBy(a => a.NameAr).ToList();
 
@@ -36,6 +37,7 @@ namespace DAL.Classes.DroupDowen
                        select new HrBranch
                        {
                            NameAr = emp.NameAr,
+                           Id=emp.Id
                            //Id = bd.Id
                        }).Distinct().OrderBy(a => a.NameAr).ToList();
 
@@ -51,6 +53,7 @@ namespace DAL.Classes.DroupDowen
                        select new EmployeeType
                        {
                            EmployeeTypeNameAr = emp.EmployeeTypeNameAr,
+                           Id=emp.Id
                            //Id = bd.Id
                        }).Distinct().OrderBy(a => a.EmployeeTypeNameAr).ToList();
 

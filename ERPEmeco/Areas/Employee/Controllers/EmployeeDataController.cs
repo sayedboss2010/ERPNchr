@@ -1,12 +1,16 @@
 ﻿using DAL.Classes.DroupDowen;
 using DAL.Classes.Employee;
+using EF.Data;
 using EF.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System.Drawing.Imaging;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Web;
+using VM.ViewModels.Employee;
 
 
 namespace ERPNchr.Areas.Employee.Controllers;
@@ -15,6 +19,12 @@ namespace ERPNchr.Areas.Employee.Controllers;
 [Area("Employee")]
 public class EmployeeDataController : Controller
 {
+    private readonly AppDbContext db = new AppDbContext();
+    private readonly IWebHostEnvironment _env;
+    public EmployeeDataController(IWebHostEnvironment env)
+    {
+        _env = env;
+    }
     public IActionResult IndexALL()
     {
         return View();
@@ -61,126 +71,120 @@ public class EmployeeDataController : Controller
     }
 
     [HttpPost]
-    public async Task<ActionResult> AddEdite(HrEmployee hR_Employees, IFormFile NID_Path)
+    public async Task<ActionResult> AddEdite(HrEmployee model, IFormFile NID_Path)
     {
+       
+        try
+        {
+            long HR_Employees_ID;
 
-        //var Chek_Nid = db.HR_Employees.Where(a => a.IsActive == true && a.Deleted_UserId == null && a.NID == hR_Employees.NID).Count();
-        //var Chek_name = db.HR_Employees.Where(a => a.IsActive == true && a.Deleted_UserId == null && a.Name_AR == hR_Employees.Name_AR).Count();
-        //if (Chek_name == 0)
-        //{
-        //    //if (Chek_Nid == 0)
-        //    //{
-        //    long HR_Employees_ID = db.Database.SqlQuery<long>("SELECT NEXT VALUE FOR dbo.HR_Employees_SEQ").Single();
+            // ===== إنشاء موظف جديد =====
+            if (model.Id == 0)
+            {
+                HR_Employees_ID = db.Database
+                    .SqlQueryRaw<long>("SELECT NEXT VALUE FOR dbo.HR_Employees_SEQ")
+                    .AsEnumerable()
+                    .First();
 
-        //    try
-        //    {
-        //        var max_Row = db.HR_Employees.Select(a => a.EmpCode).Max();
-        //        int Count = int.Parse(max_Row.ToString()) + 1;
-        //        ViewBag.MaxCode = Count;
-        //    }
-        //    catch (Exception)
-        //    {
-        //    }
-        //    if (ViewBag.MaxCode == null)
-        //        ViewBag.MaxCode = "1000";
-        //    if (NID_Path != null)
-        //    {
-        //        string path = Server.MapPath("~/Uploads/NID_Path/");
-        //        if (!Directory.Exists(path))
-        //        {
-        //            Directory.CreateDirectory(path);
-        //        }
-        //        string fileName = Path.GetFileName(NID_Path.FileName);
-        //        NID_Path.SaveAs(path + fileName);
-        //        hR_Employees.NID_Path = "Uploads/NID_Path/" + fileName;
-        //    }
+                model.Id = HR_Employees_ID;
 
-        //    hR_Employees.ID = HR_Employees_ID;
-
-        //    hR_Employees.IsActive = true;
-        //    hR_Employees.Created_Date = DateTime.Now;
-        //    hR_Employees.Created_UserId = int.Parse(Session["User_ID"].ToString());
-        //    // if (ModelState.IsValid)
-        //    // {
-        //    db.HR_Employees.Add(hR_Employees);
-        //    await db.SaveChangesAsync();
+                // معالجة ملف NID
+                if (NID_Path != null && NID_Path.Length > 0)
+                {
+                    var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    string uploadFolder = Path.Combine(webRoot, "uploads", "NID_Path");
 
 
-        //    if (hR_Employees.Current_Salary != null)
-        //    {
-        //        //        public Nullable<int> Year { get; set; }
-        //        // public Nullable<int> Month { get; set; }
-        //        // السنة والشهر لسه
-        //        long _HR_Employee_Salary_History_ID = db.Database.SqlQuery<long>("SELECT NEXT VALUE FOR dbo.HR_Employee_Salary_History_SEQ").Single();
-        //        HR_Employee_Salary_History hR_Salary_History = new HR_Employee_Salary_History();
 
-        //        hR_Salary_History.ID = _HR_Employee_Salary_History_ID;
-        //        hR_Salary_History.HR_Employee_ID = hR_Employees.ID;
-        //        hR_Salary_History.Salary = hR_Employees.Current_Salary;
-        //        hR_Salary_History.Year = hR_Employees.Year;
-        //        hR_Salary_History.Month = hR_Employees.Month;
-        //        hR_Salary_History.IS_Active = true;
-        //        hR_Salary_History.IS_Deleted = false;
-        //        hR_Salary_History.User_Creation_Date = DateTime.Now;
-        //        hR_Salary_History.User_Creation_Id = int.Parse(Session["User_ID"].ToString());
-        //        db.HR_Employee_Salary_History.Add(hR_Salary_History);
-        //        await db.SaveChangesAsync();
-        //    }
+                    if (!Directory.Exists(uploadFolder))
+                        Directory.CreateDirectory(uploadFolder);
+                    // اسم ملف فريد
+                    string fileName = $"{Guid.NewGuid()}_{NID_Path.FileName}";
+                    string filePath = Path.Combine(uploadFolder, fileName);
 
-        //    if (hR_Employees.Insurance_Number != null)
-        //    {
-        //        try
-        //        {
-        //            // السنة والشهر لسه
-        //            long _HR_Employee_Insurance_History_ID = db.Database.SqlQuery<long>("SELECT NEXT VALUE FOR dbo.HR_Employee_Insurance_History_SEQ").Single();
-        //            HR_Employee_Insurance_History HR_Insurance_History = new HR_Employee_Insurance_History();
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        NID_Path.CopyTo(stream);
+                    }
 
-        //            HR_Insurance_History.ID = _HR_Employee_Insurance_History_ID;
-        //            HR_Insurance_History.HR_Employees_ID = HR_Employees_ID;
-        //            HR_Insurance_History.Date_In = hR_Employees.Date_In;
-        //            HR_Insurance_History.Date_Out = hR_Employees.Date_Out;
-        //            HR_Insurance_History.IS_Active = true;
-        //            HR_Insurance_History.IS_Deleted = false;
-        //            HR_Insurance_History.User_Creation_Date = DateTime.Now;
-        //            HR_Insurance_History.User_Creation_Id = int.Parse(Session["User_ID"].ToString());
-        //            db.HR_Employee_Insurance_History.Add(HR_Insurance_History);
-        //            await db.SaveChangesAsync();
+                    // المسار الذي يُخزن في الداتابيز
+                    model.NidPath = $"/uploads/NID_Path/{fileName}"; ;
+                }
 
-        //        }
-        //        catch (Exception ex)
-        //        {
+                model.IsActive = model.IsActive; // من الفيو
+                //model.CreatedDate = DateTime.Now.Date;
+                //model.CreatedUserId = int.Parse(Session["User_ID"].ToString());
 
+                db.HrEmployees.Add(model);
+                await db.SaveChangesAsync();
+            }
+            else
+            {
+                // ===== تعديل موظف موجود =====
+                var existingEmployee = db.HrEmployees.Find(model.Id);
+                if (existingEmployee == null)
+                    return NotFound();
 
-        //        }
-        //    }
+                // تحديث البيانات الأساسية
+                existingEmployee.EmpCode = model.EmpCode;
+                existingEmployee.NameAr = model.NameAr;
+                existingEmployee.Nid = model.Nid;
+                existingEmployee.Email = model.Email;
+                existingEmployee.PhoneNumber = model.PhoneNumber;
+                existingEmployee.AddressAr = model.AddressAr;
+                existingEmployee.IsActive = model.IsActive;
+                existingEmployee.EmployeeTypeId = model.EmployeeTypeId; // نوع الموظف
+                existingEmployee.BranchId = model.BranchId;
+                existingEmployee.DepartmentId = model.DepartmentId;
+                existingEmployee.CurrentJobId = model.CurrentJobId;
+                existingEmployee.AppointmentDate = model.AppointmentDate;
+                existingEmployee.CurrentSalary = model.CurrentSalary;
+            
+                existingEmployee.Isbank = model.Isbank;
+                existingEmployee.InsuranceNumber = model.InsuranceNumber;
+                existingEmployee.DateIn = model.DateIn;
+                existingEmployee.DateOut = model.DateOut;
 
-        //    //}
-        //    //else
-        //    //{
-        //    //    ViewBag.Message = "الرقم القومي موجود مسبقا ";
-        //    //}
-        //}
-        //else
-        //{
-        //    try
-        //    {
-        //        var max_Row = db.HR_Employees.Select(a => a.EmpCode).Max();
-        //        int Count = int.Parse(max_Row.ToString()) + 1;
-        //        ViewBag.MaxCode = Count;
-        //    }
-        //    catch (Exception)
-        //    {
-        //    }
-        //    if (ViewBag.MaxCode == null)
-        //        ViewBag.MaxCode = "1000";
-        //    ViewBag.Message = "الاسم موجود مسبقا";
-        //    FillDroup(hR_Employees);
-        //    return View(hR_Employees);
-        //}
+                // معالجة ملف NID جديد
+                if (NID_Path != null && NID_Path.Length > 0)
+                {
+                    // مسار حفظ الملفات داخل wwwroot
+                    string uploadsFolder = Path.Combine(_env.WebRootPath, "Uploads", "NID_Path");
 
-        //FillDroup(hR_Employees);
-        return RedirectToAction("AddEdite","EmployeeData",new { area = "Employee", EmployeeID = hR_Employees.Id });
+                    // إنشاء المجلد إذا لم يكن موجوداً
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
 
-    }
+                    string fileName = Path.GetFileName(NID_Path.FileName);
+                    string fullPath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var stream = new FileStream(fullPath, FileMode.Create))
+                    {
+                        await NID_Path.CopyToAsync(stream);
+                    }
+
+                    // حفظ المسار النسبي في قاعدة البيانات
+                    existingEmployee.NidPath = Path.Combine("Uploads", "NID_Path", fileName).Replace("\\", "/");
+                }
+
+                // تحديث السجل في قاعدة البيانات باستخدام EF Core
+                db.HrEmployees.Update(existingEmployee);
+                await db.SaveChangesAsync();
+            }
+
+          
+
+            return RedirectToAction("AddEdite", "EmployeeData", new { area = "Employee", EmployeeID = model.Id });
+        }
+        catch (Exception ex)
+        {
+            ViewBag.Message = "حدث خطأ أثناء الحفظ: " + ex.Message;
+            //FillDroup(model);
+            return View(model);
+        }
+    m}
+
 
 }

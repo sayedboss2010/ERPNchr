@@ -4,16 +4,17 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VM.ViewModels.Employee;
 
 namespace DAL.Classes.Employee
 {
     public class EmployeeDataDal
     {
-        public static HrEmployee Find(long EmployeeID)
+        public static EmployeeVM Find(long EmployeeID)
         {
             using var dbContext = new AppDbContext();
             var obj = dbContext.HrEmployees.Where(a => a.Id == EmployeeID && a.IsActive == true)
-                .Select(f => new HrEmployee
+                .Select(f => new EmployeeVM
                 {
                     Id = f.Id,
                     EmpCode = f.EmpCode,
@@ -26,15 +27,15 @@ namespace DAL.Classes.Employee
                     Birthdate = f.Birthdate,
                     HireDate = f.HireDate,
                     CurrentJobId = f.CurrentJobId,
-                    JobName = f.CurrentJob.TitleAr,
+                  
                     DepartmentId = f.DepartmentId,
-                    DepartmentName = f.Department.NameAr,
+                    
                     CurrentSalary = f.CurrentSalary,
                     CurrentFunctionalDegreeId = f.CurrentFunctionalDegreeId,
                     EmployeeTypeId = f.EmployeeTypeId,
                     IsActive = f.IsActive,
                     CreatedUserId = f.CreatedUserId,
-                    CreatedDate = f.CreatedDate,
+                    //CreatedDate =f.CreatedDate,
                     UpdatedUserId = f.UpdatedUserId,
                     UpdatedDate = f.UpdatedDate,
                     DeletedUserId = f.DeletedUserId,
@@ -51,7 +52,7 @@ namespace DAL.Classes.Employee
                 }).FirstOrDefault();
 
             if (obj == null)
-                return new HrEmployee();
+                return new EmployeeVM();
 
             return obj;
         }
