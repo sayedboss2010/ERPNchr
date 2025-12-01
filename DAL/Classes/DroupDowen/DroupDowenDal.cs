@@ -14,14 +14,45 @@ namespace DAL.Classes.DroupDowen
             using var dbContext = new AppDbContext();
 
             var obj = (from emp in dbContext.HrDepartments
-                       join bd in dbContext.HrBranchDepartments on emp.Id equals bd.DepartmentId
+                       //join bd in dbContext.HrBranchDepartments on emp.Id equals bd.DepartmentId
                        where emp.IsActive == true
                        && emp.DeletedUserId == null
                        select new HrDepartment
                        {
                            NameAr = emp.NameAr,
-                           Id = bd.Id
+                           //Id = bd.Id
                        }).Distinct().OrderBy(a => a.NameAr).ToList();
+
+            return obj;
+        }
+        public static IList<HrBranch> ListHrBranch()
+        {
+            using var dbContext = new AppDbContext();
+
+            var obj = (from emp in dbContext.HrBranches
+                           //join bd in dbContext.HrBranchDepartments on emp.Id equals bd.DepartmentId
+                       where emp.IsActive == true
+                       && emp.DeletedUserId == null
+                       select new HrBranch
+                       {
+                           NameAr = emp.NameAr,
+                           //Id = bd.Id
+                       }).Distinct().OrderBy(a => a.NameAr).ToList();
+
+            return obj;
+        }
+        public static IList<EmployeeType> ListHrEmployeesTypes()
+        {
+            using var dbContext = new AppDbContext();
+
+            var obj = (from emp in dbContext.EmployeeTypes
+                           //join bd in dbContext.HrBranchDepartments on emp.Id equals bd.DepartmentId
+                      
+                       select new EmployeeType
+                       {
+                           EmployeeTypeNameAr = emp.EmployeeTypeNameAr,
+                           //Id = bd.Id
+                       }).Distinct().OrderBy(a => a.EmployeeTypeNameAr).ToList();
 
             return obj;
         }

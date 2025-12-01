@@ -1,4 +1,4 @@
-﻿@model EF.Models.HrEmployee
+﻿@model VM.ViewModels.Employee.EmployeeVM
 @{
 
     ViewData["Title"] = "Index";
@@ -107,19 +107,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="row mb-3">
-                            <div class="card-body">
-                                <div class="form-check form-switch mb-2">
-                                    <input name="IsActive" id="IsActive" checked="@Model.IsActive" class="form-check-input" type="checkbox" />
-                                    <label class="col-sm-2 form-label" for="IsActive">الحالة</label>
-                                </div>
-                                <div class="form-check form-switch mb-2">
-                                    <input name="IsManager" id="IsManager" checked="@Model.IsManager" class="form-check-input" type="checkbox" />
-                                    <label class="col-sm-2 form-label" for="IsManager">مدير ادارة</label>
-                                </div>
-                            </div>
-                        </div>
+                       
 
 
                     </div>
@@ -144,14 +132,14 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label for="CurrentBranchDeptId" class="col-sm-2 col-form-label">الإدارة</label>
+                            <label for="BranchId" class="col-sm-2 col-form-label">الإدارة</label>
                             <div class="col-sm-10">
                                 <!-- الحقل اللي المستخدم بيكتب فيه -->
-                                <input class="form-control" list="CurrentBranchDeptdatalist" id="CurrentBranchDeptText"
+                                <input class="form-control" list="CurrentBranchDeptdatalistCurrentBranchDeptdatalist" id="CurrentBranchDeptText"
                                        placeholder="اكتب للبحث..." value="@Model.DepartmentName" />
 
                                 <!-- الحقل الخفي اللي بيخزن الـ Id الفعلي -->
-                                <input type="hidden" id="CurrentBranchDeptId" name="CurrentBranchDeptId" value="@Model.CurrentBranchDeptId" />
+                                <input type="hidden" id="CurrentBranchDeptId" name="BranchId" value="@Model.BranchId" />
 
                                 <datalist id="CurrentBranchDeptdatalist">
                                     @foreach (var item in ViewBag.ListHrDepartment)
@@ -182,91 +170,57 @@
                                 </datalist>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="card mb-4">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="mb-0">بيانات المرتب</h5>
-                        <small class="text-muted float-end">المرتبات</small>
-                    </div>
-                    <div class="card-body">
-
-                        <div class="mb-3 row">
-                            <label class="col-sm-2 col-form-label" for="CurrentSalary">قيمة المرتب</label>
-                            <div class="col-sm-10">
-                                <input class="form-control" type="number" name="CurrentSalary" id="CurrentSalary" value="@Model.CurrentSalary" oninput="handleInput(this)" />
-                            </div>
-                        </div>
+                        <!-- نوع الموظف -->
                         <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="Year">لسنة</label>
-                            <div class="col-sm-10">
-                                <select class="form-control" id="Year" name="Year">
-                                    <option value="">اختر السنة</option>
-                                </select>
+                            <label class="col-sm-2 form-label">نوع الموظف</label>
 
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="Month">الشهر</label>
                             <div class="col-sm-10">
-                                <select class="form-control" id="Month" name="Month">
-                                    <option value="">اختر الشهر</option>
-                                </select>
-                            </div>
-                        </div>
+                                <div class="card-body">
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label">نوع القبض</label>
-                            <div class="col-sm-10">
-                                <div class="form-check form-check-inline mt-3">
-                                    <input class="form-check-input" type="radio" name="Isbank" id="IsbankTrue" value="true"
-                                           @(Model.Isbank == true ? "checked" : "") />
-                                    <label class="form-check-label" for="IsbankTrue">بنك</label>
-                                </div>
-                                <div class="form-check form-check-inline mt-3">
-                                    <input class="form-check-input" type="radio" name="Isbank" id="IsbankFalse" value="false"
-                                           @(Model.Isbank == false ? "checked" : "") />
-                                    <label class="form-check-label" for="IsbankFalse">خزينة</label>
+                                    <div class="d-flex flex-wrap gap-4">
+
+                                        @foreach (var item in ViewBag.ListHrEmployeesTypes)
+                                        {
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input"
+                                                       type="radio"
+                                                       name="EmployeeTypeId"
+                                                       id="EmployeeType_@item.Value"
+                                                       value="@item.Value"
+                                                       @(Model.EmployeeTypeId == Convert.ToInt32(item.Value) ? "checked" : "") />
+
+                                                <label class="form-check-label" for="EmployeeType_@item.Value">
+                                                    @item.Text
+                                                </label>
+                                            </div>
+                                        }
+
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="card mb-4">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="mb-0">بيانات التأمين</h5>
-                        <small class="text-muted float-end">Default label</small>
-                    </div>
-                    <div class="card-body">
-
+                        <!-- الحالة -->
                         <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="InsuranceNumber">الرقم التأميني</label>
-                            <div class="col-sm-10">
-                                <input type="number" class="form-control" name="InsuranceNumber" id="InsuranceNumber" value="@Model.InsuranceNumber" placeholder="الرقم التأميني" />
+                            <div class="card-body">
+
+                                <div class="form-check form-switch mb-2">
+                                    <input name="IsActive"
+                                           id="IsActive"
+                                           class="form-check-input"
+                                           type="checkbox"
+                                           @(Model.IsActive ? "checked" : "") />
+
+                                    <label class="form-label" for="IsActive">الحالة</label>
+                                </div>
+
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="DateIn">تاريخ الدخول</label>
-                            <div class="col-sm-10">
-                                <input name="DateIn" id="DateIn"
-                                       value="@(Model.DateIn.HasValue? Model.DateIn.Value.ToString("yyyy-MM-dd") : "")"
-                                       class="form-control" type="date">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="DateOut">تاريخ الخروج</label>
-                            <div class="col-sm-10">
-                                <input name="DateOut" id="DateOut"
-                                       value="@(Model.DateOut.HasValue? Model.DateOut.Value.ToString("yyyy-MM-dd") : "")"
-                                       class="form-control" type="date">
-                            </div>
-                        </div>
-
 
                     </div>
                 </div>
+              
             </div>
             <div class="row justify-content-end">
                 <div class="col-sm-10">

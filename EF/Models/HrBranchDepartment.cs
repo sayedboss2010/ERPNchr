@@ -31,6 +31,4 @@ public partial class HrBranchDepartment
     public virtual HrBranch? Branch { get; set; }
 
     public virtual HrDepartment? Department { get; set; }
-
-    public virtual ICollection<HrEmployee> HrEmployees { get; set; } = new List<HrEmployee>();
 }

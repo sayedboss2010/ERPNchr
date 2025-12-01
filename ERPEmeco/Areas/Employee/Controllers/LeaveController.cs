@@ -251,7 +251,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                             EmployeeId = e.Id,
                             EmployeeCode = e.EmpCode,
                             EmployeeName = e.NameAr,
-                            DepartmentName=e.CurrentBranchDept.Department.NameAr,
+                            DepartmentName=e.Department.NameAr,
                             LeaveTypeId = t.Id,
                             LeaveTypeName = t.NameAr,
                             StartDate = l.StartDate,
@@ -334,91 +334,87 @@ namespace YourProjectName.Areas.Employee.Controllers
             return Json(new { hasConflict = false });
         }
 
-        [HttpGet]
+
         [HttpGet]
         public JsonResult GetLeaveBalance(long employeeId, int leaveTypeId)
         {
             int year = DateTime.Now.Year;
 
             var balance = _context.HrEmployeeLeaveBalances
-                .Where(b => b.EmployeeId == employeeId && b.Year == year)
-                .FirstOrDefault();
+                .FirstOrDefault(b => b.EmployeeId == employeeId && b.Year == year);
 
             if (balance == null)
                 return Json(null);
 
-            var dto = new EmployeeLeaveBalanceDto
+            var dto = new LeaveBalanceDto
             {
                 Id = balance.Id,
 
-                // السنوي
+                TotalDays = balance.TotalDays,
+                UsedDays = balance.UsedDays,
+                RemainingDays = balance.TotalDaysReminig,
+
                 AnnualTotalDays = balance.AnnualTotalDays,
                 AnnualUsedDays = balance.AnnualUsedDays,
                 AnnualRemainingDays = balance.AnnualRemainingDays,
 
-                // العارضة
                 CasualTotalDays = balance.CasualTotalDays,
                 CasualUsedDays = balance.CasualUsedDays,
-                CasualRemainingDays = balance.CasualRemainingDays,
-
-                // الاعتيادي
-                TotalDays = balance.TotalDays,
-                UsedDays = balance.UsedDays,
-                RemainingDays = balance.TotalDaysReminig,
+                CasualRemainingDays = balance.CasualRemainingDays
             };
 
-            // --------------------------------------------------------------------
-            // تحديد نوع الإجازة المطلوب وإرجاع بياناته فقط
-            // --------------------------------------------------------------------
-            if (leaveTypeId == 2) // 2= إجازة اعتيادي
+            // ✨ تخصيص نوع الإجازة المختار
+            switch (leaveTypeId)
             {
-                dto.RemainingDays = balance.TotalDaysReminig;
-                dto.TotalDays= balance.TotalDays;
-                dto.UsedDays = balance.UsedDays;
-            }
-            else if (leaveTypeId == 1) // 1 = إجازة عارضة
-            {
-                dto.RemainingDays = balance.CasualRemainingDays;
-                dto.TotalDays = balance.CasualTotalDays;
-                dto.UsedDays = balance.CasualUsedDays;
-            }
-            else if (leaveTypeId == 5)// 5 = إجازة سنوي
-            {
-                dto.RemainingDays = balance.AnnualRemainingDays;
-                dto.TotalDays = balance.AnnualTotalDays;
-                dto.UsedDays = balance.AnnualUsedDays;
+                case 1: // Casual
+                    dto.TotalDays = balance.CasualTotalDays;
+                    dto.UsedDays = balance.CasualUsedDays;
+                    dto.RemainingDays = balance.CasualRemainingDays;
+                    break;
+
+                case 2: // Normal
+                    dto.TotalDays = balance.TotalDays;
+                    dto.UsedDays = balance.UsedDays;
+                    dto.RemainingDays = balance.TotalDaysReminig;
+                    break;
+
+                case 5: // Annual
+                    dto.TotalDays = balance.AnnualTotalDays;
+                    dto.UsedDays = balance.AnnualUsedDays;
+                    dto.RemainingDays = balance.AnnualRemainingDays;
+                    break;
             }
 
-            // --------------------------------------------------------------------
-            // جلب جميع الإجازات لهذا الرصيد لكي نحسب الأيام لكل شهر
-            // --------------------------------------------------------------------
+            // ✨ Load Leaves (as DTOs—not Entities)
             dto.Leaves = _context.HrEmployeeLeaves
-                .Where(l => l.HrEmployeeLeaveBalanceId == balance.Id
-                            && l.StartDate != null
-                            && l.EndDate != null)
+                .Where(l => l.HrEmployeeLeaveBalanceId == balance.Id &&
+                            l.StartDate != null &&
+                            l.EndDate != null)
+                .Select(l => new LeaveItemDto
+                {
+                    StartDate = l.StartDate.Value,
+                    EndDate = l.EndDate.Value,
+                    LeaveDays = l.LeaveDays,
+                    LeaveTypeId = l.LeaveTypeId
+                })
                 .ToList();
 
-            // --------------------------------------------------------------------
-            // حساب الأيام لكل شهر
-            // --------------------------------------------------------------------
+            // ✨ حساب الأيام لكل شهر
             if (dto.Leaves.Any())
             {
-                var usedDaysPerMonth = dto.Leaves
+                var perMonth = dto.Leaves
                     .SelectMany(l =>
                     {
                         var list = new List<(int Month, int Days)>();
-                        var start = l.StartDate.Value;
-                        var end = l.EndDate.Value;
+                        var start = l.StartDate;
+                        var end = l.EndDate;
 
                         while (start <= end)
                         {
-                            var endOfMonth = new DateOnly(start.Year, start.Month,
-                                DateTime.DaysInMonth(start.Year, start.Month));
-
+                            var endOfMonth = new DateOnly(start.Year, start.Month, DateTime.DaysInMonth(start.Year, start.Month));
                             var currentEnd = end < endOfMonth ? end : endOfMonth;
 
                             int days = currentEnd.DayNumber - start.DayNumber + 1;
-
                             list.Add((start.Month, days));
 
                             start = currentEnd.AddDays(1);
@@ -430,40 +426,71 @@ namespace YourProjectName.Areas.Employee.Controllers
                     .Select(g => $"{g.Key}/{g.Sum(x => x.Days)}")
                     .ToList();
 
-                dto.UsedDaysMonth = string.Join(" : ", usedDaysPerMonth);
+                dto.UsedDaysMonth = string.Join(" : ", perMonth);
             }
 
             return Json(dto);
         }
 
-
-        public class EmployeeLeaveBalanceDto
+        public class LeaveBalanceDto
         {
             public long Id { get; set; }
+
             public decimal TotalDays { get; set; }
             public decimal UsedDays { get; set; }
             public decimal? RemainingDays { get; set; }
-            public List<HrEmployeeLeaf> Leaves { get; set; }
-            public string UsedDaysMonth { get; set; }
 
-            /// إجمالي الإجازات العارضة في السنة
-            /// </summary>
-            public decimal CasualTotalDays { get; set; }
-
-            /// <summary>
-            /// ايام العارضة المستخدمة
-            /// </summary>
-            public decimal CasualUsedDays { get; set; }
             public decimal AnnualTotalDays { get; set; }
-
             public decimal AnnualUsedDays { get; set; }
             public int? AnnualRemainingDays { get; set; }
 
-           
+            public decimal CasualTotalDays { get; set; }
+            public decimal CasualUsedDays { get; set; }
             public int? CasualRemainingDays { get; set; }
 
             public int? TotalDaysReminig { get; set; }
+
+            public string UsedDaysMonth { get; set; }
+
+            public List<LeaveItemDto> Leaves { get; set; } = new();
         }
+
+        public class LeaveItemDto
+        {
+            public DateOnly StartDate { get; set; }
+            public DateOnly EndDate { get; set; }
+            public int? LeaveDays { get; set; }
+            public int? LeaveTypeId { get; set; }
+        }
+
+
+        //public class EmployeeLeaveBalanceDto
+        //{
+        //    public long Id { get; set; }
+        //    public decimal TotalDays { get; set; }
+        //    public decimal UsedDays { get; set; }
+        //    public decimal? RemainingDays { get; set; }
+        //    public List<HrEmployeeLeaf> Leaves { get; set; }
+        //    public string UsedDaysMonth { get; set; }
+
+        //    /// إجمالي الإجازات العارضة في السنة
+        //    /// </summary>
+        //    public decimal CasualTotalDays { get; set; }
+
+        //    /// <summary>
+        //    /// ايام العارضة المستخدمة
+        //    /// </summary>
+        //    public decimal CasualUsedDays { get; set; }
+        //    public decimal AnnualTotalDays { get; set; }
+
+        //    public decimal AnnualUsedDays { get; set; }
+        //    public int? AnnualRemainingDays { get; set; }
+
+           
+        //    public int? CasualRemainingDays { get; set; }
+
+        //    public int? TotalDaysReminig { get; set; }
+        //}
 
     }
 }

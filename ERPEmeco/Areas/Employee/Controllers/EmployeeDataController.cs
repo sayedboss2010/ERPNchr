@@ -34,8 +34,14 @@ public class EmployeeDataController : Controller
         var objlst = EmployeeDataDal.Find(EmployeeID);
         var ListHrDepartment = new SelectList(DroupDowenDal.ListHrDepartment(), "Id", "NameAr");
         ViewBag.ListHrDepartment = ListHrDepartment;
+        var ListHrBranch = new SelectList(DroupDowenDal.ListHrBranch(), "Id", "NameAr");
+
+        ViewBag.ListHrBranch = ListHrBranch;
         var ListHrJobs = new SelectList(DroupDowenDal.ListHrJobs(), "Id", "TitleAr");
+       
         ViewBag.ListHrJobs = ListHrJobs;
+        var ListHrEmployeesTypes = new SelectList(DroupDowenDal.ListHrEmployeesTypes(), "Id", "EmployeeTypeNameAr");
+        ViewBag.ListHrEmployeesTypes = ListHrEmployeesTypes;
         //ViewBag.TotalResults = objlst.TotalResults;
         //ViewBag.CurrentPage = objlst.CurrentPage;
         //ViewBag.TotalPages = objlst.TotalPages;
