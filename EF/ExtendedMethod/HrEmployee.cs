@@ -11,7 +11,8 @@ namespace EF.Models;
     {
         public Nullable<int> Year { get; set; }
         public Nullable<int> Month { get; set; }
-    public string DepartmentName { get; set; }
-    public string JobName { get; set; }
+        public string DepartmentName { get; set; }
+        public string JobName { get; set; }
+
 
 }

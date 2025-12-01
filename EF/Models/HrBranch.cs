@@ -32,5 +32,7 @@ public partial class HrBranch
 
     public virtual ICollection<HrBranchDepartment> HrBranchDepartments { get; set; } = new List<HrBranchDepartment>();
 
+    public virtual ICollection<HrEmployee> HrEmployees { get; set; } = new List<HrEmployee>();
+
     public virtual ICollection<HrMachineIp> HrMachineIps { get; set; } = new List<HrMachineIp>();
 }

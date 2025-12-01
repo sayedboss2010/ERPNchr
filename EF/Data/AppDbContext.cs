@@ -21,6 +21,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<DataUpdatesLogTb> DataUpdatesLogTbs { get; set; }
 
+    public virtual DbSet<EmployeeType> EmployeeTypes { get; set; }
+
     public virtual DbSet<ExceptionLogTb> ExceptionLogTbs { get; set; }
 
     public virtual DbSet<HrBranch> HrBranches { get; set; }
@@ -114,6 +116,17 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.DataUpdatesLogTbs)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_DataUpdatesLogTb_UserTb");
+        });
+
+        modelBuilder.Entity<EmployeeType>(entity =>
+        {
+            entity.ToTable("EmployeeType");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("ID");
+            entity.Property(e => e.EmployeeTypeNameAr).HasMaxLength(50);
+            entity.Property(e => e.EmployeeTypeNameEn).HasMaxLength(50);
         });
 
         modelBuilder.Entity<ExceptionLogTb>(entity =>
@@ -221,9 +234,9 @@ public partial class AppDbContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("Address_EN");
             entity.Property(e => e.AppointmentDate).HasComment("تاريخ التعيين");
+            entity.Property(e => e.BranchId).HasColumnName("BranchID");
             entity.Property(e => e.CreatedDate).HasColumnName("Created_Date");
             entity.Property(e => e.CreatedUserId).HasColumnName("Created_UserId");
-            entity.Property(e => e.CurrentBranchDeptId).HasColumnName("CurrentBranchDept_ID");
             entity.Property(e => e.CurrentFunctionalDegreeId).HasColumnName("CurrentFunctional_Degree_ID");
             entity.Property(e => e.CurrentJobId).HasColumnName("CurrentJob_ID");
             entity.Property(e => e.CurrentSalary)
@@ -238,11 +251,13 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("Date_Out");
             entity.Property(e => e.DeletedDate).HasColumnName("Deleted_Date");
             entity.Property(e => e.DeletedUserId).HasColumnName("Deleted_UserId");
+            entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
             entity.Property(e => e.Email)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.EmpCode).HasComment("كود الموظف");
             entity.Property(e => e.EmpCodeNew).HasMaxLength(50);
+            entity.Property(e => e.EmployeeTypeId).HasColumnName("EmployeeTypeID");
             entity.Property(e => e.HrJobGradesId).HasColumnName("HR_JobGradesID");
             entity.Property(e => e.InsuranceNumber)
                 .HasMaxLength(50)
@@ -270,13 +285,21 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.UpdatedDate).HasColumnName("Updated_Date");
             entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
 
-            entity.HasOne(d => d.CurrentBranchDept).WithMany(p => p.HrEmployees)
-                .HasForeignKey(d => d.CurrentBranchDeptId)
-                .HasConstraintName("FK_Employees_Branch_Department");
+            entity.HasOne(d => d.Branch).WithMany(p => p.HrEmployees)
+                .HasForeignKey(d => d.BranchId)
+                .HasConstraintName("FK_HR_Employees_HR_Branches");
 
             entity.HasOne(d => d.CurrentJob).WithMany(p => p.HrEmployees)
                 .HasForeignKey(d => d.CurrentJobId)
                 .HasConstraintName("FK_Employees_Jobs");
+
+            entity.HasOne(d => d.Department).WithMany(p => p.HrEmployees)
+                .HasForeignKey(d => d.DepartmentId)
+                .HasConstraintName("FK_HR_Employees_HR_Departments");
+
+            entity.HasOne(d => d.EmployeeType).WithMany(p => p.HrEmployees)
+                .HasForeignKey(d => d.EmployeeTypeId)
+                .HasConstraintName("FK_HR_Employees_EmployeeType");
         });
 
         modelBuilder.Entity<HrEmployeeAttendance>(entity =>

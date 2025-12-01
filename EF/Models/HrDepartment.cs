@@ -29,4 +29,6 @@ public partial class HrDepartment
     public DateOnly? DeletedDate { get; set; }
 
     public virtual ICollection<HrBranchDepartment> HrBranchDepartments { get; set; } = new List<HrBranchDepartment>();
+
+    public virtual ICollection<HrEmployee> HrEmployees { get; set; } = new List<HrEmployee>();
 }

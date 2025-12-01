@@ -35,8 +35,6 @@ public partial class HrEmployee
 
     public int? CurrentJobId { get; set; }
 
-    public int? CurrentBranchDeptId { get; set; }
-
     /// <summary>
     /// ملوش لازمه
     /// </summary>
@@ -44,7 +42,7 @@ public partial class HrEmployee
 
     public byte? CurrentFunctionalDegreeId { get; set; }
 
-    public bool IsManager { get; set; }
+    public bool IsMananger { get; set; }
 
     public bool IsActive { get; set; }
 
@@ -95,9 +93,19 @@ public partial class HrEmployee
 
     public int? HrJobGradesId { get; set; }
 
-    public virtual HrBranchDepartment? CurrentBranchDept { get; set; }
+    public int? EmployeeTypeId { get; set; }
+
+    public int? BranchId { get; set; }
+
+    public int? DepartmentId { get; set; }
+
+    public virtual HrBranch? Branch { get; set; }
 
     public virtual HrJob? CurrentJob { get; set; }
+
+    public virtual HrDepartment? Department { get; set; }
+
+    public virtual EmployeeType? EmployeeType { get; set; }
 
     public virtual ICollection<HrEmployeeAttendance> HrEmployeeAttendances { get; set; } = new List<HrEmployeeAttendance>();
 
