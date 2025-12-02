@@ -243,15 +243,19 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <label for="IsActive" class="col-sm-2 col-form-label"> الحالة</label>
+                            <div class="col-sm-10">
+                            <input name="IsActive"
+                                   id="IsActive"
+                                   class="form-check-input"
+                                   type="checkbox"
+                                   value="true"
+                                   @(Model.IsActive ? "checked" : "") />
 
-                        <input name="IsActive"
-                               id="IsActive"
-                               class="form-check-input"
-                               type="checkbox"
-                               value="true"
-                               @(Model.IsActive ? "checked" : "") />
-
-                        <input type="hidden" name="IsActive" value="false" />
+                            <input type="hidden" name="IsActive" value="false" />
+                        </div>
+                      </div>
 
 
 
