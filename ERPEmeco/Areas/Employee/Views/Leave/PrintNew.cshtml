@@ -4,7 +4,7 @@
 }
 
 <meta charset="utf-8">
-<title>نموذج طلب إجازة</title>
+<title>نموذج طلب إجازة - @Model.LeaveTypeName</title>
 
 <style>
     body {
@@ -14,15 +14,10 @@
         padding: 0;
     }
 
-    .content-wrapper {
-        flex: unset; /* أو flex: initial; */
-    }
-
     .page {
         width: 100%;
         max-width: 900px;
         margin: 20px auto;
-        margin-top: -20px auto;
         background: #fff;
         border: 2px solid #000;
         padding: 12px 16px;
@@ -45,21 +40,21 @@
         justify-content: center;
     }
 
-    .logo img {
-        max-width: 100%;
-        max-height: 100%;
-    }
+        .logo img {
+            max-width: 100%;
+            max-height: 100%;
+        }
 
     .header-text {
         flex: 1;
         text-align: center;
     }
 
-    .header-text h1 {
-        margin: 0;
-        font-size: 22px;
-        font-weight: 700;
-    }
+        .header-text h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+        }
 
     .header-meta {
         font-size: 13px;
@@ -74,9 +69,7 @@
 
     .row {
         display: flex;
-        /* gap: 8px; */
         margin-bottom: 6px;
-        align-items: center;
     }
 
     .col {
@@ -91,25 +84,6 @@
         margin-bottom: 2px;
     }
 
-    .value {
-        border: 1px solid #000;
-        padding: 6px;
-        min-height: 22px;
-        font-size: 13px;
-        background: #fafafa;
-    }
-
-    .row.flex-labels {
-        flex-direction: row;
-        align-items: center;
-    }
-
-    .row.flex-labels .col {
-        flex-direction: row;
-        align-items: center;
-        gap: 6px;
-    }
-
     table.details {
         width: 60%;
         margin: 10px auto;
@@ -117,67 +91,37 @@
         font-size: 13px;
     }
 
-    table.details th, table.details td {
-        border: 1px solid #000;
-        padding: 6px;
-        text-align: center;
-    }
+        table.details th, table.details td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: center;
+        }
 
-    table.details th {
-        background: #eee;
-        font-weight: 600;
-    }
-
-    .sigs {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 20px;
-        text-align: center;
-    }
-
-    .sig-box {
-        flex: 1;
-        min-height: 60px;
-        font-size: 13px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #000;
-        padding: 6px;
-        box-sizing: border-box;
-    }
-
-    .footer {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 10px;
-        font-size: 12px;
-    }
-
-    .stamp {
-        border: 1px dashed #000;
-        padding: 6px;
-        min-width: 140px;
-        text-align: center;
-    }
+        table.details th {
+            background: #eee;
+            font-weight: 600;
+        }
 
     .no-print {
         text-align: center;
         margin: 20px;
     }
 
-    /* إعداد الطباعة */
+    .attachment-box {
+        border: 1px dashed #888;
+        padding: 10px;
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .attachment-img {
+        max-width: 100%;
+        max-height: 450px;
+        border: 1px solid #555;
+    }
+
+    /* الطباعة */
     @@media print {
-        @@page {
-            size: A5 landscape;
-            margin: 5mm;
-        }
-
-        body {
-            background: #fff !important;
-            padding: 0 !important;
-        }
-
         body * {
             visibility: hidden;
         }
@@ -192,8 +136,6 @@
             top: 0;
             width: 100%;
             border: 2px solid #000;
-            padding: 12px 16px;
-            box-sizing: border-box;
         }
 
         .no-print {
@@ -201,96 +143,134 @@
         }
     }
 </style>
+
 <!-- زر الطباعة -->
 <div class="no-print">
     <button onclick="window.print()">🖨️ طباعة النموذج</button>
 </div>
+
 <div class="page">
     <header>
-        <div class="logo"><img src="~/assets/img/Logo/lg.png" alt="شعار"></div>
+        <div class="logo"><img src="~/assets/img/Logo/lg.png" alt="Logo"></div>
+
         <div class="header-text">
-            <h1>طلب إجازة اعتيادي</h1>
+            <h1>طلب إجازة — @Model.LeaveTypeName</h1>
             <div class="header-meta">
-                نظام الموارد البشرية — تاريخ التحرير: <strong>@DateTime.Now.ToString("yyyy/MM/dd")</strong>
+                نظام الموارد البشرية • تاريخ: <strong>@DateTime.Now.ToString("yyyy/MM/dd")</strong>
             </div>
         </div>
     </header>
 
     <div class="form-grid">
+
         <!-- بيانات الموظف -->
-        <div class="row flex-labels">
-            <div class="col-6">
+        <div class="row">
+            <div class="col">
                 <label class="field">الموظف:</label>
                 <span>@Model.EmployeeName</span>
             </div>
-            <div class="col-3">
+            <div class="col">
                 <label class="field">الكود:</label>
                 <span>@Model.EmployeeCode</span>
             </div>
-            <div class="col-3">
+            <div class="col">
                 <label class="field">الإدارة:</label>
                 <span>@Model.DepartmentName</span>
             </div>
         </div>
 
-
-
-
-        <!-- تاريخ الإجازة والمدة -->
-        <div class="row flex-labels">
-            <div class="col-6">
+        <!-- تاريخ الإجازة -->
+        <div class="row">
+            <div class="col">
                 <label class="field">من:</label>
                 <span>@Model.StartDate?.ToString("yyyy/MM/dd")</span>
             </div>
-            <div class="col-3">
+            <div class="col">
                 <label class="field">إلى:</label>
                 <span>@Model.EndDate?.ToString("yyyy/MM/dd")</span>
             </div>
-            <div class="col-3">
+            <div class="col">
                 <label class="field">المدة:</label>
-                <span>@ViewBag.RequiredVacationDays يوم</span>
+                <span>@Model.ActualDays يوم</span>
             </div>
         </div>
 
-        <!-- جدول الإجازات -->
-        <table class="details">
-            <thead>
-                <tr>
-                    <th>النوع</th>
-                    <th>عادية</th>
-                </tr>
-            </thead>
-            <tbody>
-                @{
-                    string TotalDays = string.Format("{0:0.##}", @Model.TotalDays);
-                    string UsedDays = string.Format("{0:0.##}", @Model.UsedDays);
-                    string RemainingBalance = string.Format("{0:0.##}", @Model.TotalDays - @Model.UsedDays - @ViewBag.RequiredVacationDays);
-                }
-                <tr>
-                    <td>الإجازة السنوية</td>
-                    <td>@TotalDays</td>
-                </tr>
-                <tr>
-                    <td>الإجازة السابق منحها</td>
-                    <td>@UsedDays</td>
-                </tr>
-                <tr>
-                    <td>الرصيد المتبقي</td>
-                    <td>@RemainingBalance</td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- السبب -->
+        <div class="row">
+            <div class="col">
+                <label class="field">السبب:</label>
+                <span>@Model.Reason</span>
+            </div>
+        </div>
 
-        <!-- التواقيع -->
-        <div class="row flex-labels">
-            <div class="col-6">توقيع الموظف</div>
-            <div class="col-3">موافقة المشرف</div>
-            <div class="col-3">تصديق المدير</div>
-            <br />
-            <br />
-            <br />
-        </div>       
+        <!-- جدول الرصيد (اعتيادي / عارضة فقط) -->
+        @if (Model.LeaveTypeId == 1 || Model.LeaveTypeId == 2)
+        {
+            <table class="details">
+                <thead>
+                    <tr>
+                        <th>البيان</th>
+                        <th>القيمة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>الإجمالي السنوي</td>
+                        <td>@Model.TotalDays</td>
+                    </tr>
+                    <tr>
+                        <td>المستخدم</td>
+                        <td>@Model.UsedDays</td>
+                    </tr>
+                    <tr>
+                        <td>المتبقي قبل الطلب</td>
+                        <td>@Model.RemainingBefore</td>
+                    </tr>
+                    <tr>
+                        <td>المتبقي بعد الخصم</td>
+                        <td>@Model.RemainingAfter</td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+
+        <!-- المرفق الطبي — يظهر للمرضية فقط -->
+        @if (Model.LeaveTypeId == 3)
+        {
+            <div class="attachment-box">
+                <h4>المرفق الطبي</h4>
+
+                @if (string.IsNullOrEmpty(Model.AttachmentPath))
+                {
+                    <p>لا يوجد ملف مرفق.</p>
+                }
+                else
+                {
+                    var ext = System.IO.Path.GetExtension(Model.AttachmentPath).ToLower();
+
+                    if (ext == ".jpg" || ext == ".jpeg" || ext == ".png")
+                    {
+                        <img class="attachment-img" src="@Url.Content(Model.AttachmentPath)" />
+                    }
+                    else if (ext == ".pdf")
+                    {
+                        <p>📄 ملف PDF</p>
+                        <a href="@Url.Content(Model.AttachmentPath)" target="_blank">عرض المرفق</a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Content(Model.AttachmentPath)" target="_blank">تحميل الملف</a>
+                    }
+                }
+            </div>
+        }
+
+        <!-- توقيعات -->
+        <div class="row" style="margin-top:25px;">
+            <div class="col">توقيع الموظف: ____________________</div>
+            <div class="col">موافقة المشرف: ____________________</div>
+            <div class="col">اعتماد المدير: ____________________</div>
+        </div>
+
     </div>
 </div>
-
-

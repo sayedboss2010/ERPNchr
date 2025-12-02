@@ -115,5 +115,9 @@ public partial class HrEmployee
 
     public virtual ICollection<HrEmployeeLeaf> HrEmployeeLeaves { get; set; } = new List<HrEmployeeLeaf>();
 
+    public virtual ICollection<HrEmployeeOfficialMission> HrEmployeeOfficialMissions { get; set; } = new List<HrEmployeeOfficialMission>();
+
+    public virtual ICollection<HrEmployeePermission> HrEmployeePermissions { get; set; } = new List<HrEmployeePermission>();
+
     public virtual ICollection<PrUser> PrUsers { get; set; } = new List<PrUser>();
 }

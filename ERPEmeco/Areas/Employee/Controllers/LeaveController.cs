@@ -206,8 +206,8 @@ namespace YourProjectName.Areas.Employee.Controllers
             }
             _context.SaveChanges();
             
-                 return RedirectToAction("index", "Leave", new { area = "Employee" });
-            //return RedirectToAction("PrintNew", "Leave", new { area = "Employee", id = entity.Id });
+               //  return RedirectToAction("index", "Leave", new { area = "Employee" });
+            return RedirectToAction("PrintNew", "Leave", new { area = "Employee", id = entity.Id });
         }
 
         // 🖨️ عرض نموذج الطباعة
@@ -236,77 +236,148 @@ namespace YourProjectName.Areas.Employee.Controllers
         }
         public ActionResult PrintNew(long id)
         {
-            ViewBag.Date = DateTime.Now;
-            var data = (from l in _context.HrEmployeeLeaves
-                        join e in _context.HrEmployees on l.EmployeeId equals e.Id
-                        join t in _context.HrLeaveTypes on l.LeaveTypeId equals t.Id
-                        join tb in _context.HrEmployeeLeaveBalances
-                            on new { EmpId = e.Id, Year = l.StartDate.Value.Year }
-                            equals new { EmpId = tb.EmployeeId, Year = tb.Year } into balanceJoin
-                        from tb in balanceJoin.DefaultIfEmpty()
-                        where l.Id == id
-                        select new EmployeeLeaveVM
-                        {
-                            Id = l.Id,
-                            EmployeeId = e.Id,
-                            EmployeeCode = e.EmpCode,
-                            EmployeeName = e.NameAr,
-                            DepartmentName=e.Department.NameAr,
-                            LeaveTypeId = t.Id,
-                            LeaveTypeName = t.NameAr,
-                            StartDate = l.StartDate,
-                            EndDate = l.EndDate,
-                            Reason = l.Reason,
-                            TotalDays = tb.TotalDays,
+            // جلب بيانات الإجازة والموظف ونوع الإجازة
+            var leave = (from l in _context.HrEmployeeLeaves
+                         join e in _context.HrEmployees on l.EmployeeId equals e.Id
+                         join t in _context.HrLeaveTypes on l.LeaveTypeId equals t.Id
+                         where l.Id == id
+                         select new
+                         {
+                             Leave = l,
+                             Employee = e,
+                             LeaveType = t
+                         }).FirstOrDefault();
 
-                            // ✅ استخدم 0 لو مفيش سجل رصيد
-                            RemainingBefore = (t.NameAr ?? "").Contains("عرض")
-                                ? (tb != null ? (int)tb.CasualRemainingDays : 0)
-                                : (tb != null ? (int)tb.TotalDaysReminig : 0),
+            if (leave == null)
+                return Content("❌ لم يتم العثور على الإجازة");
 
-                            UsedDays = (t.NameAr ?? "").Contains("عرض")
-                                ? (tb != null ? (int)tb.CasualUsedDays : 0)
-                                : (tb != null ? (int)tb.UsedDays : 0)
-                        }).FirstOrDefault();
+            // جلب آخر رصيد مسجل للموظف للسنة المطلوبة (إن وجد)
+            int year = leave.Leave.StartDate?.Year ?? DateTime.Now.Year;
+            var balance = _context.HrEmployeeLeaveBalances
+                          .Where(b => b.EmployeeId == leave.Employee.Id && b.Year == year)
+                          .OrderByDescending(b => b.Id)
+                          .FirstOrDefault();
 
-            if (data == null)
-                return Content("لم يتم العثور على الإجازة المطلوبة");
+            // تحويل DateOnly إلى DateTime للتعامل مع الأيام
+            var start = leave.Leave.StartDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Now;
+            var end = leave.Leave.EndDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Now;
 
-            if (data.StartDate == null || data.EndDate == null)
-                return Content("بيانات التواريخ غير صحيحة.");
+            int totalDays = (end - start).Days + 1;
+            int actualDays = Enumerable.Range(0, totalDays)
+                                       .Select(i => start.AddDays(i))
+                                       .Count(d => d.DayOfWeek != DayOfWeek.Friday);
 
-            //// أيام الاجازة المطلوبة
-            ///
-            DateTime startDate = DateTime.Parse( data.StartDate.Value.ToString());
-            DateTime endDate = DateTime.Parse(data.EndDate.Value.ToString());
-            // حساب الفرق بين التاريخين
-            int RequiredVacationDays = (endDate - startDate).Days + 1;
+            // تجهيز ViewModel
+            var data = new EmployeeLeaveVM
+            {
+                Id = leave.Leave.Id,
+                EmployeeName = leave.Employee.NameAr,
+                EmployeeCode = leave.Employee.EmpCode,
+                DepartmentName = leave.Employee.Department?.NameAr ?? "-",
+                LeaveTypeId = leave.LeaveType.Id,
+                LeaveTypeName = leave.LeaveType.NameAr,
+                StartDate = leave.Leave.StartDate,
+                EndDate = leave.Leave.EndDate,
+                Reason = leave.Leave.Reason,
+                AttachmentPath = leave.Leave.AttachmentPath,
+                ActualDays = actualDays,
 
-            //int RequiredVacationDays = (data.EndDate.Value.Day - data.StartDate.Value.Day) + 1;
-            ////  أيام الاجازة المطلوبة من غير جمع
+                TotalDays = balance?.TotalDays ?? 0,
+                UsedDays = balance?.UsedDays ?? 0,
+                RemainingBefore = balance?.TotalDaysReminig ?? 0
+            };
 
-            RequiredVacationDays = Enumerable.Range(0, RequiredVacationDays)
-                            .Select(i => data.StartDate.Value.AddDays(i))
-                            .Count(d => d.DayOfWeek != DayOfWeek.Friday);
+            // حساب الرصيد بعد الطلب فقط لأنواع اعتيادي / عارضة
+            if (data.LeaveTypeId == 1 || data.LeaveTypeId == 2)
+            {
+                int remainingBefore = data.RemainingBefore.Value;
+                data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0);
+            }
+            else
+            {
+                data.RemainingAfter = 0;
+            }
 
-            ViewBag.RequiredVacationDays = RequiredVacationDays;
-            
-            //// أول يومين بدون خصم
-            //int deductedDays = actualDays <= 2 ? 0 : actualDays - 2;
-
-            //// الرصيد بعد الخصم
-            //int remainingAfter = data.RemainingBefore - actualDays;
-            //if (remainingAfter < 0) remainingAfter = 0;
-
-            //// تعيين القيم في الموديل
-            ////data.TotalDays = totalDays;
-            //data.ActualDays = actualDays;
-            //data.DeductedDays = deductedDays;
-            //data.RemainingAfter = remainingAfter;
-
-
-            return View(data);
+            return View("PrintNew", data);
         }
+
+
+
+
+
+        //public ActionResult PrintNew(long id)
+        //{
+        //    ViewBag.Date = DateTime.Now;
+        //    var data = (from l in _context.HrEmployeeLeaves
+        //                join e in _context.HrEmployees on l.EmployeeId equals e.Id
+        //                join t in _context.HrLeaveTypes on l.LeaveTypeId equals t.Id
+        //                join tb in _context.HrEmployeeLeaveBalances
+        //                    on new { EmpId = e.Id, Year = l.StartDate.Value.Year }
+        //                    equals new { EmpId = tb.EmployeeId, Year = tb.Year } into balanceJoin
+        //                from tb in balanceJoin.DefaultIfEmpty()
+        //                where l.Id == id
+        //                select new EmployeeLeaveVM
+        //                {
+        //                    Id = l.Id,
+        //                    EmployeeId = e.Id,
+        //                    EmployeeCode = e.EmpCode,
+        //                    EmployeeName = e.NameAr,
+        //                    DepartmentName=e.Department.NameAr,
+        //                    LeaveTypeId = t.Id,
+        //                    LeaveTypeName = t.NameAr,
+        //                    StartDate = l.StartDate,
+        //                    EndDate = l.EndDate,
+        //                    Reason = l.Reason,
+        //                    TotalDays = tb.TotalDays,
+
+        //                    // ✅ استخدم 0 لو مفيش سجل رصيد
+        //                    RemainingBefore = (t.NameAr ?? "").Contains("عرض")
+        //                        ? (tb != null ? (int)tb.CasualRemainingDays : 0)
+        //                        : (tb != null ? (int)tb.TotalDaysReminig : 0),
+
+        //                    UsedDays = (t.NameAr ?? "").Contains("عرض")
+        //                        ? (tb != null ? (int)tb.CasualUsedDays : 0)
+        //                        : (tb != null ? (int)tb.UsedDays : 0)
+        //                }).FirstOrDefault();
+
+        //    if (data == null)
+        //        return Content("لم يتم العثور على الإجازة المطلوبة");
+
+        //    if (data.StartDate == null || data.EndDate == null)
+        //        return Content("بيانات التواريخ غير صحيحة.");
+
+        //    //// أيام الاجازة المطلوبة
+        //    ///
+        //    DateTime startDate = DateTime.Parse( data.StartDate.Value.ToString());
+        //    DateTime endDate = DateTime.Parse(data.EndDate.Value.ToString());
+        //    // حساب الفرق بين التاريخين
+        //    int RequiredVacationDays = (endDate - startDate).Days + 1;
+
+        //    //int RequiredVacationDays = (data.EndDate.Value.Day - data.StartDate.Value.Day) + 1;
+        //    ////  أيام الاجازة المطلوبة من غير جمع
+
+        //    RequiredVacationDays = Enumerable.Range(0, RequiredVacationDays)
+        //                    .Select(i => data.StartDate.Value.AddDays(i))
+        //                    .Count(d => d.DayOfWeek != DayOfWeek.Friday);
+
+        //    ViewBag.RequiredVacationDays = RequiredVacationDays;
+
+        //    //// أول يومين بدون خصم
+        //    //int deductedDays = actualDays <= 2 ? 0 : actualDays - 2;
+
+        //    //// الرصيد بعد الخصم
+        //    //int remainingAfter = data.RemainingBefore - actualDays;
+        //    //if (remainingAfter < 0) remainingAfter = 0;
+
+        //    //// تعيين القيم في الموديل
+        //    ////data.TotalDays = totalDays;
+        //    //data.ActualDays = actualDays;
+        //    //data.DeductedDays = deductedDays;
+        //    //data.RemainingAfter = remainingAfter;
+
+
+        //    return View(data);
+        //}
         [HttpPost]
         public JsonResult CheckLeaveDate(long employeeId, string startDate, string endDate)
         {
