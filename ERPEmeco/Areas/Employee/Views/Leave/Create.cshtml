@@ -118,14 +118,13 @@
 </div>
 
 @section Scripts {
-
     <script>
 
         $(document).ready(function () {
 
-            // ============================
-            // 1) اختيار الموظف → جلب الرصيد
-            // ============================
+            // =====================================================
+            // 1) اختيار الموظف → تحميل الرصيد
+            // =====================================================
             $("#EmployeeOptions").on("input", function () {
                 const input = $(this).val();
                 const hidden = $("#EmployeeId");
@@ -140,27 +139,31 @@
                 });
 
                 hidden.val(selectedId);
-
                 loadLeaveBalance();
             });
 
-            // عند تغيير نوع الإجازة
+            // =====================================================
+            // 2) تغيير نوع الإجازة
+            // =====================================================
             $("#LeaveTypeId").change(function () {
-               let type = $(this).val();
-                     if (type == "3") {   // مرضي
-            $("#AttachmentSection").show();
-        } else {
-            $("#AttachmentSection").hide();
-            $("#AttachmentFile").val("");
-        }
-        if(type == "1"|| type == "2"){
+                let type = $(this).val();
 
-        $("#DaysSection").show();
-           } else {
-               $("#DaysSection").hide();
-               
-           }
-                   loadLeaveBalance();
+                // مرضي → ملف إلزامي
+                if (type == "3") {
+                    $("#AttachmentSection").show();
+                } else {
+                    $("#AttachmentSection").hide();
+                    $("#AttachmentFile").val("");
+                }
+
+                // إجازات تحتاج رصيد
+                if (type == "1" || type == "2") {
+                    $("#DaysSection").show();
+                } else {
+                    $("#DaysSection").hide();
+                }
+
+                loadLeaveBalance();
             });
 
             function loadLeaveBalance() {
@@ -185,58 +188,120 @@
                 }
             }
 
-            // ============================
-            // 2) التاريخ → حساب الأيام
-            // ============================
-                 $("#StartDate, #EndDate").change(function () {
+            // =====================================================
+            // 3) تغيير التواريخ
+            // =====================================================
+      $("#StartDate, #EndDate").change(function () {
 
-            var startVal = $("#StartDate").val();
-            var endVal = $("#EndDate").val();
+                var startVal = $("#StartDate").val();
+                var endVal = $("#EndDate").val();
 
-            // لو أي واحد فاضي
-            if (!startVal || !endVal) return;
+                if (!startVal || !endVal) return;
 
-            var start = new Date(startVal);
-            var end = new Date(endVal);
+                var start = new Date(startVal);
+                var end = new Date(endVal);
+                var leaveType = $("#LeaveTypeId").val();
+                   
+        if (!startVal || !endVal) return;
 
-            // ❌ منع تاريخ نهاية قبل البداية
-            if (end < start) {
-                alert("❌ تاريخ النهاية يجب أن يكون بعد تاريخ البداية");
+        
 
-                $("#EndDate").val(""); // تفريغ التاريخ الخطأ
-                $("#ActualDays").val("");
-                $("#DaysFromBalance").val("");
-                $("#DeductedDays").val("");
-                $("#NewRemaining").val("");
+        // ❌ منع أي إجازة سنوية أو مرضية قبل اليوم
+        var today = new Date();
+        today.setHours(0,0,0,0); // تصفير الوقت
+        start.setHours(0,0,0,0);
 
+        if ((leaveType == "3" || leaveType == "5") && start < today) {
+            alert("❌ لا يمكن أن تكون الإجازة السنوية أو المرضية قبل تاريخ اليوم");
+            $("#StartDate").val("");
+            $("#EndDate").val("");
+            $("#btnSave").prop("disabled", true);
+            return;
+        }
+                // ❌ منع نهاية قبل البداية
+                if (end < start) {
+                    alert("❌ تاريخ النهاية يجب أن يكون بعد البداية");
+                    $("#EndDate").val("");
+                    $("#btnSave").prop("disabled", true);
+                    return;
+                }
+
+                       // =====================================================
+        // شرط الإجازة الاعتيادية
+        // =====================================================
+               // =====================================================
+        // شرط الإجازة الاعتيادية
+        // =====================================================
+               if (leaveType == "2") {
+
+            let now = new Date();
+            let start = new Date($("#StartDate").val());
+
+            // 48 ساعة من الآن
+            let minDate48 = new Date(now.getTime() + 48*60*60*1000);
+
+            // 24 ساعة من الآن
+            let minDate24 = new Date(now.getTime() + 24*60*60*1000);
+
+            // تحقق إذا التاريخ أقل من أي واحد منهم
+            // (يمكنك تعديل السياسة إذا تريد 24 أو 48 ساعة)
+            if (start < minDate24 && start < minDate48) {
+                alert("❌ يجب تقديم الإجازة الاعتيادية قبل 24 أو 48 ساعة على الأقل");
                 $("#btnSave").prop("disabled", true);
                 return;
             }
+        }
 
-            // لو التاريخ صحيح → نسمح بالحفظ
-            $("#btnSave").prop("disabled", false);
+                // =====================================================
+                // شرط الإجازة السنوية
+                // =====================================================
+                if (leaveType == "5") {
+                          start.setHours(0,0,0,0);
+          end.setHours(0,0,0,0);
 
-            var employeeId = $("#EmployeeId").val();
+                    
+                    let month = start.getMonth() + 1;
 
-            // فحص التداخل مع إجازة سابقة
-            $.post('/Employee/Leave/CheckLeaveDate',
-                { employeeId: employeeId, startDate: startVal, endDate: endVal },
-                function (response) {
+                    // ❌ مسموح فقط في 7 و 8
+                    if (month != 7 && month != 8) {
+                        alert("❌ الإجازة السنوية متاحة فقط في شهر 7 أو 8");
+                        $("#btnSave").prop("disabled", true);
+                        return;
+                    }
+                            var diff = Math.round((end - start) / (1000 * 3600 * 24)) + 1;
 
-                    if (response.hasConflict) {
-                        alert(response.message);
+        if (diff != 5) {
+            alert("❌ الإجازة السنوية يجب أن تكون 5 أيام فقط من الأحد إلى الخميس");
+            $("#btnSave").prop("disabled", true);
+            return;
+        }
+
+                    // ❌ يجب أن تكون 5 أيام
+                    if (diff != 5) {
+                        alert("❌ الإجازة السنوية يجب أن تكون 5 أيام فقط من الاحد الي الخميس");
                         $("#btnSave").prop("disabled", true);
                         return;
                     }
 
-                    $("#btnSave").prop("disabled", false);
+                    // ❌ يجب أن تكون من الأحد إلى الخميس
+                    // الأحد = 0 — الخميس = 4
+                    if (start.getDay() != 0 || end.getDay() != 4) {
+                        alert("❌ الإجازة السنوية يجب أن تكون من الأحد إلى الخميس فقط");
+                        $("#btnSave").prop("disabled", true);
+                        return;
+                    }
+                }
 
-                    // حساب عدد الأيام
-                    calculateDays();
-                });
-        });
+                $("#btnSave").prop("disabled", false);
 
-            // الحسابات الخاصة بالأيام
+                // حساب الأيام
+                calculateDays();
+
+            });
+
+            // =====================================================
+            // حساب أيام الإجازة والخصم
+            // =====================================================
             function calculateDays() {
 
                 let start = new Date($("#StartDate").val());
@@ -258,7 +323,27 @@
                 }
             }
 
+            // =====================================================
+            // 4) الملف إلزامي للإجازة المرضي
+            // =====================================================
+            $("#btnSave").click(function (e) {
+
+                let leaveType = $("#LeaveTypeId").val();
+
+                if (leaveType == "3") {
+                    let file = $("#AttachmentFile").val();
+
+                    if (!file) {
+                        e.preventDefault();
+                        alert("❌ يجب إرفاق ملف للإجازة المرضية (PDF أو صورة)");
+                        return false;
+                    }
+                }
+            });
+
         });
+
     </script>
+
 
 }
