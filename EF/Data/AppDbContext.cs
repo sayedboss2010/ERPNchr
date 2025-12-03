@@ -1,8 +1,8 @@
-﻿using EF.Models;
+﻿using System;
+using System.Collections.Generic;
+using EF.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
 
 namespace EF.Data;
 
@@ -74,7 +74,6 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<PrUserGroup> PrUserGroups { get; set; }
 
     public virtual DbSet<UserType> UserTypes { get; set; }
-
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -478,6 +477,10 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.UpdatedDate).HasColumnName("Updated_Date");
             entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
 
+            entity.HasOne(d => d.Department).WithMany(p => p.HrEmployeeOfficialMissions)
+                .HasForeignKey(d => d.DepartmentId)
+                .HasConstraintName("FK_HR_EmployeeOfficialMission_HR_Departments");
+
             entity.HasOne(d => d.Employee).WithMany(p => p.HrEmployeeOfficialMissions)
                 .HasForeignKey(d => d.EmployeeId)
                 .HasConstraintName("FK_HR_EmployeeOfficialMission_HR_Employees");
@@ -836,6 +839,8 @@ public partial class AppDbContext : DbContext
         modelBuilder.HasSequence("HR_Employee_Leaves_SEQ")
             .HasMin(1L)
             .IsCyclic();
+        modelBuilder.HasSequence("HR_EmployeeOfficialMission_SEQ").HasMin(1L);
+        modelBuilder.HasSequence("HR_EmployeePermissions_SEQ").HasMin(1L);
         modelBuilder.HasSequence("HR_Employees_SEQ")
             .StartsAt(17L)
             .HasMin(1L)

@@ -1,0 +1,95 @@
+﻿@model IEnumerable<VM.ViewModels.Employee.EmployeeMissionsVM>
+@{
+    ViewBag.Title = "قائمة المأموريات";
+    Layout = "_Layout";
+}
+
+<h2 class="text-center">قائمة المأموريات</h2>
+<hr />
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>الموظف</th>
+            <th>الادارة</th>
+            <th>تاريخ بداية المأمورية</th>
+            <th>تاريخ نهاية المأمورية</th>
+            <th>جهةالمأمورية</th>
+            <th>الغرض من المأمورية</th>
+            <th>خيارات</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.EmplyeeName</td>
+                    <td>@item.DepartmentName</td>
+                    <td>@item.StartDate?.ToString("yyyy/MM/dd")</td>
+                    <td>@item.EndDate?.ToString("yyyy/MM/dd")</td>
+                    <td>@item.AuthorityOfMission</td>
+                    <td>@item.PurposeOfMission</td>
+                    <td>
+                        <span>: المدير المباشر</span>
+                        @if (item.DirectManagerApproval == true)
+                        {
+                            <span class="text-success">تم القبول</span>
+
+                            <input type="checkbox" class="activateLeave" data-id="@item.Id" />
+                        }
+                        else if (item.DirectManagerApproval == false)
+                        {
+                            <span class="text-success">تم رفض الاذن</span>
+                        }
+                        else
+                        {
+                            <span class="text-success">لم يتم النظر</span>
+
+                        }
+                    </td>
+                    <td>
+                        <a href="@Url.Action("PrintMissionNew", "EmployeeMission", new { id = item.Id, area = "Employee" })" class="btn btn-info btn-sm">طباعة</a>
+                    </td>
+                </tr>
+            }
+
+        }
+        </tbody>
+</table>
+
+<a href="@Url.Action("Create", "EmployeeMission", new { area = "Employee" })" class="btn btn-primary">إضافة اذن</a>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(".activateLeave").change(function () {
+                var checkbox = $(this);
+                var leaveId = checkbox.data("id");
+
+                if (confirm("هل أنت متأكد من تفعيل هذه الإجازة؟")) {
+                    $.ajax({
+                        url: '@Url.Action("ActivateLeave", "Leave", new { area = "Employee" })',
+                        type: 'POST',
+                        data: { id: leaveId },
+                        success: function (response) {
+                            if (response.success) {
+                                checkbox.replaceWith('<span class="text-success">تم القبول</span>');
+                            } else {
+                                alert("حدث خطأ أثناء تفعيل الإجازة");
+                                checkbox.prop("checked", false);
+                            }
+                        },
+                        error: function () {
+                            alert("حدث خطأ أثناء الاتصال بالخادم");
+                            checkbox.prop("checked", false);
+                        }
+                    });
+                } else {
+                    checkbox.prop("checked", false);
+                }
+            });
+        });
+    </script>
+}

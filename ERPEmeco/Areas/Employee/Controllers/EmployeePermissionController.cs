@@ -10,12 +10,9 @@ namespace ERPNchr.Areas.Employee.Controllers
     [Area("Employee")]
     public class EmployeePermissionController : Controller
     {
-        private readonly IWebHostEnvironment _env;
+      
         private readonly AppDbContext _context = new AppDbContext();
-        public EmployeePermissionController(IWebHostEnvironment env)
-        {
-            _env = env;
-        }
+     
         // 🧾 عرض كل الإجازات
         public ActionResult Index()
         {
@@ -41,6 +38,7 @@ namespace ERPNchr.Areas.Employee.Controllers
 
         // ➕ شاشة إضافة جديدة
         [HttpGet]
+
         public ActionResult Create()
         {
             var Emplist = (from e in _context.HrEmployees

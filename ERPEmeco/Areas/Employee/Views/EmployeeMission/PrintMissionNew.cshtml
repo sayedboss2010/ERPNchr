@@ -1,10 +1,9 @@
-﻿@model VM.ViewModels.Employee.EmployeePermissionVM
+﻿@model VM.ViewModels.Employee.EmployeeMissionsVM
 @{
     Layout = "_Layout";
 }
-
 <meta charset="utf-8">
-<title>إذن حضور - @Model.EmplyeeName</title>
+<title> مأمورية رسمية - @Model.EmplyeeName</title>
 
 <style>
     body {
@@ -123,7 +122,7 @@
         <div class="logo"><img src="~/assets/img/Logo/lg.png" alt="Logo"></div>
 
         <div class="header-text">
-            <h1>@Model.PermissionTypeName</h1>
+            <h1>مأمورية رسمية</h1>
             <div class="header-meta">
                 نظام الموارد البشرية • تاريخ الطباعة:
                 <strong>@DateTime.Now.ToString("yyyy/MM/dd")</strong>
@@ -135,32 +134,44 @@
 
         <!-- بيانات الموظف -->
         <div class="row">
-            <div class="col">
+            <div class="col-6">
                 <label class="field">الموظف:</label>
                 <span>@Model.EmplyeeName</span>
             </div>
-
-            <div class="col">
-                <label class="field">نوع الإذن:</label>
-                <span>@Model.PermissionTypeName</span>
+            <div class="col-6">
+                <label class="field">الادارة:</label>
+                <span>@Model.DepartmentName</span>
+            </div>
+        </div>
+        <div class="row">
+            <div col-12>
+                <label class="field">جهة المأمورية:</label>
+                <span>@Model.AuthorityOfMission</span>
+            </div>
+          
+        </div>
+        <div class="row">
+            <div col-12>
+                <label class="field">الغرض من المأمورية:</label>
+                <span>@Model.PurposeOfMission</span>
             </div>
 
-            <div class="col">
-                <label class="field">تاريخ الإذن:</label>
+        </div>
+        <div class ="row">
+            <div class="col-6">
+                <label class="field">تاريخ بداية المأمورية:</label>
+                <span>@Model.StartDate?.ToString("yyyy/MM/dd")</span>
+            </div>
+
+            <div class="col-6">
+                <label class="field">تاريخ نهاية المأمورية:</label>
                 <span>
-                    @Model.DateOfPermission.Value.ToDateTime(TimeOnly.MinValue).ToString("yyyy/MM/dd")
+                    @Model.EndDate?.ToString("yyyy/MM/dd")
                 </span>
             </div>
         </div>
 
-        <!-- أسباب أو ملاحظات (لو عايزة تضيفي لاحقاً) -->
-        <div class="row">
-            <div class="col">
-                <label class="field">ملاحظات:</label>
-              @*   <span>@(Model.Notes ?? "لا يوجد")</span> *@
-            </div>
-        </div>
-
+       
         <!-- توقيعات -->
         <div class="row" style="margin-top:25px;">
             <div class="col">توقيع الموظف: ____________________</div>

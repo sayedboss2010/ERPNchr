@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EF.Models;
 
 namespace VM.ViewModels.Employee
 {
     public class EmployeeMissionsVM
     {
-        public int Id { get; set; }
-
-        public long? EmployeeId { get; set; }
-
+        public int? Id { get; set; }
+        public string? EmplyeeName { get; set; }
+        public int? EmployeeId { get; set; }
+        public string? DepartmentName { get; set; }
         public int? DepartmentId { get; set; }
 
         public string? AuthorityOfMission { get; set; }
@@ -22,7 +23,7 @@ namespace VM.ViewModels.Employee
 
         public DateOnly? EndDate { get; set; }
 
-        public bool IsActive { get; set; }
+        public bool? IsActive { get; set; }
 
         public int? CreatedUserId { get; set; }
 
@@ -45,5 +46,11 @@ namespace VM.ViewModels.Employee
         /// موافقة مدير الادارة
         /// </summary>
         public bool? DepartmentManagerApproval { get; set; }
+
+        public virtual HrDepartment? Department { get; set; }
+
+        public virtual HrEmployee? Employee { get; set; }
+
     }
+   
 }
