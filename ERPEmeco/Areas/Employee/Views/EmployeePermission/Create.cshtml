@@ -46,9 +46,15 @@
         <!-- التواريخ -->
         <div class="row mt-4">
             <div class="col-md-4">
-                <label class="control-label">تاريخ الاذن</label>
-                @Html.TextBoxFor(m => m.DateOfPermission, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "DateOfPermission" })
-            </div>
+    <label class="control-label">تاريخ الإذن</label>
+    @Html.TextBoxFor(m => m.DateOfPermission, "{0:yyyy-MM-dd}", 
+        new { 
+            @class = "form-control", 
+            type = "date", 
+            id = "DateOfPermission", 
+            min = DateTime.Now.ToString("yyyy-MM-dd")  // أقصى تاريخ مسموح هو اليوم
+        })
+</div>
 
           
 
@@ -75,6 +81,19 @@
     <script>
 
         $(document).ready(function () {
+                   $("#DateOfPermission").change(function() {
+    var selectedDate = new Date($(this).val());
+    var today = new Date();
+    
+    // تصفير الوقت لكلا التاريخين لضمان المقارنة الصحيحة
+    selectedDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate < today) {
+        alert("❌ تاريخ الإذن لا يمكن أن يكون بعد اليوم.");
+        $(this).val(today.toISOString().split('T')[0]); // إعادة تعيين إلى اليوم
+    }
+});
 
             // ============================
             // 1) اختيار الموظف → جلب الرصيد
