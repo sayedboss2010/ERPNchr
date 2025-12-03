@@ -94,6 +94,11 @@
                             <div data-i18n="Analytics">الرئيسية</div>
                         </a>
                     </li>
+                    <li class="menu-item @(Html.IsActive("IndexALL", "EmployeeData", "Employee", true))">
+                        <a href="~/Employee/EmployeeData/AddEdite" class="menu-link">
+                            <div data-i18n="Without menu">قائمة الموظفين</div>
+                        </a>
+                    </li>
                     <li class="menu-item @(Html.IsActive("AddEdite", "EmployeeData", "Employee", true))">
                         <a href="~/Employee/EmployeeData/AddEdite" class="menu-link">
                             <div data-i18n="Without menu">بيانات الموظفين</div>

@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VM.ViewModels.Employee;
+using VM.ViewModels;
 
 namespace DAL.Classes.Employee
 {

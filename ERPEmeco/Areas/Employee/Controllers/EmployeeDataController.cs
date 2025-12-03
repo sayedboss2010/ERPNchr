@@ -10,7 +10,8 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Web;
-using VM.ViewModels.Employee;
+using VM.ViewModels;
+using BCrypt.Net;
 
 
 namespace ERPNchr.Areas.Employee.Controllers;
@@ -27,7 +28,74 @@ public class EmployeeDataController : Controller
     }
     public IActionResult IndexALL()
     {
-        return View();
+        var employees = db.HrEmployees
+    .Select(e => new EmployeeVM
+    {
+        Id = e.Id,
+        EmpCode = e.EmpCode,
+        NameAr = e.NameAr,
+        NameEn = e.NameEn,
+        Email = e.Email,
+        Password = e.Password,
+        AddressAr = e.AddressAr,
+        AddressEn = e.AddressEn,
+        PhoneNumber = e.PhoneNumber,
+
+        //Birthdate = e.Birthdate.HasValue
+        //    ? DateOnly.FromDateTime(e.Birthdate.Value)
+        //    : null,
+
+        //HireDate = e.HireDate.HasValue
+        //    ? DateOnly.FromDateTime(e.HireDate.Value)
+        //    : null,
+
+        CurrentJobId = e.CurrentJobId,
+        CurrentSalary = e.CurrentSalary,
+        CurrentFunctionalDegreeId = e.CurrentFunctionalDegreeId,
+        IsMananger = e.IsMananger,
+        IsActive = e.IsActive,
+        CreatedUserId = e.CreatedUserId,
+        //CreatedDate = e.CreatedDate,
+        UpdatedUserId = e.UpdatedUserId,
+
+        //UpdatedDate = e.UpdatedDate.HasValue
+        //    ? DateOnly.FromDateTime(e.UpdatedDate.Value)
+        //    : null,
+
+        DeletedUserId = e.DeletedUserId,
+
+        //DeletedDate = e.DeletedDate.HasValue
+        //    ? DateOnly.FromDateTime(e.DeletedDate.Value)
+        //    : null,
+
+        InsuranceNumber = e.InsuranceNumber,
+        Nid = e.Nid,
+
+        //DateIn = e.DateIn.HasValue
+        //    ? DateOnly.FromDateTime(e.DateIn.Value)
+        //    : null,
+
+        //DateOut = e.DateOut.HasValue
+        //    ? DateOnly.FromDateTime(e.DateOut.Value)
+        //    : null,
+
+        NidPath = e.NidPath,
+        Mobile = e.Mobile,
+        EmpCodeNew = e.EmpCodeNew,
+        Isbank = e.Isbank,
+
+        //AppointmentDate = e.AppointmentDate.HasValue
+        //    ? DateOnly.FromDateTime(e.AppointmentDate.Value)
+        //    : null,
+
+        HrJobGradesId = e.HrJobGradesId,
+        EmployeeTypeId = e.EmployeeTypeId,
+        BranchId = e.BranchId,
+        DepartmentId = e.DepartmentId
+    })
+    .ToList();
+
+        return View(employees);
     }
     public IActionResult AddEdite(long EmployeeID = 0)
     {
@@ -107,6 +175,8 @@ public class EmployeeDataController : Controller
                         NID_Path.CopyTo(stream);
                     }
 
+                    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
+                    model.Password = hashedPassword;
                     // المسار الذي يُخزن في الداتابيز
                     model.NidPath = $"/uploads/NID_Path/{fileName}"; ;
                 }
@@ -117,6 +187,9 @@ public class EmployeeDataController : Controller
 
                 db.HrEmployees.Add(model);
                 await db.SaveChangesAsync();
+
+                var age = NationalIdExtensions.GetAge(model.Nid);
+
             }
             else
             {
@@ -144,6 +217,10 @@ public class EmployeeDataController : Controller
                 existingEmployee.InsuranceNumber = model.InsuranceNumber;
                 existingEmployee.DateIn = model.DateIn;
                 existingEmployee.DateOut = model.DateOut;
+
+
+                //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
+                //model.Password = hashedPassword;
 
                 // معالجة ملف NID جديد
                 if (NID_Path != null && NID_Path.Length > 0)

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VM.ViewModels.Employee
+namespace VM.ViewModels
 {
     public class EmployeeVM
     {
