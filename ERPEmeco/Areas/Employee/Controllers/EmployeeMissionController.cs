@@ -58,12 +58,12 @@ namespace ERPNchr.Areas.Employee.Controllers
 
             ViewBag.EmployeeOptions = Emplist;
 
-            ViewBag.ListHrDepartment = _context.HrDepartments
-                .Select(d => new SelectListItem
-                {
-                    Value = d.Id.ToString(),
-                    Text = d.NameAr
-                }).ToList();
+            //ViewBag.ListHrDepartment = _context.HrDepartments
+            //    .Select(d => new SelectListItem
+            //    {
+            //        Value = d.Id.ToString(),
+            //        Text = d.NameAr
+            //    }).ToList();
         }
 
         [HttpGet]
@@ -81,14 +81,7 @@ namespace ERPNchr.Areas.Employee.Controllers
                            }).ToList();
             // هنا نخزن النص المعروض في ViewBag
             ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
-            ViewBag.PermissionType = new SelectList(_context.PermissionsTypes, "Id", "NameAr");
-
-            ViewBag.ListHrDepartment = _context.HrDepartments
-               .Select(d => new SelectListItem
-               {
-                   Value = d.Id.ToString(),
-                   Text = d.NameAr
-               }).ToList();
+           
             return View();
         }
 

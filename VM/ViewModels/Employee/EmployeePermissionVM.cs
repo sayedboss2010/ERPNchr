@@ -1,6 +1,7 @@
 ﻿using EF.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace VM.ViewModels.Employee
 
         public string? EmplyeeName { get; set; }
         public string? PermissionTypeName { get; set; }
+        [Required(ErrorMessage = "❌ تاريخ بداية المامورية إجباري")]
         public DateOnly? DateOfPermission { get; set; }
 
         public bool IsActive { get; set; }
