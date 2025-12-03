@@ -1,8 +1,8 @@
-﻿using EF.Models;
+﻿using System;
+using System.Collections.Generic;
+using EF.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
 
 namespace EF.Data;
 
@@ -41,6 +41,10 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<HrEmployeeLeaveBalance> HrEmployeeLeaveBalances { get; set; }
 
+    public virtual DbSet<HrEmployeeOfficialMission> HrEmployeeOfficialMissions { get; set; }
+
+    public virtual DbSet<HrEmployeePermission> HrEmployeePermissions { get; set; }
+
     public virtual DbSet<HrJob> HrJobs { get; set; }
 
     public virtual DbSet<HrJobGrade> HrJobGrades { get; set; }
@@ -52,6 +56,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<HrMachineMove> HrMachineMoves { get; set; }
 
     public virtual DbSet<LogInHistoryTb> LogInHistoryTbs { get; set; }
+
+    public virtual DbSet<PermissionsType> PermissionsTypes { get; set; }
 
     public virtual DbSet<PrGroup> PrGroups { get; set; }
 
@@ -281,7 +287,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.NidPath)
                 .HasMaxLength(500)
                 .HasColumnName("NID_Path");
-            entity.Property(e => e.PhoneNumber).HasMaxLength(12);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(50);
             entity.Property(e => e.UpdatedDate).HasColumnName("Updated_Date");
             entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
 
@@ -451,6 +457,64 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK_LeaveBalance_Employee");
         });
 
+        modelBuilder.Entity<HrEmployeeOfficialMission>(entity =>
+        {
+            entity.ToTable("HR_EmployeeOfficialMission");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("ID");
+            entity.Property(e => e.AuthorityOfMission).HasMaxLength(50);
+            entity.Property(e => e.CreatedDate).HasColumnName("Created_Date");
+            entity.Property(e => e.CreatedUserId).HasColumnName("Created_UserId");
+            entity.Property(e => e.DeletedDate).HasColumnName("Deleted_Date");
+            entity.Property(e => e.DeletedUserId).HasColumnName("Deleted_UserId");
+            entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
+            entity.Property(e => e.DepartmentManagerApproval).HasComment("موافقة مدير الادارة");
+            entity.Property(e => e.DirectManagerApproval).HasComment("موافقة المدير المباشر");
+            entity.Property(e => e.EmployeeId).HasColumnName("Employee_ID");
+            entity.Property(e => e.PurposeOfMission).HasMaxLength(100);
+            entity.Property(e => e.UpdatedDate).HasColumnName("Updated_Date");
+            entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
+
+            entity.HasOne(d => d.Department).WithMany(p => p.HrEmployeeOfficialMissions)
+                .HasForeignKey(d => d.DepartmentId)
+                .HasConstraintName("FK_HR_EmployeeOfficialMission_HR_Departments");
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.HrEmployeeOfficialMissions)
+                .HasForeignKey(d => d.EmployeeId)
+                .HasConstraintName("FK_HR_EmployeeOfficialMission_HR_Employees");
+        });
+
+        modelBuilder.Entity<HrEmployeePermission>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_EmployeePermissions");
+
+            entity.ToTable("HR_EmployeePermissions");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("ID");
+            entity.Property(e => e.CreatedDate).HasColumnName("Created_Date");
+            entity.Property(e => e.CreatedUserId).HasColumnName("Created_UserId");
+            entity.Property(e => e.DeletedDate).HasColumnName("Deleted_Date");
+            entity.Property(e => e.DeletedUserId).HasColumnName("Deleted_UserId");
+            entity.Property(e => e.DepartmentManagerApproval).HasComment("موافقة مدير الادارة");
+            entity.Property(e => e.DirectManagerApproval).HasComment("موافقة المدير المباشر");
+            entity.Property(e => e.EmployeeId).HasColumnName("Employee_ID");
+            entity.Property(e => e.PermissionTypeId).HasColumnName("PermissionTypeID");
+            entity.Property(e => e.UpdatedDate).HasColumnName("Updated_Date");
+            entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.HrEmployeePermissions)
+                .HasForeignKey(d => d.EmployeeId)
+                .HasConstraintName("FK_HR_EmployeePermissions_HR_Employees");
+
+            entity.HasOne(d => d.PermissionType).WithMany(p => p.HrEmployeePermissions)
+                .HasForeignKey(d => d.PermissionTypeId)
+                .HasConstraintName("FK_EmployeePermissions_PermissionsTypes");
+        });
+
         modelBuilder.Entity<HrJob>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_Jobs");
@@ -593,6 +657,15 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.LogInHistoryTbs)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_LogInHistoryTb_PR_User");
+        });
+
+        modelBuilder.Entity<PermissionsType>(entity =>
+        {
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("ID");
+            entity.Property(e => e.NameAr).HasMaxLength(50);
+            entity.Property(e => e.NameEn).HasMaxLength(50);
         });
 
         modelBuilder.Entity<PrGroup>(entity =>
@@ -766,6 +839,8 @@ public partial class AppDbContext : DbContext
         modelBuilder.HasSequence("HR_Employee_Leaves_SEQ")
             .HasMin(1L)
             .IsCyclic();
+        modelBuilder.HasSequence("HR_EmployeeOfficialMission_SEQ").HasMin(1L);
+        modelBuilder.HasSequence("HR_EmployeePermissions_SEQ").HasMin(1L);
         modelBuilder.HasSequence("HR_Employees_SEQ")
             .StartsAt(17L)
             .HasMin(1L)

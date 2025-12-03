@@ -1,0 +1,295 @@
+﻿@model VM.ViewModels.Employee.EmployeeMissionsVM
+@{
+    ViewBag.Title = "تسجيل ";
+    Layout = "_Layout";
+}
+@Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">الرئيسية / </span> تسجيل مأمورية موظف
+    </h4>
+
+    @using (Html.BeginForm("Create", "EmployeeMission", new { area = "Employee" }, FormMethod.Post))
+    {
+        <div class="form-horizontal">
+
+            @Html.HiddenFor(m => m.Id)
+            <input type="hidden" id="LeaveBalanceID" name="LeaveBalanceID" />
+            <!-- اختيار الموظف -->
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="control-label">الموظف</label>
+
+                    <input class="form-control" list="datalistOptions" id="EmployeeOptions" placeholder="اختار موظف..." autocomplete="off" />
+                    <input type="hidden" name="EmployeeId" id="EmployeeId" />
+
+                    <datalist id="datalistOptions">
+                        @foreach (var item in (ViewBag.EmployeeOptions as IEnumerable<SelectListItem>
+                       ?? Enumerable.Empty<SelectListItem>()))
+                        {
+                            <option value="@item.Text" data-id="@item.Value"></option>
+                        }
+                    </datalist>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="control-label">الإدارة</label>
+                    <div class="col-sm-10">
+
+                        <input class="form-control"
+                               id="CurrentBranchDeptText"
+                               list="CurrentBranchDeptdatalist"
+                               placeholder="اكتب للبحث..." />
+
+                        <input type="hidden"
+                               id="CurrentBranchDeptId"
+                               name="DepartmentId"
+                               />
+
+                        <datalist id="CurrentBranchDeptdatalist">
+                            @foreach (var item in ViewBag.ListHrDepartment)
+                            {
+                                <option value="@item.Text" data-id="@item.Value"></option>
+                            }
+                        </datalist>
+
+                    </div>
+                </div>
+
+            </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="control-label"> الغرض من المأمورية</label>
+                        <input type="text" class="form-control" name="PurposeOfMission"  />
+                    </div>
+                </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="control-label"> جهة  المأمورية</label>
+                    <input type="text" class="form-control" name="AuthorityOfMission" />
+                </div>
+            </div>
+                <div class="row mt-6">
+                    <div class="col-md-3">
+                        <label>تاريخ بداية المأمورية</label>
+                        @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "StartDate" })
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>تاريخ نهاية المأمورية</label>
+                        @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "EndDate" })
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+         
+
+
+
+            <!-- زر الحفظ -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <button type="submit" id="btnSave" class="btn btn-primary">حفظ</button>
+                    <a href="@Url.Action("Create", "EmployeeMission", new { area = "Employee" })" class="btn btn-secondary">رجوع</a>
+                </div>
+            </div>
+        
+    }
+</div>
+
+
+}
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            // ============================
+            // 1) اختيار الموظف → جلب الرصيد
+            // ============================
+            $("#EmployeeOptions").on("input", function () {
+                const input = $(this).val();
+                const hidden = $("#EmployeeId");
+                const options = $("#datalistOptions option");
+                let selectedId = "";
+
+                options.each(function () {
+                    if ($(this).val() === input) {
+                        selectedId = $(this).data("id");
+                        return false;
+                    }
+                });
+
+                hidden.val(selectedId);
+
+
+            });
+
+             $("#CurrentBranchDeptText").on("input", function () {
+                const input = $(this).val();
+                const hidden = $("#CurrentBranchDeptId");
+                const options = $("#CurrentBranchDeptdatalist option");
+                let selectedId = "";
+
+                options.each(function () {
+                    if ($(this).val() === input) {
+                        selectedId = $(this).data("id");
+                        return false;
+                    }
+                });
+
+                hidden.val(selectedId);
+
+
+            });
+
+        });
+    </script>
+
+}
+
+
+
+@* @model VM.ViewModels.Employee.EmployeeMissionsVM
+@{
+    ViewBag.Title = "تسجيل مأمورية";
+    Layout = "_Layout";
+}
+@Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">الرئيسية / </span> تسجيل مأمورية موظف
+    </h4>
+
+    @using (Html.BeginForm("Create", "EmployeeMission", new { area = "Employee" }, FormMethod.Post))
+    {
+        <div class="form-horizontal">
+
+            @Html.HiddenFor(m => m.Id)
+            <input type="hidden" id="LeaveBalanceID" name="LeaveBalanceID" />
+            <!-- اختيار الموظف -->
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="control-label">الموظف</label>
+
+                    <input class="form-control" list="datalistOptions" id="EmployeeOptions" placeholder="اختار موظف..." autocomplete="off" />
+                    <input type="hidden" name="EmployeeId" id="EmployeeId" />
+
+                    <datalist id="datalistOptions">
+                        @foreach (var emp in ViewBag.EmployeeOptions as SelectList)
+                        {
+                            <option data-id="@emp.Value" value="@emp.Text"></option>
+                        }
+                    </datalist>
+                </div>
+                <div class="row mb-6">
+                    <label for="DepartmentId" class="col-sm-2 col-form-label">الإدارة</label>
+                    <div class="col-sm-10">
+
+                        <input class="form-control"
+                               id="CurrentBranchDeptText"
+                               list="CurrentBranchDeptdatalist"
+                               placeholder="اكتب للبحث..." />
+
+                        <input type="hidden"
+                               id="CurrentBranchDeptId"
+                               name="DepartmentId"
+                               value="@Model.DepartmentId" />
+
+                        <datalist id="CurrentBranchDeptdatalist">
+                            @foreach (var item in ViewBag.ListHrDepartment)
+                            {
+                                <option value="@item.Text" data-id="@item.Value"></option>
+                            }
+                        </datalist>
+
+                    </div>
+                </div>
+               
+            </div>
+            <div class ="row">
+                <div class="col-md-6">
+                    <label class="control-label"> الغرض من المأمورية</label>
+                    <input type="text" class="form-control" name="AuthorityOfMission" value="@Model.AuthorityOfMission" />
+                </div>
+            </div>
+            <div class="row mt-6">
+                <div class="col-md-3">
+                    <label>تاريخ بداية المأمورية</label>
+                    @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "StartDate" })
+                </div>
+
+                <div class="col-md-3">
+                    <label>تاريخ نهاية المأمورية</label>
+                    @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "EndDate" })
+                </div>
+
+                
+            </div>
+
+          
+
+
+
+            <!-- زر الحفظ -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <button type="submit" id="btnSave" class="btn btn-primary">حفظ</button>
+                    <a href="@Url.Action("Create", "EmployeeMission", new { area = "Employee" })" class="btn btn-secondary">رجوع</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+}
+@section Scripts {
+
+    <script>
+
+              // DepartmentId
+        document.getElementById("CurrentBranchDeptText").addEventListener("input", function () {
+            const val = this.value.trim();
+            const opts = document.querySelectorAll("#CurrentBranchDeptdatalist option");
+
+            let match = Array.from(opts).find(o => o.value.trim() === val);
+            document.getElementById("CurrentBranchDeptId").value = match ? match.dataset.id : "";
+        });
+        $(document).ready(function () {
+
+            // ============================
+            // 1) اختيار الموظف → جلب الرصيد
+            // ============================
+            $("#EmployeeOptions").on("input", function () {
+                const input = $(this).val();
+                const hidden = $("#EmployeeId");
+                const options = $("#datalistOptions option");
+                let selectedId = "";
+
+                options.each(function () {
+                    if ($(this).val() === input) {
+                        selectedId = $(this).data("id");
+                        return false;
+                    }
+                });
+
+                hidden.val(selectedId);
+
+
+            });
+
+
+
+        });
+    </script>
+
+}
+ *@

@@ -1,0 +1,105 @@
+﻿@model VM.ViewModels.Employee.EmployeePermissionVM
+@{
+    ViewBag.Title = "تسجيل إذن";
+    Layout = "_Layout";
+}
+@Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">الرئيسية / </span> تسجيل اذن موظف
+    </h4>
+
+    @using (Html.BeginForm("Create", "EmployeePermission", new { area = "Employee" }, FormMethod.Post))
+    {
+        <div class="form-horizontal">
+
+            @Html.HiddenFor(m => m.Id)
+            <input type="hidden" id="LeaveBalanceID" name="LeaveBalanceID" />
+            <!-- اختيار الموظف -->
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <label class="control-label">الموظف</label>
+
+                    <input class="form-control" list="datalistOptions" id="EmployeeOptions" placeholder="اختار موظف..." autocomplete="off" />
+                    <input type="hidden" name="EmployeeId" id="EmployeeId"/>
+
+                    <datalist id="datalistOptions">
+                        @foreach (var emp in ViewBag.EmployeeOptions as SelectList)
+                        {
+                            <option data-id="@emp.Value" value="@emp.Text"></option>
+                        }
+                    </datalist>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="control-label">نوع الاذن</label>
+                    @Html.DropDownListFor(m => m.PermissionTypeId,
+                    (SelectList)ViewBag.PermissionType,
+                                "-- اختر نوع الاذن --",
+                                new { @class = "form-control", id = "PermissionTypeId" })
+            </div>
+        </div>
+
+    
+
+        <!-- التواريخ -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <label class="control-label">تاريخ الاذن</label>
+                @Html.TextBoxFor(m => m.DateOfPermission, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", id = "DateOfPermission" })
+            </div>
+
+          
+
+        
+        </div>
+
+      
+
+        <!-- زر الحفظ -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <button type="submit" id="btnSave" class="btn btn-primary" >حفظ</button>
+                <a href="@Url.Action("Create", "EmployeePermission", new { area = "Employee" })" class="btn btn-secondary">رجوع</a>
+            </div>
+        </div>
+    </div>
+        }
+</div>
+
+
+}
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            // ============================
+            // 1) اختيار الموظف → جلب الرصيد
+            // ============================
+            $("#EmployeeOptions").on("input", function () {
+                const input = $(this).val();
+                const hidden = $("#EmployeeId");
+                const options = $("#datalistOptions option");
+                let selectedId = "";
+
+                options.each(function () {
+                    if ($(this).val() === input) {
+                        selectedId = $(this).data("id");
+                        return false;
+                    }
+                });
+
+                hidden.val(selectedId);
+
+                
+            });
+
+           
+
+        });
+    </script>
+
+}
