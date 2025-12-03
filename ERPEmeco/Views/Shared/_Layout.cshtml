@@ -106,11 +106,29 @@
                     </li>
                     <li class="menu-item">
                         <a href="~/Employee/Leave/Create" class="menu-link">
-                            <div data-i18n="Without navbar">اضافة اجازة</div>
+                            <div data-i18n="Without navbar">اضافة أجازه</div>
                         </a>
                     </li>
-                    
-
+                    <li class="menu-item">
+                        <a href="~/Employee/EmployeePermission/Create" class="menu-link">
+                            <div data-i18n="Without navbar">اضافة اذن</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="~/Employee/EmployeePermission/index" class="menu-link">
+                            <div data-i18n="Without navbar">قائمةالاذنون</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="~/Employee/EmployeeMission/Create" class="menu-link">
+                            <div data-i18n="Without navbar">اضافة مأمورية رسمية</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="~/Employee/EmployeeMission/index" class="menu-link">
+                            <div data-i18n="Without navbar">قائمةالمأموريات</div>
+                        </a>
+                    </li>
                     <!-- البيانات الاساسية -->
                     <li class="menu-item">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -119,8 +137,8 @@
                         </a>
 
                         <ul class="menu-sub">
-                            <li class="menu-item @(Html.IsActive("AddEdite", "EmployeeData", "Employee", true))">
-                                <a href="~/Employee/EmployeeData/AddEdite" class="menu-link">
+                            <li class="menu-item @(Html.IsActive("Index", "Branches", "LookUP", true))">
+                                <a href="~/LookUP/Branches/Index" class="menu-link">
                                     <div data-i18n="Without menu">الفروع</div>
                                 </a>
                             </li>
