@@ -21,7 +21,7 @@
                 <div class="col-md-6">
                     <label class="control-label">الموظف</label>
 
-                    <input class="form-control" list="datalistOptions" id="EmployeeOptions" placeholder="اختار موظف..." autocomplete="off" />
+                    <input class="form-control" list="datalistOptions" id="EmployeeOptions" placeholder="اختار موظف..." autocomplete="off" required />
                     <input type="hidden" name="EmployeeId" id="EmployeeId"/>
 
                     <datalist id="datalistOptions">
@@ -37,7 +37,7 @@
                     @Html.DropDownListFor(m => m.PermissionTypeId,
                     (SelectList)ViewBag.PermissionType,
                                 "-- اختر نوع الاذن --",
-                                new { @class = "form-control", id = "PermissionTypeId" })
+                                new { @class = "form-control", id = "PermissionTypeId" ,required = "required"})
             </div>
         </div>
 
@@ -52,7 +52,8 @@
             @class = "form-control", 
             type = "date", 
             id = "DateOfPermission", 
-            min = DateTime.Now.ToString("yyyy-MM-dd")  // أقصى تاريخ مسموح هو اليوم
+            min = DateTime.Now.ToString("yyyy-MM-dd"),
+            required = "required"  // أقصى تاريخ مسموح هو اليوم
         })
 </div>
 
