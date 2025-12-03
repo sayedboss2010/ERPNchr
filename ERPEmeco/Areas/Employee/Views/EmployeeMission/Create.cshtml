@@ -109,6 +109,31 @@
     <script>
 
         $(document).ready(function () {
+            // افترض أن لديك حقول البداية والنهاية بالمهمة
+$("#StartDate, #EndDate").change(function() {
+    var start = new Date($("#StartDate").val());
+    var end = new Date($("#EndDate").val());
+    var today = new Date();
+
+    // تصفير الوقت لضمان المقارنة الصحيحة
+    start.setHours(0,0,0,0);
+    end.setHours(0,0,0,0);
+    today.setHours(0,0,0,0);
+
+    // التأكد أن البداية اليوم أو أكبر
+    if(start < today){
+        alert("❌ تاريخ بداية المهمة لا يمكن أن يكون قبل اليوم.");
+        $("#StartDate").val(today.toISOString().split('T')[0]);
+        return;
+    }
+
+    // التأكد أن النهاية بعد البداية
+    if(end < start){
+        alert("❌ تاريخ نهاية المهمة يجب أن يكون بعد تاريخ البداية.");
+        $("#EndDate").val(start.toISOString().split('T')[0]);
+        return;
+    }
+});
 
             // ============================
             // 1) اختيار الموظف → جلب الرصيد
