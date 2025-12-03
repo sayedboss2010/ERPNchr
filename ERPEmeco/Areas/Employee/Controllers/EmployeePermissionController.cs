@@ -26,7 +26,7 @@ namespace ERPNchr.Areas.Employee.Controllers
                             Id = l.Id,
                             EmployeeId = e.Id,
                             EmplyeeName = e.NameAr,
-                            PermissionTypeName = t.NameEn,                           
+                            PermissionTypeName = t.NameAr,                           
                             DateOfPermission = l.DateOfPermission,                                              
                             DirectManagerApproval = l.DirectManagerApproval,
                             DepartmentManagerApproval = l.DepartmentManagerApproval,
@@ -61,31 +61,43 @@ namespace ERPNchr.Areas.Employee.Controllers
         [HttpPost]
         public IActionResult Create(EmployeePermissionVM model)
         {
-            // التحقق من وجود إذن لنفس الموظف في نفس التاريخ
-            bool exists = _context.HrEmployeePermissions
-                                  .Any(p => p.EmployeeId == model.EmployeeId
-                                  &&p.PermissionTypeId==model.PermissionTypeId
-                                            && p.DateOfPermission == model.DateOfPermission
-                                            && p.IsActive);
-
-            if (exists)
+            if (model.DateOfPermission.HasValue)
             {
-                var Emplist = (from e in _context.HrEmployees
-                               where e.IsActive == true
-                               //&& e.CurrentBranchDeptId == 5
-                               select new
-                               {
-                                   e.Id,
-                                   e.NameAr,
-                                   Display = e.NameAr + " (" + e.EmpCode + ")"  // نضيف النص المعروض بالاسم + الكود
-                               }).ToList();
-                // هنا نخزن النص المعروض في ViewBag
-                ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
-                ViewBag.PermissionType = new SelectList(_context.PermissionsTypes, "Id", "NameAr");
-                ModelState.AddModelError("", "⚠️ هذا الموظف لديه إذن في نفس التاريخ.");
-                
-                return View(model); // إعادة عرض الصفحة مع البيانات المدخلة ورسالة الخطأ
+                int permissionMonth = model.DateOfPermission.Value.Month;
+                int permissionYear = model.DateOfPermission.Value.Year;
+
+                bool exists = _context.HrEmployeePermissions
+                                      .Any(p => p.EmployeeId == model.EmployeeId
+                                             && p.PermissionTypeId == model.PermissionTypeId
+                                             && p.DateOfPermission.HasValue
+                                             && p.DateOfPermission.Value.Month == permissionMonth
+                                             && p.DateOfPermission.Value.Year == permissionYear
+                                             && p.IsActive);
+
+                if (exists)
+                {
+                    var Emplist = (from e in _context.HrEmployees
+                                   where e.IsActive == true
+                                   select new
+                                   {
+                                       e.Id,
+                                       e.NameAr,
+                                       Display = e.NameAr + " (" + e.EmpCode + ")"
+                                   }).ToList();
+
+                    ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
+                    ViewBag.PermissionType = new SelectList(_context.PermissionsTypes, "Id", "NameAr");
+
+                    ModelState.AddModelError("", "⚠️ هذا الموظف لديه إذن من نفس النوع في نفس الشهر.");
+                    return View(model);
+                }
             }
+            else
+            {
+                ModelState.AddModelError("", "❌ يجب إدخال تاريخ الإذن.");
+                return View(model);
+            }
+
 
             // إنشاء المعرف الجديد
             long HrEmployeePermission_ID = _context.Database
