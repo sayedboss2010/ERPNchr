@@ -16,6 +16,7 @@ public class EmployeeLeaveVM
     public long? EmployeeCode { get; set; }
     public string? EmployeeName { get; set; }
     public string? DepartmentName { get; set; }
+    public int? DepartmentID { get; set; }
 
     public byte? LeaveTypeId { get; set; }
 

@@ -167,7 +167,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                 // =============================
                 if (model.LeaveTypeId == 1)
                 {
-                    leaveBalance.CasualUsedDays += (int)model.ActualDays;
+                    leaveBalance.CasualUsedDays = (int)model.ActualDays;
                     leaveBalance.CasualRemainingDays =
                         (int)(leaveBalance.CasualTotalDays - leaveBalance.CasualUsedDays);
                 }
@@ -177,7 +177,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                 // =============================
                 if (model.LeaveTypeId == 2)
                 {
-                    leaveBalance.UsedDays += (int)model.ActualDays;
+                    leaveBalance.UsedDays = (int)model.ActualDays;
                     leaveBalance.TotalDaysReminig =
                         (int)(leaveBalance.TotalDays - leaveBalance.UsedDays);
                 }
@@ -188,7 +188,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                 //// =============================
                 if (model.LeaveTypeId == 5)
                 {
-                    leaveBalance.AnnualUsedDays += (int)model.ActualDays;
+                    leaveBalance.AnnualUsedDays = (int)model.ActualDays;
                     leaveBalance.AnnualRemainingDays =
                         (int)(leaveBalance.AnnualTotalDays - leaveBalance.AnnualUsedDays);
                 }
@@ -240,13 +240,17 @@ namespace YourProjectName.Areas.Employee.Controllers
             var leave = (from l in _context.HrEmployeeLeaves
                          join e in _context.HrEmployees on l.EmployeeId equals e.Id
                          join t in _context.HrLeaveTypes on l.LeaveTypeId equals t.Id
+                         join d in _context.HrDepartments on e.DepartmentId equals d.Id into dept
+                         from d in dept.DefaultIfEmpty() // left join
                          where l.Id == id
                          select new
                          {
                              Leave = l,
                              Employee = e,
+                             Department = d,
                              LeaveType = t
                          }).FirstOrDefault();
+
 
             if (leave == null)
                 return Content("❌ لم يتم العثور على الإجازة");
@@ -262,18 +266,36 @@ namespace YourProjectName.Areas.Employee.Controllers
             var start = leave.Leave.StartDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Now;
             var end = leave.Leave.EndDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Now;
 
-            int totalDays = (end - start).Days + 1;
+            // التأكد من إزالة الوقت من التواريخ
+            DateTime startDate = start.Date;
+            DateTime endDate = end.Date;
+
+            // حساب عدد الأيام بين البداية والنهاية + 1
+            int totalDays = (endDate - startDate).Days + 1;
+
+            // التأكد من أن totalDays ≥ 1
+            totalDays = Math.Max(1, totalDays);
+
+            // حساب عدد الأيام الفعلية مع استبعاد الجمعة
             int actualDays = Enumerable.Range(0, totalDays)
-                                       .Select(i => start.AddDays(i))
-                                       .Count(d => d.DayOfWeek != DayOfWeek.Friday);
+                                       .Select(i => startDate.AddDays(i))
+                                       .Count(d => d.DayOfWeek != DayOfWeek.Friday); // استبدل Friday باليوم الذي تريد استبعاده
+
+            Console.WriteLine($"إجمالي الأيام: {totalDays}");
+            Console.WriteLine($"الأيام الفعلية بعد استبعاد الجمعة: {actualDays}");
+
 
             // تجهيز ViewModel
             var data = new EmployeeLeaveVM
             {
                 Id = leave.Leave.Id,
                 EmployeeName = leave.Employee.NameAr,
+                DepartmentID= leave.Employee.DepartmentId,
                 EmployeeCode = leave.Employee.EmpCode,
-                DepartmentName = leave.Employee.Department?.NameAr ?? "-",
+                DepartmentName = string.IsNullOrWhiteSpace(leave.Department?.NameAr)
+                 ? "-"
+                 : leave.Department.NameAr,
+
                 LeaveTypeId = leave.LeaveType.Id,
                 LeaveTypeName = leave.LeaveType.NameAr,
                 StartDate = leave.Leave.StartDate,
