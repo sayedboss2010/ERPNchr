@@ -192,110 +192,116 @@
             // 3) تغيير التواريخ
             // =====================================================
       $("#StartDate, #EndDate").change(function () {
+            var remainingDayes=$("#RemainingDays").val();
+              if(remainingDayes==0){
+                alert("❌ لا يمكن أن تاخذ الإجازة لعدموجود رصيد كافي");
+              }
+              else {
+               var startVal = $("#StartDate").val();
+                  var endVal = $("#EndDate").val();
 
-                var startVal = $("#StartDate").val();
-                var endVal = $("#EndDate").val();
+                  if (!startVal || !endVal) return;
 
-                if (!startVal || !endVal) return;
+                  var start = new Date(startVal);
+                  var end = new Date(endVal);
+                  var leaveType = $("#LeaveTypeId").val();
 
-                var start = new Date(startVal);
-                var end = new Date(endVal);
-                var leaveType = $("#LeaveTypeId").val();
-                   
-        if (!startVal || !endVal) return;
+          if (!startVal || !endVal) return;
 
-        
 
-        // ❌ منع أي إجازة سنوية أو مرضية قبل اليوم
-        var today = new Date();
-        today.setHours(0,0,0,0); // تصفير الوقت
-        start.setHours(0,0,0,0);
 
-        if ((leaveType == "3" || leaveType == "5") && start < today) {
-            alert("❌ لا يمكن أن تكون الإجازة السنوية أو المرضية قبل تاريخ اليوم");
-            $("#StartDate").val("");
-            $("#EndDate").val("");
-            $("#btnSave").prop("disabled", true);
-            return;
-        }
-                // ❌ منع نهاية قبل البداية
-                if (end < start) {
-                    alert("❌ تاريخ النهاية يجب أن يكون بعد البداية");
-                    $("#EndDate").val("");
-                    $("#btnSave").prop("disabled", true);
-                    return;
-                }
+          // ❌ منع أي إجازة سنوية أو مرضية قبل اليوم
+          var today = new Date();
+          today.setHours(0,0,0,0); // تصفير الوقت
+          start.setHours(0,0,0,0);
 
-                       // =====================================================
-        // شرط الإجازة الاعتيادية
-        // =====================================================
-               // =====================================================
-        // شرط الإجازة الاعتيادية
-        // =====================================================
-               if (leaveType == "2") {
+          if ((leaveType == "3" || leaveType == "5") && start < today) {
+              alert("❌ لا يمكن أن تكون الإجازة السنوية أو المرضية قبل تاريخ اليوم");
+              $("#StartDate").val("");
+              $("#EndDate").val("");
+              $("#btnSave").prop("disabled", true);
+              return;
+          }
+                  // ❌ منع نهاية قبل البداية
+                  if (end < start) {
+                      alert("❌ تاريخ النهاية يجب أن يكون بعد البداية");
+                      $("#EndDate").val("");
+                      $("#btnSave").prop("disabled", true);
+                      return;
+                  }
 
-            let now = new Date();
-            let start = new Date($("#StartDate").val());
+                         // =====================================================
+          // شرط الإجازة الاعتيادية
+          // =====================================================
+                 // =====================================================
+          // شرط الإجازة الاعتيادية
+          // =====================================================
+                 if (leaveType == "2") {
 
-            // 48 ساعة من الآن
-            let minDate48 = new Date(now.getTime() + 48*60*60*1000);
+              let now = new Date();
+              let start = new Date($("#StartDate").val());
 
-            // 24 ساعة من الآن
-            let minDate24 = new Date(now.getTime() + 24*60*60*1000);
+              // 48 ساعة من الآن
+              let minDate48 = new Date(now.getTime() + 48*60*60*1000);
 
-            // تحقق إذا التاريخ أقل من أي واحد منهم
-            // (يمكنك تعديل السياسة إذا تريد 24 أو 48 ساعة)
-            if (start < minDate24 && start < minDate48) {
-                alert("❌ يجب تقديم الإجازة الاعتيادية قبل 24 أو 48 ساعة على الأقل");
-                $("#btnSave").prop("disabled", true);
-                return;
-            }
-        }
+              // 24 ساعة من الآن
+              let minDate24 = new Date(now.getTime() + 24*60*60*1000);
 
-                // =====================================================
-                // شرط الإجازة السنوية
-                // =====================================================
-                if (leaveType == "5") {
-                          start.setHours(0,0,0,0);
-          end.setHours(0,0,0,0);
+              // تحقق إذا التاريخ أقل من أي واحد منهم
+              // (يمكنك تعديل السياسة إذا تريد 24 أو 48 ساعة)
+              if (start < minDate24 && start < minDate48) {
+                  alert("❌ يجب تقديم الإجازة الاعتيادية قبل 24 أو 48 ساعة على الأقل");
+                  $("#btnSave").prop("disabled", true);
+                  return;
+              }
+          }
 
-                    
-                    let month = start.getMonth() + 1;
+                  // =====================================================
+                  // شرط الإجازة السنوية
+                  // =====================================================
+                  if (leaveType == "5") {
+                            start.setHours(0,0,0,0);
+            end.setHours(0,0,0,0);
 
-                    // ❌ مسموح فقط في 7 و 8
-                    if (month != 7 && month != 8) {
-                        alert("❌ الإجازة السنوية متاحة فقط في شهر 7 أو 8");
-                        $("#btnSave").prop("disabled", true);
-                        return;
-                    }
-                            var diff = Math.round((end - start) / (1000 * 3600 * 24)) + 1;
 
-        if (diff != 5) {
-            alert("❌ الإجازة السنوية يجب أن تكون 5 أيام فقط من الأحد إلى الخميس");
-            $("#btnSave").prop("disabled", true);
-            return;
-        }
+                      let month = start.getMonth() + 1;
 
-                    // ❌ يجب أن تكون 5 أيام
-                    if (diff != 5) {
-                        alert("❌ الإجازة السنوية يجب أن تكون 5 أيام فقط من الاحد الي الخميس");
-                        $("#btnSave").prop("disabled", true);
-                        return;
-                    }
+                      // ❌ مسموح فقط في 7 و 8
+                      if (month != 7 && month != 8) {
+                          alert("❌ الإجازة السنوية متاحة فقط في شهر 7 أو 8");
+                          $("#btnSave").prop("disabled", true);
+                          return;
+                      }
+                              var diff = Math.round((end - start) / (1000 * 3600 * 24)) + 1;
 
-                    // ❌ يجب أن تكون من الأحد إلى الخميس
-                    // الأحد = 0 — الخميس = 4
-                    if (start.getDay() != 0 || end.getDay() != 4) {
-                        alert("❌ الإجازة السنوية يجب أن تكون من الأحد إلى الخميس فقط");
-                        $("#btnSave").prop("disabled", true);
-                        return;
-                    }
-                }
+          if (diff != 5) {
+              alert("❌ الإجازة السنوية يجب أن تكون 5 أيام فقط من الأحد إلى الخميس");
+              $("#btnSave").prop("disabled", true);
+              return;
+          }
 
-                $("#btnSave").prop("disabled", false);
+                      // ❌ يجب أن تكون 5 أيام
+                      if (diff != 5) {
+                          alert("❌ الإجازة السنوية يجب أن تكون 5 أيام فقط من الاحد الي الخميس");
+                          $("#btnSave").prop("disabled", true);
+                          return;
+                      }
 
-                // حساب الأيام
-                calculateDays();
+                      // ❌ يجب أن تكون من الأحد إلى الخميس
+                      // الأحد = 0 — الخميس = 4
+                      if (start.getDay() != 0 || end.getDay() != 4) {
+                          alert("❌ الإجازة السنوية يجب أن تكون من الأحد إلى الخميس فقط");
+                          $("#btnSave").prop("disabled", true);
+                          return;
+                      }
+                  }
+
+                  $("#btnSave").prop("disabled", false);
+
+                  // حساب الأيام
+                  calculateDays();
+              } 
+     
 
             });
 
