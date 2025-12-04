@@ -192,8 +192,9 @@
             // 3) تغيير التواريخ
             // =====================================================
       $("#StartDate, #EndDate").change(function () {
+                 var leaveType = $("#LeaveTypeId").val();
             var remainingDayes=$("#RemainingDays").val();
-              if(remainingDayes==0){
+                          if(remainingDayes==0 && (leaveType == "2" ||leaveType == "1") ){
                 alert("❌ لا يمكن أن تاخذ الإجازة لعدم وجود رصيد كافي");
               }
               else {
@@ -204,7 +205,7 @@
 
                   var start = new Date(startVal);
                   var end = new Date(endVal);
-                  var leaveType = $("#LeaveTypeId").val();
+                 
 
           if (!startVal || !endVal) return;
 
@@ -236,30 +237,40 @@
                  // =====================================================
           // شرط الإجازة الاعتيادية
           // =====================================================
-                 if (leaveType == "2") {
+        if (leaveType == "2" ) {
+        let now = new Date();
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);   // نحدد اليوم فقط بدون ساعات
 
-              let now = new Date();
-              let start = new Date($("#StartDate").val());
+        let start = new Date($("#StartDate").val());
+        start.setHours(0, 0, 0, 0);    // نحدد اليوم فقط
 
-              // 48 ساعة من الآن
-              let minDate48 = new Date(now.getTime() + 48*60*60*1000);
+        // حساب الفرق بالأيام
+        let diffDays = (start - today) / (1000 * 60 * 60 * 24);
 
-              // 24 ساعة من الآن
-              let minDate24 = new Date(now.getTime() + 24*60*60*1000);
+        // السماح فقط لو الفرق يوم أو يومين
+        if (diffDays === 1 || diffDays === 2) {
+            $("#btnSave").prop("disabled", false); // مسموح
+        } else {
+            alert("❌ الإجازة الاعتيادية يجب أن تكون قبلها بيوم أو يومين فقط.");
+            $("#btnSave").prop("disabled", true);  // يمنع الحفظ
+        }
 
-              // تحقق إذا التاريخ أقل من أي واحد منهم
-              // (يمكنك تعديل السياسة إذا تريد 24 أو 48 ساعة)
-              if (start < minDate24 && start < minDate48) {
-                  alert("❌ يجب تقديم الإجازة الاعتيادية قبل 24 أو 48 ساعة على الأقل");
-                  $("#btnSave").prop("disabled", true);
-                  return;
-              }
-          }
 
+       
+
+
+      
+
+
+       
+
+        $("#btnSave").prop("disabled", false);
+        }
                   // =====================================================
                   // شرط الإجازة السنوية
                   // =====================================================
-                  if (leaveType == "5") {
+  if (leaveType == "5") {
                             start.setHours(0,0,0,0);
             end.setHours(0,0,0,0);
 

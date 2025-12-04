@@ -127,13 +127,17 @@ namespace ERPNchr.Areas.Employee.Controllers
         {
             var data = (from p in _context.HrEmployeePermissions
                         join e in _context.HrEmployees on p.EmployeeId equals e.Id
+                        join dl in _context.HrDepartments on e.DepartmentId equals dl.Id into dept
+                        from dl in dept.DefaultIfEmpty() // left join
                         join t in _context.PermissionsTypes on p.PermissionTypeId equals t.Id
                         where p.Id == id
                         select new EmployeePermissionVM
                         {
                             EmplyeeName = e.NameAr,
                             PermissionTypeName = t.NameAr,
-                            DateOfPermission = p.DateOfPermission
+                            DateOfPermission = p.DateOfPermission,
+                            DepartmentName = dl.NameAr,
+
                         }).FirstOrDefault();
 
             return View(data);   // يفتح صفحة الطباعة

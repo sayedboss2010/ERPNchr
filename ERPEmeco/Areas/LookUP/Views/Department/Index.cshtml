@@ -28,13 +28,13 @@
                     {
                         <span class="text-danger activateLeave"
                               data-id="@item.Id"
-                              data-isactive="true">غير نشط</span>
+                              data-isactive="true">غير فعال</span>
                     }
                     else
                     {
                         <span class="text-success activateLeave"
                               data-id="@item.Id"
-                              data-isactive="false">نشط</span>
+                              data-isactive="false">فعال</span>
                     }
                 </td>
 
@@ -46,6 +46,7 @@
                     <a href="@Url.Action("CreateEdite", "Department", new { TypePage = 3, DepartmentID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
                         عرض
                     </a>
+
                 </td>
             </tr>
         }

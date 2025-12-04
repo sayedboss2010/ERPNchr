@@ -257,44 +257,28 @@ namespace YourProjectName.Areas.Employee.Controllers
 
             // جلب آخر رصيد مسجل للموظف للسنة المطلوبة (إن وجد)
             int year = leave.Leave.StartDate?.Year ?? DateTime.Now.Year;
-            var balance = _context.HrEmployeeLeaveBalances
-                          .Where(b => b.EmployeeId == leave.Employee.Id && b.Year == year)
-                          .OrderByDescending(b => b.Id)
-                          .FirstOrDefault();
+            var lastBalance = _context.HrEmployeeLeaveBalances
+                  .Where(b => b.EmployeeId == leave.Employee.Id && b.Year == year)
+                  .OrderByDescending(b => b.Id)
+                  .FirstOrDefault();
 
-            // تحويل DateOnly إلى DateTime للتعامل مع الأيام
-            var start = leave.Leave.StartDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Now;
-            var end = leave.Leave.EndDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Now;
+            DateTime startDate = leave.Leave.StartDate?.ToDateTime(TimeOnly.MinValue).Date ?? DateTime.Now.Date;
+            DateTime endDate = leave.Leave.EndDate?.ToDateTime(TimeOnly.MinValue).Date ?? DateTime.Now.Date;
 
-            // التأكد من إزالة الوقت من التواريخ
-            DateTime startDate = start.Date;
-            DateTime endDate = end.Date;
-
-            // حساب عدد الأيام بين البداية والنهاية + 1
             int totalDays = (endDate - startDate).Days + 1;
-
-            // التأكد من أن totalDays ≥ 1
             totalDays = Math.Max(1, totalDays);
 
-            // حساب عدد الأيام الفعلية مع استبعاد الجمعة
             int actualDays = Enumerable.Range(0, totalDays)
                                        .Select(i => startDate.AddDays(i))
-                                       .Count(d => d.DayOfWeek != DayOfWeek.Friday); // استبدل Friday باليوم الذي تريد استبعاده
+                                       .Count(d => d.DayOfWeek != DayOfWeek.Friday);
 
-            Console.WriteLine($"إجمالي الأيام: {totalDays}");
-            Console.WriteLine($"الأيام الفعلية بعد استبعاد الجمعة: {actualDays}");
-
-
-            // تجهيز ViewModel
             var data = new EmployeeLeaveVM
             {
                 Id = leave.Leave.Id,
                 EmployeeName = leave.Employee.NameAr,
-                DepartmentID= leave.Employee.DepartmentId,
+                DepartmentID = leave.Employee.DepartmentId,
                 EmployeeCode = leave.Employee.EmpCode,
-                DepartmentName = string.IsNullOrWhiteSpace(leave.Department?.NameAr)
-                 ? "-"
-                 : leave.Department.NameAr,
+                DepartmentName = string.IsNullOrWhiteSpace(leave.Department?.NameAr) ? "-" : leave.Department.NameAr,
 
                 LeaveTypeId = leave.LeaveType.Id,
                 LeaveTypeName = leave.LeaveType.NameAr,
@@ -304,17 +288,14 @@ namespace YourProjectName.Areas.Employee.Controllers
                 AttachmentPath = leave.Leave.AttachmentPath,
                 ActualDays = actualDays,
 
-                TotalDays = balance?.TotalDays ?? 0,
-                UsedDays = balance?.UsedDays ?? 0,
-                RemainingBefore = balance?.TotalDaysReminig ?? 0
+                TotalDays = lastBalance?.TotalDays ?? 0,
+                UsedDays = lastBalance?.UsedDays ?? 0,
+                RemainingBefore = lastBalance?.TotalDaysReminig ?? 0
             };
 
-            // حساب الرصيد بعد الطلب فقط لأنواع اعتيادي / عارضة
             if (data.LeaveTypeId == 1 || data.LeaveTypeId == 2)
-            {
-                int remainingBefore = data.RemainingBefore.Value;
-                data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0);
-            }
+            { int remainingBefore = data.RemainingBefore.Value; data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0); }
+
             else
             {
                 data.RemainingAfter = 0;
