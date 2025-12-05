@@ -1,4 +1,5 @@
-﻿using VM.ViewModels;
+﻿using BCrypt.Net;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DAL.Classes.Account;
 
@@ -16,32 +17,56 @@ public static class LoginDal
         {
             using var _dbContext = new AppDbContext();
 
-            var data = _dbContext.PrUsers.FirstOrDefault(u => u.UserName == credentialsVm.UserName
-            && u.Password == HelperClass.HashMd5(credentialsVm.Password));
+            //var data = _dbContext.PrUsers.FirstOrDefault(u => u.UserName == credentialsVm.UserName
+            //&& u.Password == HelperClass.HashMd5(credentialsVm.Password));
 
-            if (data != null && !string.IsNullOrEmpty(data.UserName))
+            var checkedEmalil = _dbContext.HrEmployees.FirstOrDefault(u => u.Email == credentialsVm.UserName);
+            if (checkedEmalil != null)
             {
-                var user = new LogInUserVm
+                //CheckPass
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(credentialsVm.Password);
+
+                bool isCorrect = BCrypt.Net.BCrypt.Verify(checkedEmalil.Password, hashedPassword);
+                if (isCorrect)
                 {
-                    Id = data.Id,
-                    UserName = data.UserName,
-                    UserTypeId = data.UserTypeId,
-                    FullName = data.FullName,
-                    //Email = data.Email,
-                    Sts = 1,
-                    AuthKey = HelperClass.HashMd5(data.Id.ToString() + data.UserTypeId.ToString())
+                    // Login success
+                    var user = new LogInUserVm
+                    {
+                        Id = checkedEmalil.Id,
+                        UserName = checkedEmalil.Email,
+                        UserTypeId = checkedEmalil.EmployeeTypeId,
+                        FullName = checkedEmalil.NameAr,
+                        BranchId = checkedEmalil.BranchId,
+                        DepartmentId = checkedEmalil.DepartmentId,
+                        Email = checkedEmalil.Email,
+                        Sts = 1,
+                        AuthKey = HelperClass.HashMd5(checkedEmalil.Id.ToString() + checkedEmalil.EmployeeTypeId.ToString())
+                    };
+
+                    //run in thread                
+                    Task.Run(() => AddLoginHistory(user));
+
+                    return user;
+                }
+                else
+                {
+                    return new LogInUserVm
+                    {
+                        Sts = 0 // Indicating failure
+                    };
+                }
+
+                
+            }
+            else
+            {
+                return new LogInUserVm
+                {
+                    Sts = 0 // Indicating failure
                 };
-
-                //run in thread                
-                Task.Run(() => AddLoginHistory(user));
-
-                return user;
             }
 
-            return new LogInUserVm
-            {
-                Sts = 0 // Indicating failure
-            };
+            
         }
         catch (Exception ex)
         {
@@ -68,7 +93,7 @@ public static class LoginDal
             using var _dbContext = new AppDbContext();
             var loginHistory = new LogInHistoryTb
             {
-                UserId = user.Id,
+                UserId =(int) user.Id,
                 LogInDate = DateTime.Now,
             };
 
@@ -79,7 +104,7 @@ public static class LoginDal
         {
             ExceptionDal.LogException(new ExceptionLogVm
             {
-                UserId = user.Id, // Assuming 0 for system-level exceptions
+                UserId = (int)user.Id, // Assuming 0 for system-level exceptions
                 Exception = $"MethodName:AddLoginHistory\r\nException:\r\n{ex}",
                 ExceptionTime = DateTime.Now,
                 ExceptionType = ex.GetType().ToString(),

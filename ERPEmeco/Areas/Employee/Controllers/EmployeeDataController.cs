@@ -1,17 +1,18 @@
-﻿using DAL.Classes.DroupDowen;
+﻿using BCrypt.Net;
+using DAL.Classes.DroupDowen;
 using DAL.Classes.Employee;
 using EF.Data;
 using EF.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Web;
 using VM.ViewModels;
-using BCrypt.Net;
 
 
 namespace ERPNchr.Areas.Employee.Controllers;
@@ -133,6 +134,79 @@ public class EmployeeDataController : Controller
         //    return PartialView("_PartialAllCompanys", objlst.Items);
         //}
 
+        if (EmployeeID > 0)
+        {
+            var employees = db.HrEmployees
+                .Where(a => a.Id == EmployeeID)
+               .Select(e => new EmployeeVM
+               {
+                   Id = e.Id,
+                   EmpCode = e.EmpCode,
+                   NameAr = e.NameAr,
+                   NameEn = e.NameEn,
+                   Email = e.Email,
+                   Password = e.Password,
+                   AddressAr = e.AddressAr,
+                   AddressEn = e.AddressEn,
+                   PhoneNumber = e.PhoneNumber,
+
+                   //Birthdate = e.Birthdate.HasValue
+                   //    ? DateOnly.FromDateTime(e.Birthdate.Value)
+                   //    : null,
+
+                   //HireDate = e.HireDate.HasValue
+                   //    ? DateOnly.FromDateTime(e.HireDate.Value)
+                   //    : null,
+
+                   CurrentJobId = e.CurrentJobId,
+                   CurrentSalary = e.CurrentSalary,
+                   CurrentFunctionalDegreeId = e.CurrentFunctionalDegreeId,
+                   IsMananger = e.IsMananger,
+                   IsActive = e.IsActive,
+                   CreatedUserId = e.CreatedUserId,
+                   //CreatedDate = e.CreatedDate,
+                   UpdatedUserId = e.UpdatedUserId,
+
+                   //UpdatedDate = e.UpdatedDate.HasValue
+                   //    ? DateOnly.FromDateTime(e.UpdatedDate.Value)
+                   //    : null,
+
+                   DeletedUserId = e.DeletedUserId,
+
+                   //DeletedDate = e.DeletedDate.HasValue
+                   //    ? DateOnly.FromDateTime(e.DeletedDate.Value)
+                   //    : null,
+
+                   InsuranceNumber = e.InsuranceNumber,
+                   Nid = e.Nid,
+
+                   //DateIn = e.DateIn.HasValue
+                   //    ? DateOnly.FromDateTime(e.DateIn.Value)
+                   //    : null,
+
+                   //DateOut = e.DateOut.HasValue
+                   //    ? DateOnly.FromDateTime(e.DateOut.Value)
+                   //    : null,
+
+                   NidPath = e.NidPath,
+                   Mobile = e.Mobile,
+                   EmpCodeNew = e.EmpCodeNew,
+                   Isbank = e.Isbank,
+
+                   //AppointmentDate = e.AppointmentDate.HasValue
+                   //    ? DateOnly.FromDateTime(e.AppointmentDate.Value)
+                   //    : null,
+
+                   HrJobGradesId = e.HrJobGradesId,
+                   EmployeeTypeId = e.EmployeeTypeId,
+                   BranchId = e.BranchId,
+                   DepartmentId = e.DepartmentId
+               })
+               .FirstOrDefault();
+            return View(employees);
+
+        }
+
         return View(objlst);
 
 
@@ -188,7 +262,68 @@ public class EmployeeDataController : Controller
                 db.HrEmployees.Add(model);
                 await db.SaveChangesAsync();
 
-                var age = NationalIdExtensions.GetAge(model.Nid);
+
+                //#region احتساب الاجازة
+                //// التعديل فى الارصدة
+                //// لو تاريخ التعيين اقل من 10 سنوات له 21 يوم 
+                //// 30 يوم بعد 10 سنوات
+                //// 45 يوم اجازة بعد سن 50 سنه
+                //// 45 يوم للإعاقة
+                //// جميع المراحل 7 ايام عارضه
+                //// model.AppointmentDate تاريخ التعيين
+
+
+                //var age = NationalIdExtensions.GetAge(model.Nid);
+
+                //// -------------------------
+                //// حساب مدة الخدمة من DateOnly
+                //// -------------------------
+
+                //int yearsOfService = 0;
+
+                //if (model.AppointmentDate != null)
+                //{
+                //    // تحويل DateOnly إلى DateTime
+                //    var appointDate = model.AppointmentDate.Value.ToDateTime(new TimeOnly(0, 0));
+
+                //    yearsOfService = DateTime.Now.Year - appointDate.Year;
+
+                //    // لو لسه موصلش نفس التاريخ في السنة الحالية → ننقص سنة
+                //    if (appointDate.Date > DateTime.Now.AddYears(-yearsOfService))
+                //        yearsOfService--;
+                //}
+
+                //// -------------------------
+                //// حساب رصيد الإجازات
+                //// -------------------------
+
+                //int annualLeaveDays = 0;
+                //int casualLeaveDays = 7; // ثابتة
+
+                //// أولوية الإعاقة
+                //if (model.HasDisability)
+                //{
+                //    annualLeaveDays = 45;
+                //}
+                //else if (age >= 50)
+                //{
+                //    annualLeaveDays = 45;
+                //}
+                //else if (yearsOfService >= 10)
+                //{
+                //    annualLeaveDays = 30;
+                //}
+                //else
+                //{
+                //    annualLeaveDays = 21;
+                //}
+
+                //// حفظ النتائج في الموديل
+                //model.AnnualLeaveDays = annualLeaveDays;
+                //model.CasualLeaveDays = casualLeaveDays;
+                //model.YearsOfService = yearsOfService;
+                //model.Age = age;
+                //#endregion
 
             }
             else
@@ -218,10 +353,19 @@ public class EmployeeDataController : Controller
                 existingEmployee.DateIn = model.DateIn;
                 existingEmployee.DateOut = model.DateOut;
 
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
 
                 //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
                 //model.Password = hashedPassword;
-
+                bool isCorrect = BCrypt.Net.BCrypt.Verify(existingEmployee.Password, hashedPassword);
+                if (isCorrect)
+                {
+                    // Login success
+                }
+                else
+                {
+                    model.Password = hashedPassword;
+                }
                 // معالجة ملف NID جديد
                 if (NID_Path != null && NID_Path.Length > 0)
                 {

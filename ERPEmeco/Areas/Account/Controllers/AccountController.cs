@@ -29,6 +29,12 @@ public class AccountController : Controller
             return View();
         }
 
+
+        //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
+        //model.Password = hashedPassword;
+       
+
+
         var credentialsVm = new UserCredentialsVm
         {
             UserName = userName,
@@ -43,9 +49,11 @@ public class AccountController : Controller
             Response.Cookies.Append("UserId", user.Id.ToString(), option);
             Response.Cookies.Append("AuthKey", user.AuthKey, option);
             Response.Cookies.Append("UserType", user.UserTypeId.ToString(), option);
-            Response.Cookies.Append("UserName", user.UserName, option);
+            Response.Cookies.Append("UserName", user.Email, option);
             Response.Cookies.Append("FullName", user.FullName, option);
-            //Response.Cookies.Append("Email", user.Email, option);
+            Response.Cookies.Append("DepartmentID", user.DepartmentId.ToString(), option);
+            Response.Cookies.Append("BranchID", user.BranchId.ToString(), option);
+            Response.Cookies.Append("Email", user.Email, option);
 
             return RedirectToAction("Index", "Home", new { area = "Account" });
         }

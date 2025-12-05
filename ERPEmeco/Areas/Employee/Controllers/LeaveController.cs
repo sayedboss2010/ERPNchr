@@ -21,52 +21,207 @@ namespace YourProjectName.Areas.Employee.Controllers
         // 🧾 عرض كل الإجازات
         public ActionResult Index()
         {
-            var data = (from l in _context.HrEmployeeLeaves
+
+            int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
+
+            int? userType = Request.Cookies.ContainsKey("UserType") ? int.Parse(Request.Cookies["UserType"]) : null;
+
+            int? branchId = Request.Cookies.ContainsKey("BranchID") ? int.Parse(Request.Cookies["BranchID"]) : null;
+
+            int? departmentId = Request.Cookies.ContainsKey("DepartmentID") ? int.Parse(Request.Cookies["DepartmentID"]) : null;
+
+            var query = from l in _context.HrEmployeeLeaves
                         join e in _context.HrEmployees on l.EmployeeId equals e.Id
                         join t in _context.HrLeaveTypes on l.LeaveTypeId equals t.Id
                         where l.IsActive == true
-                        orderby l.Id descending
-                        select new EmployeeLeaveVM
-                        {
-                            Id = l.Id,
-                            EmployeeId = e.Id,
-                            EmployeeName = e.NameAr,
-                            LeaveTypeId = t.Id,
-                            LeaveTypeName = t.NameAr,
-                            StartDate = l.StartDate,
-                            EndDate = l.EndDate,
-                            LeaveDays = l.LeaveDays,
-                            Reason = l.Reason,
-                            DirectManagerApproval = l.DirectManagerApproval,
-                            DepartmentManagerApproval = l.DepartmentManagerApproval,
+                        select new { l, e, t };
 
-                        }).ToList();
+            switch (userType)
+            {
+                case 1: // موظف - يشوف بس الطلبات الخاصة به
+                    query = query.Where(x => x.e.Id == userId);
+                    break;
+
+                case 2: // مدير إدارة - يشوف كل الموظفين في الإدارة
+                    query = query.Where(x =>
+                        x.e.DepartmentId == departmentId &&
+                        x.e.BranchId == branchId
+                    );
+                    break;
+
+                case 3: // رئيس قطاع - يشوف كل الموظفين
+                        // لا نضيف أي فلاتر
+                    break;
+            }
+
+            // ----- Final Select -----
+            var data = query
+                .OrderByDescending(x => x.l.Id)
+                .Select(x => new EmployeeLeaveVM
+                {
+                    Id = x.l.Id,
+                    EmployeeId = x.e.Id,
+                    EmployeeName = x.e.NameAr,
+                    LeaveTypeId = x.t.Id,
+                    LeaveTypeName = x.t.NameAr,
+                    StartDate = x.l.StartDate,
+                    EndDate = x.l.EndDate,
+                    LeaveDays = x.l.LeaveDays,
+                    Reason = x.l.Reason,
+                    DirectManagerApproval = x.l.DirectManagerApproval,
+                    DepartmentManagerApproval = x.l.DepartmentManagerApproval
+                })
+                .ToList();
+            //var data = (from l in _context.HrEmployeeLeaves
+            //            join e in _context.HrEmployees on l.EmployeeId equals e.Id
+            //            join t in _context.HrLeaveTypes on l.LeaveTypeId equals t.Id
+            //            where l.IsActive == true
+            //            orderby l.Id descending
+            //            select new EmployeeLeaveVM
+            //            {
+            //                Id = l.Id,
+            //                EmployeeId = e.Id,
+            //                EmployeeName = e.NameAr,
+            //                LeaveTypeId = t.Id,
+            //                LeaveTypeName = t.NameAr,
+            //                StartDate = l.StartDate,
+            //                EndDate = l.EndDate,
+            //                LeaveDays = l.LeaveDays,
+            //                Reason = l.Reason,
+            //                DirectManagerApproval = l.DirectManagerApproval,
+            //                DepartmentManagerApproval = l.DepartmentManagerApproval,
+
+            //            }).ToList();
+
+
 
             return View(data);
         }
 
         // ➕ شاشة إضافة جديدة
+        //[HttpGet]
+        //public ActionResult Create()
+        //{
+        //    int? UserId = null;
+        //    int? UserType = null;
+        //    int? BranchID = null;
+        //    int? DepartmentID = null;
+        //    if (Request.Cookies.ContainsKey("UserId"))
+        //    {
+        //        UserId = int.Parse(Request.Cookies["UserId"]);
+        //    }
+        //    if (Request.Cookies.ContainsKey("UserType"))
+        //    {
+        //        UserType = int.Parse(Request.Cookies["UserType"]);
+        //    }
+        //    if (Request.Cookies.ContainsKey("BranchID"))
+        //    {
+        //        BranchID = int.Parse(Request.Cookies["BranchID"]);
+        //    }
+        //    if (Request.Cookies.ContainsKey("DepartmentID"))
+        //    {
+        //        DepartmentID = int.Parse(Request.Cookies["DepartmentID"]);
+        //    }
+        //    if (UserType == 1)// موظف
+        //    {
+        //        var Emplist = (from e in _context.HrEmployees
+        //                       where e.IsActive == true
+        //                       && e.Id == UserId
+        //                       select new
+        //                       {
+        //                           e.Id,
+        //                           e.NameAr,
+        //                           Display = e.NameAr + " (" + e.EmpCode + ")"  // نضيف النص المعروض بالاسم + الكود
+        //                       }).ToList();
+
+        //        ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
+        //    }
+        //    else if (UserType == 2)// مدير ادارة
+        //    {
+        //        // هيشوف كل موظفين الادارة
+        //        var Emplist = (from e in _context.HrEmployees
+        //                       where e.IsActive == true
+        //                       && e.DepartmentId == DepartmentID
+        //                       && e.BranchId == BranchID
+        //                       select new
+        //                       {
+        //                           e.Id,
+        //                           e.NameAr,
+        //                           Display = e.NameAr + " (" + e.EmpCode + ")"  // نضيف النص المعروض بالاسم + الكود
+        //                       }).ToList();
+
+        //        ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
+        //    }
+        //    else if (UserType == 3)// رئيس قطاع
+        //    {
+        //        // يشوف كل الموظفين
+        //        var Emplist = (from e in _context.HrEmployees
+        //                       where e.IsActive == true
+        //                      select new
+        //                       {
+        //                           e.Id,
+        //                           e.NameAr,
+        //                           Display = e.NameAr + " (" + e.EmpCode + ")"  // نضيف النص المعروض بالاسم + الكود
+        //                       }).ToList();
+
+        //        ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
+        //    }
+
+
+        //    ViewBag.LeaveTypeId = new SelectList(_context.HrLeaveTypes.Where(a => a.IsActive == true), "Id", "NameAr");
+
+
+
+        //    return View();
+
+        //}
+
         [HttpGet]
         public ActionResult Create()
         {
-            var Emplist = (from e in _context.HrEmployees
-                           where e.IsActive == true
-                           //&& e.CurrentBranchDeptId == 5
-                           select new
-                           {
-                               e.Id,
-                               e.NameAr,
-                               Display = e.NameAr + " (" + e.EmpCode + ")"  // نضيف النص المعروض بالاسم + الكود
-                           }).ToList();
+            int? userId = Request.Cookies.ContainsKey("UserId")? int.Parse(Request.Cookies["UserId"]): null;
 
-            // هنا نخزن النص المعروض في ViewBag
-            ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
-            ViewBag.LeaveTypeId = new SelectList(_context.HrLeaveTypes.Where(a => a.IsActive == true), "Id", "NameAr");
+            int? userType = Request.Cookies.ContainsKey("UserType")? int.Parse(Request.Cookies["UserType"]): null;
+
+            int? branchId = Request.Cookies.ContainsKey("BranchID")? int.Parse(Request.Cookies["BranchID"]): null;
+
+            int? departmentId = Request.Cookies.ContainsKey("DepartmentID")? int.Parse(Request.Cookies["DepartmentID"]): null;
+
+            // ----- Base Query -----
+            var employeesQuery = _context.HrEmployees.Where(e => e.IsActive);
+
+            switch (userType)
+            {
+                case 1: // موظف
+                    employeesQuery = employeesQuery.Where(e => e.Id == userId);
+                    break;
+
+                case 2: // مدير إدارة
+                    employeesQuery = employeesQuery.Where(e => e.DepartmentId == departmentId&& e.BranchId == branchId);
+                    break;
+
+                case 3: // رئيس قطاع
+                        // يشوف الكل → لا نضيف أي فلاتر
+                    break;
+            }
+
+            // ----- Build List -----
+            var employeeOptions = employeesQuery
+                .Select(e => new
+                {
+                    e.Id,
+                    Display = e.NameAr + " (" + e.EmpCode + ")"
+                })
+                .ToList();
+
+            ViewBag.EmployeeOptions = new SelectList(employeeOptions, "Id", "Display");
+
+            // ----- Leave Types -----
+            ViewBag.LeaveTypeId = new SelectList(_context.HrLeaveTypes.Where(a => a.IsActive),"Id", "NameAr");
 
             return View();
         }
 
-       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(EmployeeLeaveVM model, IFormFile AttachmentFile)
@@ -145,14 +300,14 @@ namespace YourProjectName.Areas.Employee.Controllers
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 Reason = model.Reason,
-                HrEmployeeLeaveBalanceId=model.LeaveBalanceID,
+                HrEmployeeLeaveBalanceId = model.LeaveBalanceID,
                 LeaveDays = model.ActualDays,
                 CreatedDate = DateOnly.FromDateTime(DateTime.Now),
                 CreatedUserId = 1, // TODO: استبدلها بالمستخدم الحالي
                 IsActive = true,
                 AttachmentPath = attachmentPath  // ← هنا الحفظ
             };
-        
+
             _context.HrEmployeeLeaves.Add(entity);
             // HR_Employee_LeaveBalance اجمالى الاجازة للموظف
             var leaveBalance = _context.HrEmployeeLeaveBalances.FirstOrDefault(e => e.Id == model.LeaveBalanceID);
@@ -202,11 +357,11 @@ namespace YourProjectName.Areas.Employee.Controllers
                 leaveBalance.UpdatedDate = DateTime.Now;
                 leaveBalance.UpdatedUserId = 1;
 
-                
+
             }
             _context.SaveChanges();
-            
-               //  return RedirectToAction("index", "Leave", new { area = "Employee" });
+
+            //  return RedirectToAction("index", "Leave", new { area = "Employee" });
             return RedirectToAction("PrintNew", "Leave", new { area = "Employee", id = entity.Id });
         }
 
@@ -560,7 +715,7 @@ namespace YourProjectName.Areas.Employee.Controllers
         //    public decimal AnnualUsedDays { get; set; }
         //    public int? AnnualRemainingDays { get; set; }
 
-           
+
         //    public int? CasualRemainingDays { get; set; }
 
         //    public int? TotalDaysReminig { get; set; }

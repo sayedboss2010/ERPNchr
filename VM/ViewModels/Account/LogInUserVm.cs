@@ -2,7 +2,7 @@
 
 public class LogInUserVm
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
 
     public string FullName { get; set; }
 
@@ -19,4 +19,8 @@ public class LogInUserVm
     public bool IsActive { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public int? BranchId { get; set; }
+
+    public int? DepartmentId { get; set; }
 }
