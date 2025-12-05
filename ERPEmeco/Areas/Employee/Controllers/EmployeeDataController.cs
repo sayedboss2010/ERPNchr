@@ -331,6 +331,7 @@ public class EmployeeDataController : Controller
                     CreatedDate = DateTime.Now,
                     IsActive = true
                 };
+                db.HrEmployeeLeaveBalances.Add(ff);
                 await db.SaveChangesAsync();
                 //model.AnnualLeaveDays = annualLeaveDays;
                 //model.CasualLeaveDays = casualLeaveDays;
