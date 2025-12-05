@@ -55,7 +55,7 @@ public class AccountController : Controller
             Response.Cookies.Append("BranchID", user.BranchId.ToString(), option);
             Response.Cookies.Append("Email", user.Email, option);
 
-            return RedirectToAction("Index", "Home", new { area = "Account" });
+            return RedirectToAction("Index", "Home", new { area = "Account", EmployeeID = user.Id });
         }
 
         ViewBag.ErrorMessage = "1";

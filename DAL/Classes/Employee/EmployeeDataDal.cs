@@ -27,7 +27,7 @@ namespace DAL.Classes.Employee
                     Birthdate = f.Birthdate,
                     HireDate = f.HireDate,
                     CurrentJobId = f.CurrentJobId,
-                  
+                    BranchId=f.BranchId,
                     DepartmentId = f.DepartmentId,
                     
                     CurrentSalary = f.CurrentSalary,

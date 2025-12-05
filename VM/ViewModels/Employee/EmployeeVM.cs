@@ -10,8 +10,11 @@ namespace VM.ViewModels
     public class EmployeeVM
     {
         public long Id { get; set; }
-   
-       
+        public string EmolyeetypeName { get; set; }
+        public string DepartmentName { get; set; }
+        public string BranchName { get; set; }
+        public string JobName { get; set; }
+
         /// <summary>
         /// كود الموظف
         /// </summary>
