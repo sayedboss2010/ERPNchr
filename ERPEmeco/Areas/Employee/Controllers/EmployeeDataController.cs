@@ -301,7 +301,7 @@ public class EmployeeDataController : Controller
                 int casualLeaveDays = 7; // ثابتة
 
                 // أولوية الإعاقة
-                if (model.Disability)
+                if (model.Disability==true)
                 {
                     annualLeaveDays = 45;
                 }

@@ -112,8 +112,8 @@ namespace ERPNchr.Areas.Employee.Controllers
 
 
             // إنشاء المعرف الجديد
-            long HrEmployeeMission_ID = _context.Database
-                .SqlQueryRaw<long>("SELECT NEXT VALUE FOR dbo.HR_EmployeeOfficialMission_SEQ")
+            int HrEmployeeMission_ID = _context.Database
+                .SqlQueryRaw<int>("SELECT NEXT VALUE FOR dbo.HR_EmployeeOfficialMission_SEQ")
                 .AsEnumerable()
                 .First();
 
