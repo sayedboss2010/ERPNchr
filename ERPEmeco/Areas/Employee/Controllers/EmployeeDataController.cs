@@ -263,67 +263,80 @@ public class EmployeeDataController : Controller
                 await db.SaveChangesAsync();
 
 
-                //#region احتساب الاجازة
-                //// التعديل فى الارصدة
-                //// لو تاريخ التعيين اقل من 10 سنوات له 21 يوم 
-                //// 30 يوم بعد 10 سنوات
-                //// 45 يوم اجازة بعد سن 50 سنه
-                //// 45 يوم للإعاقة
-                //// جميع المراحل 7 ايام عارضه
-                //// model.AppointmentDate تاريخ التعيين
+                #region احتساب الاجازة
+                // التعديل فى الارصدة
+                // لو تاريخ التعيين اقل من 10 سنوات له 21 يوم 
+                // 30 يوم بعد 10 سنوات
+                // 45 يوم اجازة بعد سن 50 سنه
+                // 45 يوم للإعاقة
+                // جميع المراحل 7 ايام عارضه
+                // model.AppointmentDate تاريخ التعيين
 
 
-                //var age = NationalIdExtensions.GetAge(model.Nid);
+                var age = NationalIdExtensions.GetAge(model.Nid);
 
-                //// -------------------------
-                //// حساب مدة الخدمة من DateOnly
-                //// -------------------------
+                // -------------------------
+                // حساب مدة الخدمة من DateOnly
+                // -------------------------
 
-                //int yearsOfService = 0;
+                int yearsOfService = 0;
 
-                //if (model.AppointmentDate != null)
-                //{
-                //    // تحويل DateOnly إلى DateTime
-                //    var appointDate = model.AppointmentDate.Value.ToDateTime(new TimeOnly(0, 0));
+                if (model.AppointmentDate != null)
+                {
+                    // تحويل DateOnly إلى DateTime
+                    var appointDate = model.AppointmentDate.Value.ToDateTime(new TimeOnly(0, 0));
 
-                //    yearsOfService = DateTime.Now.Year - appointDate.Year;
+                    yearsOfService = DateTime.Now.Year - appointDate.Year;
 
-                //    // لو لسه موصلش نفس التاريخ في السنة الحالية → ننقص سنة
-                //    if (appointDate.Date > DateTime.Now.AddYears(-yearsOfService))
-                //        yearsOfService--;
-                //}
+                    // لو لسه موصلش نفس التاريخ في السنة الحالية → ننقص سنة
+                    if (appointDate.Date > DateTime.Now.AddYears(-yearsOfService))
+                        yearsOfService--;
+                }
 
-                //// -------------------------
-                //// حساب رصيد الإجازات
-                //// -------------------------
+                // -------------------------
+                // حساب رصيد الإجازات
+                // -------------------------
 
-                //int annualLeaveDays = 0;
-                //int casualLeaveDays = 7; // ثابتة
+                int annualLeaveDays = 0;
+                int casualLeaveDays = 7; // ثابتة
 
-                //// أولوية الإعاقة
-                //if (model.HasDisability)
-                //{
-                //    annualLeaveDays = 45;
-                //}
-                //else if (age >= 50)
-                //{
-                //    annualLeaveDays = 45;
-                //}
-                //else if (yearsOfService >= 10)
-                //{
-                //    annualLeaveDays = 30;
-                //}
-                //else
-                //{
-                //    annualLeaveDays = 21;
-                //}
+                // أولوية الإعاقة
+                if (model.Disability)
+                {
+                    annualLeaveDays = 45;
+                }
+                else if (age >= 50)
+                {
+                    annualLeaveDays = 45;
+                }
+                else if (yearsOfService >= 10)
+                {
+                    annualLeaveDays = 30;
+                }
+                else
+                {
+                    annualLeaveDays = 21;
+                }
 
-                //// حفظ النتائج في الموديل
+                // حفظ النتائج في HR_Employee_LeaveBalance
+                HrEmployeeLeaveBalance ff = new HrEmployeeLeaveBalance
+                {
+                    EmployeeId = model.Id,
+                    AnnualTotalDays = annualLeaveDays,
+                    AnnualRemainingDays = annualLeaveDays,
+                    CasualTotalDays = casualLeaveDays,
+                    CasualRemainingDays= casualLeaveDays,
+                    //YearsOfService = yearsOfService,
+                    //Age = age,
+                    CreatedDate = DateTime.Now,
+                    IsActive = true
+                };
+                await db.SaveChangesAsync();
                 //model.AnnualLeaveDays = annualLeaveDays;
                 //model.CasualLeaveDays = casualLeaveDays;
                 //model.YearsOfService = yearsOfService;
                 //model.Age = age;
-                //#endregion
+                #endregion
 
             }
             else

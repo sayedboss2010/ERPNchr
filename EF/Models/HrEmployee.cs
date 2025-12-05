@@ -99,6 +99,11 @@ public partial class HrEmployee
 
     public int? DepartmentId { get; set; }
 
+    /// <summary>
+    /// ذوي الاعاقة 1
+    /// </summary>
+    public bool? Disability { get; set; }
+
     public virtual HrBranch? Branch { get; set; }
 
     public virtual HrJob? CurrentJob { get; set; }

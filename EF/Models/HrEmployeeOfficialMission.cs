@@ -5,7 +5,7 @@ namespace EF.Models;
 
 public partial class HrEmployeeOfficialMission
 {
-    public long Id { get; set; }
+    public int Id { get; set; }
 
     public long? EmployeeId { get; set; }
 
