@@ -166,7 +166,7 @@ public class EmployeeDataController : Controller
                    CreatedUserId = e.CreatedUserId,
                    //CreatedDate = e.CreatedDate,
                    UpdatedUserId = e.UpdatedUserId,
-
+                   AppointmentDate=e.AppointmentDate,
                    //UpdatedDate = e.UpdatedDate.HasValue
                    //    ? DateOnly.FromDateTime(e.UpdatedDate.Value)
                    //    : null,
@@ -187,7 +187,7 @@ public class EmployeeDataController : Controller
                    //DateOut = e.DateOut.HasValue
                    //    ? DateOnly.FromDateTime(e.DateOut.Value)
                    //    : null,
-
+                   
                    NidPath = e.NidPath,
                    Mobile = e.Mobile,
                    EmpCodeNew = e.EmpCodeNew,
@@ -409,9 +409,18 @@ public class EmployeeDataController : Controller
                 await db.SaveChangesAsync();
             }
 
-          
+            if (model.Id != 0)
+            {
+                return RedirectToAction("IndexALL", "EmployeeData", new { area = "Employee" });
 
-            return RedirectToAction("AddEdite", "EmployeeData", new { area = "Employee", EmployeeID = model.Id });
+
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home", new { area = "Account", EmployeeID = model.Id });
+
+            }
+
         }
         catch (Exception ex)
         {

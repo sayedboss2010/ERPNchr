@@ -29,7 +29,7 @@ namespace DAL.Classes.Employee
                     CurrentJobId = f.CurrentJobId,
                     BranchId=f.BranchId,
                     DepartmentId = f.DepartmentId,
-                    
+                    Password=f.Password,
                     CurrentSalary = f.CurrentSalary,
                     CurrentFunctionalDegreeId = f.CurrentFunctionalDegreeId,
                     EmployeeTypeId = f.EmployeeTypeId,

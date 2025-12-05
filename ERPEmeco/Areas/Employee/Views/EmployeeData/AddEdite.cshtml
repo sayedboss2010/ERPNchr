@@ -9,264 +9,175 @@
     @* @using (Html.BeginForm("AddEdite", "EmployeeData", FormMethod.Post, new { area = "Employee", enctype = "multipart/form-data" })) *@
     @using (Html.BeginForm("AddEdite", "EmployeeData", new { area = "Employee" }, FormMethod.Post, true, new { enctype = "multipart/form-data" }))
     {
-        @Html.AntiForgeryToken()
-        @Html.HiddenFor(model => model.Id)
+         @Html.HiddenFor(m => m.Id)
 
-        <!-- Basic Layout & Basic with Icons -->
         <div class="row">
-            <!-- Basic with Icons -->
+
+            <!-- بيانات الموظف -->
             <div class="col-xxl">
                 <div class="card mb-4">
-                    <div class="card-header d-flex align-items-center justify-content-between">
+
+                    <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">بيانات الموظف</h5>
-                        <small class="text-muted float-end">البيانات الاساسية</small>
                     </div>
+
                     <div class="card-body">
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="EmpCode">كود الموظف</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="EmpCode2" class="input-group-text"><i class="bx bx-user"></i></span>
-                                    <input type="text" class="form-control" name="EmpCode" id="EmpCode" value="@Model.EmpCode" placeholder="كود الموظف" aria-label="كود الموظف" aria-describedby="EmpCode2" />
-                                </div>
-                            </div>
+                        <!-- كود الموظف -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">كود الموظف</label>
+                            <input class="form-control" name="EmpCode" value="@Model.EmpCode" />
                         </div>
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="Name_AR">إسم الموظف</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="Name_AR2" class="input-group-text">
-                                        <i class="bx bx-user"></i>
-                                    </span>
-                                    <input type="text" name="NameAr" id="Name_AR" value="@Model.NameAr" class="form-control" placeholder="John Doe" aria-label="John Doe" aria-describedby="Name_AR2" />
-                                </div>
-                            </div>
+                        <!-- اسم الموظف -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">اسم الموظف</label>
+                            <input class="form-control" name="NameAr" value="@Model.NameAr" />
                         </div>
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="Nid">الرقم القومي</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="Nid2" class="input-group-text">
-                                        <i class="bx bx-buildings"></i>
-                                    </span>
-                                    <input type="text" name="Nid" id="Nid" value="@Model.Nid" class="form-control" placeholder="الرقم القومي" aria-label="الرقم القومي" aria-describedby="Nid2" />
-                                </div>
-                            </div>
+                        <!-- الرقم القومي -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">الرقم القومي</label>
+                            <input class="form-control" name="Nid" value="@Model.Nid" />
                         </div>
 
-                        <div class="row mb-3">
-                            <label for="NID_Path" class="col-sm-2 col-form-label">تحميل القومي</label>
-                            <div class="col-sm-10">
-                                <input class="form-control" name="NID_Path" type="file" id="NID_Path" />
-                            </div>
+                        <!-- تحميل البطاقة -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">صورة البطاقة</label><br />
+
+                            @if (!string.IsNullOrEmpty(Model.NidPath))
+                            {
+                                <a href="~/Uploads/NID/@Model.NidPath"
+                                   class="btn btn-info mb-2" target="_blank">
+                                    تحميل البطاقة
+                                </a>
+                            }
+
+                            <input class="form-control" type="file" name="Nid_File" />
                         </div>
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="Email">البريد الالكتروني</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <input type="text"
-                                           name="Email" id="Email" value="@Model.Email"
-                                           class="form-control"
-                                           placeholder="john.doe"
-                                           aria-label="john.doe"
-                                           aria-describedby="Email2" />
-                                    <span class="input-group-text" id="Email2">@@gmail.com</span>
-                                </div>
-                                <div class="form-text">يمكنك استخدام الحروف، الأرقام والنقاط (.)</div>
-                            </div>
+                        <!-- البريد -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">البريد الإلكتروني</label>
+                            <input class="form-control" name="Email" value="@Model.Email" />
                         </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="Password">الرقم السري</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span class="input-group-text"><i class="bx bx-lock"></i></span>
-                                    <input type="password" name="Password" id="Password"
-                                           class="form-control" placeholder="ادخل كلمة السر (اختياري)" />
-                                </div>
-                                <small class="text-muted">اتركه فارغًا إذا لا تريد تغيير كلمة السر</small>
-                            </div>
+                        <!-- البريد -->
+                        <div class="mb-3">
+ <div class="mb-3">
+                        <label class="fw-bold">الرقم السري:</label>
+                        <input type="password" class="form-control" name="Password" value="@Model.Password" />
+                    </div>
                         </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 form-label" for="PhoneNumber">الهاتف</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="PhoneNumber2" class="input-group-text">
-                                        <i class="bx bx-phone"></i>
-                                    </span>
-                                    <input type="text" name="PhoneNumber" id="PhoneNumber" value="@Model.PhoneNumber" class="form-control phone-mask" placeholder="الهاتف" aria-label="الهاتف" aria-describedby="PhoneNumber2" />
-                                </div>
-                            </div>
+                        <!-- الهاتف -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">الهاتف</label>
+                            <input class="form-control" name="PhoneNumber" value="@Model.PhoneNumber" />
                         </div>
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 form-label" for="AddressAr">العنوان</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="AddressAr2" class="input-group-text">
-                                        <i class="bx bx-comment"></i>
-                                    </span>
-                                    <textarea name="AddressAr" id="AddressAr"
-                                          class="form-control"
-                                          placeholder="العنوان"
-                                          aria-label="العنوان"
-                                          aria-describedby="AddressAr2">@Model.AddressAr</textarea>
-                                </div>
-                            </div>
+                        <!-- العنوان -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">العنوان</label>
+                            <textarea class="form-control" name="AddressAr">@Model.AddressAr</textarea>
                         </div>
-                       
-
 
                     </div>
                 </div>
             </div>
 
-            <!-- Basic Layout -->
+            <!-- بيانات الوظيفة -->
             <div class="col-xxl">
-
                 <div class="card mb-4">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="mb-0">بيانات الوظيفة</h5>
-                        <small class="text-muted float-end">Default label</small>
+
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">البيانات الوظيفية</h5>
                     </div>
+
                     <div class="card-body">
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="AppointmentDate">تاريخ التعيين</label>
-                            <div class="col-sm-10">
-                                <input name="AppointmentDate" id="AppointmentDate"
-                                       value="@(Model.AppointmentDate.HasValue? Model.AppointmentDate.Value.ToString("yyyy-MM-dd") : "")"
-                                       class="form-control" type="date">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="DepartmentId" class="col-sm-2 col-form-label">الإدارة</label>
-                            <div class="col-sm-10">
 
-                                <input class="form-control"
-                                       id="CurrentBranchDeptText"
-                                       list="CurrentBranchDeptdatalist"
-                                       placeholder="اكتب للبحث..." />
-
-                                <input type="hidden"
-                                       id="CurrentBranchDeptId"
-                                       name="DepartmentId"
-                                       value="@Model.DepartmentId" />
-
-                                <datalist id="CurrentBranchDeptdatalist">
-                                    @foreach (var item in ViewBag.ListHrDepartment)
-                                    {
-                                        <option value="@item.Text" data-id="@item.Value"></option>
-                                    }
-                                </datalist>
-
-                            </div>
+                        <!-- تاريخ التعيين -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">تاريخ التعيين</label>
+                            <input type="date" class="form-control" name="AppointmentDate"
+                                   value="@(Model.AppointmentDate?.ToString("yyyy-MM-dd"))" />
                         </div>
 
-                        <div class="row mb-3">
-                            <label for="BranchId" class="col-sm-2 col-form-label">المحافظة / الفرع</label>
-                            <div class="col-sm-10">
-
-                                <input class="form-control"
-                                       id="CurrentBranchText"
-                                       list="CurrentBranchlist"
-                                       placeholder="اكتب للبحث..." />
-
-                                <input type="hidden"
-                                       id="CurrentBranchId"
-                                       name="BranchId"
-                                       value="@Model.BranchId" />
-
-                                <datalist id="CurrentBranchlist">
-                                    @foreach (var item in ViewBag.ListHrBranch)
-                                    {
-                                        <option value="@item.Text" data-id="@item.Value"></option>
-                                    }
-                                </datalist>
-
-                            </div>
+                        <!-- الإدارة -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">الإدارة</label>
+                            <select class="form-select" name="DepartmentId">
+                                <option value="">اختر الإدارة</option>
+                                @foreach (var item in ViewBag.ListHrDepartment)
+                                {
+                                    <option value="@item.Value"
+                                            @(item.Value == Model.DepartmentId?.ToString() ? "selected" : "")>
+                                        @item.Text
+                                    </option>
+                                }
+                            </select>
                         </div>
 
-
-                        <div class="row mb-3">
-                            <label for="CurrentJobId" class="col-sm-2 col-form-label">الوظيفة الحالية</label>
-                            <div class="col-sm-10">
-                                <!-- المستخدم يكتب ويبحث هنا -->
-                                <input class="form-control"
-                                       id="CurrentJobText"
-                                       list="ListHrJobsDatalistOptions"
-                                       placeholder="اكتب للبحث..." />
-
-                                <input type="hidden"
-                                       id="CurrentJobId"
-                                       name="CurrentJobId"
-                                       value="@Model.CurrentJobId" />
-
-                                <datalist id="ListHrJobsDatalistOptions">
-                                    @foreach (var item in ViewBag.ListHrJobs)
-                                    {
-                                        <option value="@item.Text" data-id="@item.Value"></option>
-                                    }
-                                </datalist>
-
-                            </div>
+                        <!-- الفرع -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">المحافظة / الفرع</label>
+                            <select class="form-select" name="BranchId">
+                                <option value="">اختر الفرع</option>
+                                @foreach (var item in ViewBag.ListHrBranch)
+                                {
+                                    <option value="@item.Value"
+                                            @(item.Value == Model.BranchId?.ToString() ? "selected" : "")>
+                                        @item.Text
+                                    </option>
+                                }
+                            </select>
                         </div>
+
+                        <!-- الوظيفة -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">الوظيفة الحالية</label>
+                            <select class="form-select" name="CurrentJobId">
+                                <option value="">اختر الوظيفة</option>
+                                @foreach (var item in ViewBag.ListHrJobs)
+                                {
+                                    <option value="@item.Value"
+                                            @(item.Value == Model.CurrentJobId?.ToString() ? "selected" : "")>
+                                        @item.Text
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
                         <!-- نوع الموظف -->
-                        <div class="row mb-3">
-                            <label class="col-sm-2 form-label">نوع الموظف</label>
-
-                            <div class="col-sm-10">
-                                <div class="card-body">
-
-                                    <div class="d-flex flex-wrap gap-4">
-
-                                        @foreach (var item in ViewBag.ListHrEmployeesTypes)
-                                        {
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input"
-                                                       type="radio"
-                                                       name="EmployeeTypeId"
-                                                       id="EmployeeType_@item.Value"
-                                                       value="@item.Value"
-                                                       @(Model.EmployeeTypeId == Convert.ToInt32(item.Value) ? "checked" : "") />
-
-                                                <label class="form-check-label" for="EmployeeType_@item.Value">
-                                                    @item.Text
-                                                </label>
-                                            </div>
-                                        }
-
-                                    </div>
-
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">نوع الموظف</label><br />
+                            @foreach (var item in ViewBag.ListHrEmployeesTypes)
+                            {
+                                <label class="me-3">
+                                    <input type="radio" name="EmployeeTypeId" value="@item.Value"
+                                           @(item.Value == Model.EmployeeTypeId.ToString() ? "checked" : "") />
+                                    @item.Text
+                                </label>
+                            }
                         </div>
-                        <div class="row mb-3">
-                            <label for="IsActive" class="col-sm-2 col-form-label"> الحالة</label>
-                            <div class="col-sm-10">
-                            <input name="IsActive"
-                                   id="IsActive"
-                                   class="form-check-input"
-                                   type="checkbox"
-                                   value="true"
+
+                        <!-- الحالة -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">الحالة</label><br />
+                            <input type="checkbox" name="IsActive" value="true"
                                    @(Model.IsActive ? "checked" : "") />
-
                             <input type="hidden" name="IsActive" value="false" />
+                            <span>نشط</span>
                         </div>
-                      </div>
-
-
 
                     </div>
                 </div>
-              
             </div>
-            <div class="row justify-content-end">
-                <div class="col-sm-10">
-                    <button type="submit" class="btn btn-primary">حفــــظ</button>
-                </div>
+
+        </div>
+
+        <!-- زر الحفظ -->
+        <div class="row mt-3">
+            <div class="col-12 text-end">
+                <button type="submit" class="btn btn-primary">حفــــظ</button>
             </div>
         </div>
     }
