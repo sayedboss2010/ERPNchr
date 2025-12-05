@@ -251,6 +251,8 @@
                     if (ext == ".jpg" || ext == ".jpeg" || ext == ".png")
                     {
                         <img class="attachment-img" src="@Url.Content(Model.AttachmentPath)" />
+                        <p>📄 ملف </p>
+                        <a href="@Url.Content(Model.AttachmentPath)" target="_blank">عرض المرفق</a>
                     }
                     else if (ext == ".pdf")
                     {

@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<VM.ViewModels.JopDataVM>
 @{
-    ViewBag.Title = "قائمة الفروع";
+    ViewBag.Title = "قائمة الوظايف";
     Layout = "_Layout";
 }
 
-<h2 class="text-center">قائمة الفروع</h2>
+<h2 class="text-center">قائمة الوظايف</h2>
 <hr />
 <a href="@Url.Action("CreateEdite", "HRJob", new { TypePage = 1, area = "LookUP" })" class="btn btn-primary btn-sm">
-    إنشاء فرع جديدة
+    إنشاء وظيفه جديدة
 </a>
 
 <table class="table table-bordered table-striped">

@@ -142,14 +142,15 @@ namespace ERPNchr.Areas.Employee.Controllers
         {
             var data = (from p in _context.HrEmployeeOfficialMissions
                         join e in _context.HrEmployees on p.EmployeeId equals e.Id
-                       
+                        join dl in _context.HrDepartments on e.DepartmentId equals dl.Id into dept
+                         from dl in dept.DefaultIfEmpty() // left join
                         where p.Id == id
                         select new EmployeeMissionsVM
                         {    Id=(int)e.Id,
                             EmplyeeName = e.NameAr,
                             EmployeeId=e.EmployeeTypeId,
                             DepartmentId=e.DepartmentId,
-                            DepartmentName = p.Department.NameAr,
+                            DepartmentName = dl.NameAr,
                             AuthorityOfMission = p.AuthorityOfMission,
                             PurposeOfMission = p.PurposeOfMission,
                             StartDate = p.StartDate,

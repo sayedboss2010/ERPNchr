@@ -17,41 +17,19 @@ namespace VM.ViewModels.Employee
         public int? DepartmentId { get; set; }
 
         public string? AuthorityOfMission { get; set; }
-
         public string? PurposeOfMission { get; set; }
-        [Required(ErrorMessage = "❌ تاريخ بداية المامورية إجباري")]
+
+        [Required(ErrorMessage = "❌ تاريخ بداية المأمورية إجباري")]
         public DateOnly? StartDate { get; set; }
-        [Required(ErrorMessage = "❌ تاريخ نهاية المامورية إجباري")]
+
+        [Required(ErrorMessage = "❌ تاريخ نهاية المأمورية إجباري")]
         public DateOnly? EndDate { get; set; }
 
         public bool? IsActive { get; set; }
 
-        public int? CreatedUserId { get; set; }
-
-        public DateOnly? CreatedDate { get; set; }
-
-        public int? UpdatedUserId { get; set; }
-
-        public DateOnly? UpdatedDate { get; set; }
-
-        public int? DeletedUserId { get; set; }
-
-        public DateOnly? DeletedDate { get; set; }
-
-        /// <summary>
-        /// موافقة المدير المباشر
-        /// </summary>
         public bool? DirectManagerApproval { get; set; }
-
-        /// <summary>
-        /// موافقة مدير الادارة
-        /// </summary>
         public bool? DepartmentManagerApproval { get; set; }
-
-        public virtual HrDepartment? Department { get; set; }
-
-        public virtual HrEmployee? Employee { get; set; }
-
     }
-   
+
+
 }
