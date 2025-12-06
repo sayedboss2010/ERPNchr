@@ -10,6 +10,7 @@ namespace VM.ViewModels;
 
 public class EmployeeLeaveVM
 {
+    public string EmployeeTypeName{ get; set; }
     public long? Id { get; set; }
     public string AttachmentPath { get; set; } = null!;
     public long? EmployeeId { get; set; }

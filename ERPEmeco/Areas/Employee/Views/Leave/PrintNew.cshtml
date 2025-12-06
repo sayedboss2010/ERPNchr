@@ -166,70 +166,73 @@
         <!-- بيانات الموظف -->
         <div class="row">
             <div class="col">
-                <label class="field">الموظف:</label>
+                <label class="field">الاسم:</label>
                 <span>@Model.EmployeeName</span>
             </div>
             <div class="col">
-                <label class="field">الكود:</label>
-                <span>@Model.EmployeeCode</span>
+                <label class="field">الوظيفة:</label>
+                <span>@Model.EmployeeTypeName</span>
             </div>
             <div class="col">
-                <label class="field">الإدارة:</label>
-                <span>@Model.DepartmentName</span>
+                <label class="field">الرقم:</label>
+                <span>@Model.EmployeeCode</span>
             </div>
         </div>
 
         <!-- تاريخ الإجازة -->
         <div class="row">
             <div class="col">
-                <label class="field">من:</label>
-                <span>@Model.StartDate?.ToString("yyyy/MM/dd")</span>
+                <label class="field">المدة:&nbsp;&nbsp;<span>@Model.ActualDays يوم</span></label>
+                
             </div>
             <div class="col">
-                <label class="field">إلى:</label>
-                <span>@Model.EndDate?.ToString("yyyy/MM/dd")</span>
+                
+                <label class="field">من:&nbsp;&nbsp;<span>@Model.StartDate?.ToString("yyyy/MM/dd")</span></label>
+                
             </div>
             <div class="col">
-                <label class="field">المدة:</label>
-                <span>@Model.ActualDays يوم</span>
+                <label class="field">إلى:&nbsp;&nbsp;<span>@Model.EndDate?.ToString("yyyy/MM/dd")</span></label>
+                
             </div>
+            
         </div>
 
         <!-- السبب -->
         <div class="row">
             <div class="col">
-                <label class="field">السبب:</label>
-                <span>@Model.Reason</span>
+                <label class="field">القائم بالعمل:</label>
+                
+            </div>
+            <div class="col">
+                <label class="field">توقيع طالب الاجازة :</label>
+               
             </div>
         </div>
-
+        <div class="row">تحريرا في @DateTime.Now.ToString("yyyy/MM/dd")</div>
         <!-- جدول الرصيد (اعتيادي / عارضة فقط) -->
         @if (Model.LeaveTypeId == 1 || Model.LeaveTypeId == 2)
         {
+            <h3 style="text-align:center">بيانات تستوفي بمعرفة شئون الافراد</h3>
             <table class="details">
                 <thead>
                     <tr>
-                        <th>البيان</th>
-                        <th>القيمة</th>
+                        <th>الاجازات المستحقة عن السنه المالية</th>
+                        <th>الاجازات السابق منحها عن السنه</th>
+                        <th> الرصيد المتبقي</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>الإجمالي السنوي</td>
+                        
                         <td>@Model.TotalDays</td>
-                    </tr>
-                    <tr>
-                        <td>المستخدم</td>
+                    
+                       
                         <td>@Model.UsedDays</td>
-                    </tr>
-                    <tr>
-                        <td>المتبقي قبل الطلب</td>
-                        <td>@Model.RemainingBefore</td>
-                    </tr>
-                    <tr>
-                        <td>المتبقي بعد الخصم</td>
+                    
+                   
+                        
                         <td>@Model.RemainingAfter</td>
-                    </tr>
+                   
                 </tbody>
             </table>
         }
@@ -269,10 +272,14 @@
 
         <!-- توقيعات -->
         <div class="row" style="margin-top:25px;">
-            <div class="col">توقيع الموظف: ____________________</div>
-            <div class="col">موافقة المشرف: ____________________</div>
+            <div class="col">توقيع شئون الافراد: ____________________</div>
+            <div class="col">موافقة مسؤل الادارة: ____________________</div>
             <div class="col">اعتماد المدير: ____________________</div>
         </div>
-
+        <div class="row">
+            <div class="col"></div>
+            <div class="col">وتفضلوا بقبول وافر الاحترام</div>
+            <div class="col"></div>
+        </div>
     </div>
 </div>

@@ -396,7 +396,11 @@ namespace YourProjectName.Areas.Employee.Controllers
         {
             // جلب بيانات الإجازة والموظف ونوع الإجازة
             var leave = (from l in _context.HrEmployeeLeaves
+                        
                          join e in _context.HrEmployees on l.EmployeeId equals e.Id
+                         join w in _context.EmployeeTypes on e.EmployeeTypeId equals w.Id into pt
+                         from w in pt.DefaultIfEmpty() // left join
+                         where l.Id == id
                          join t in _context.HrLeaveTypes on l.LeaveTypeId equals t.Id
                          join d in _context.HrDepartments on e.DepartmentId equals d.Id into dept
                          from d in dept.DefaultIfEmpty() // left join
@@ -406,7 +410,8 @@ namespace YourProjectName.Areas.Employee.Controllers
                              Leave = l,
                              Employee = e,
                              Department = d,
-                             LeaveType = t
+                             LeaveType = t,
+                             EmployeeType=w
                          }).FirstOrDefault();
 
 
@@ -445,7 +450,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                 Reason = leave.Leave.Reason,
                 AttachmentPath = leave.Leave.AttachmentPath,
                 ActualDays = actualDays,
-
+                EmployeeTypeName= string.IsNullOrWhiteSpace(leave.EmployeeType?.EmployeeTypeNameAr) ? "-" : leave.EmployeeType.EmployeeTypeNameAr,
                 TotalDays = lastBalance?.TotalDays ?? 0,
                 UsedDays = lastBalance?.UsedDays ?? 0,
                 RemainingBefore = lastBalance?.TotalDaysReminig ?? 0
