@@ -47,7 +47,7 @@
 
                             @if (!string.IsNullOrEmpty(Model.NidPath))
                             {
-                                <a href="~/Uploads/NID/@Model.NidPath"
+                                <a href="@Model.NidPath"
                                    class="btn btn-info mb-2" target="_blank">
                                     تحميل البطاقة
                                 </a>
@@ -170,9 +170,10 @@
                          <!-- الاعاقه -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">ذوي الاعاقة</label><br />
-                            <input type="checkbox" name="Disability" value="true"
-                                   @(Model.Disability.HasValue? "checked" : "") />
-                            <input type="hidden" name="Disability" value="false" />
+                          <input type="checkbox" name="Disability" value="true"
+       @(Model.Disability == true ? "checked" : "") />
+<input type="hidden" name="Disability" value="false" />
+
                             <span>اعاقة</span>
                         </div>
 

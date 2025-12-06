@@ -271,73 +271,93 @@ public class EmployeeDataController : Controller
                 // 45 يوم للإعاقة
                 // جميع المراحل 7 ايام عارضه
                 // model.AppointmentDate تاريخ التعيين
-
-
-                var age = NationalIdExtensions.GetAge(model.Nid);
-
-                // -------------------------
-                // حساب مدة الخدمة من DateOnly
-                // -------------------------
-
-                
-                int yearsOfService = 0;
-
-                if (model.AppointmentDate != null)
+                var Epmloyeebalance = db.HrEmployeeLeaveBalances.Where(a => a.EmployeeId == model.Id).FirstOrDefault();
+                if (Epmloyeebalance==null)
                 {
-                    // تحويل DateOnly إلى DateTime
-                    var appointDate = model.AppointmentDate.Value.ToDateTime(new TimeOnly(0, 0));
+                    var age = NationalIdExtensions.GetAge(model.Nid);
 
-                    yearsOfService = DateTime.Now.Year - appointDate.Year;
+                    // -------------------------
+                    // حساب مدة الخدمة
+                    // -------------------------
+                    int yearsOfService = 0;
 
-                    // لو لسه موصلش نفس التاريخ في السنة الحالية → ننقص سنة
-                    if (appointDate.Date > DateTime.Now.AddYears(-yearsOfService))
-                        yearsOfService--;
+                    if (model.AppointmentDate != null)
+                    {
+                        var appointDate = model.AppointmentDate.Value.ToDateTime(new TimeOnly(0, 0));
+
+                        yearsOfService = DateTime.Now.Year - appointDate.Year;
+
+                        if (appointDate.Date > DateTime.Now.AddYears(-yearsOfService))
+                            yearsOfService--;
+                    }
+
+                    // -------------------------
+                    // حساب رصيد الإجازات للسنة الجديدة
+                    // -------------------------
+                    int annualLeaveDays = 5;   // رصيد السنة الجديدة الأساسي
+                    int casualLeaveDays = 7;
+                    int totalDays = 0;
+
+                    if (model.Disability == true)
+                    {
+                        totalDays = 45;
+                    }
+                    else if (age >= 50)
+                    {
+                        totalDays = 45;
+                    }
+                    else if (yearsOfService >= 10)
+                    {
+                        totalDays = 30;
+                    }
+                    else
+                    {
+                        totalDays = 21;
+                    }
+                    // var Epmloyeebalance = db.HrEmployeeLeaveBalances.Where(a => a.EmployeeId == model.Id).FirstOrDefault();
+
+                    // -------------------------
+                    // إضافة المتبقي من السنة السابقة (حد أقصى 7)
+                    // -------------------------
+                    //int previousYearRemaining = Epmloyeebalance?.AnnualRemainingDays ?? 0;
+                    //int carryOver = 0;
+
+                    //// شرط بداية السنة الجديدة
+                    //bool isNewYear = (DateTime.Now.Month == 1 && DateTime.Now.Day == 1);
+
+                    //if (isNewYear)
+                    //{
+                    //    carryOver = Math.Min(previousYearRemaining, 7);
+
+                    //    // إضافتهم لرصيد السنة الجديدة
+                    //    totalDays += carryOver;
+                    //}
+
+                    // -------------------------
+                    // حفظ رصيد السنة الجديدة
+                    // -------------------------
+                    HrEmployeeLeaveBalance ff = new HrEmployeeLeaveBalance
+                    {
+                        EmployeeId = model.Id,
+                        TotalDaysReminig = totalDays,
+                        AnnualTotalDays = annualLeaveDays,
+                        AnnualUsedDays = 0,
+                        AnnualRemainingDays = annualLeaveDays,    // ← رصيد السنة الجديدة بعد الإضافة
+                        CasualTotalDays = casualLeaveDays,
+                        CasualUsedDays = 0,
+                        CasualRemainingDays = casualLeaveDays,
+                        TotalDays = totalDays,
+                        UsedDays = 0,
+                        CreatedDate = DateTime.Now,
+                        Year = DateTime.Now.Year,                // ← أضف تبويب السنة الجديدة
+                        IsActive = true
+                    };
+
+                    db.HrEmployeeLeaveBalances.Add(ff);
+                    await db.SaveChangesAsync();
                 }
+               
 
-                // -------------------------
-                // حساب رصيد الإجازات
-                // -------------------------
-
-                int annualLeaveDays = 0;
-                int casualLeaveDays = 7; // ثابتة
-
-                // أولوية الإعاقة
-                if (model.Disability==true)
-                {
-                    annualLeaveDays = 45;
-                }
-                else if (age >= 50)
-                {
-                    annualLeaveDays = 45;
-                }
-                else if (yearsOfService >= 10)
-                {
-                    annualLeaveDays = 30;
-                }
-                else
-                {
-                    annualLeaveDays = 21;
-                }
-
-                // حفظ النتائج في HR_Employee_LeaveBalance
-                HrEmployeeLeaveBalance ff = new HrEmployeeLeaveBalance
-                {
-                    EmployeeId = model.Id,
-                    AnnualTotalDays = annualLeaveDays,
-                    AnnualRemainingDays = annualLeaveDays,
-                    CasualTotalDays = casualLeaveDays,
-                    CasualRemainingDays= casualLeaveDays,
-                    //YearsOfService = yearsOfService,
-                    //Age = age,
-                    CreatedDate = DateTime.Now,
-                    IsActive = true
-                };
-                db.HrEmployeeLeaveBalances.Add(ff);
-                await db.SaveChangesAsync();
-                //model.AnnualLeaveDays = annualLeaveDays;
-                //model.CasualLeaveDays = casualLeaveDays;
-                //model.YearsOfService = yearsOfService;
-                //model.Age = age;
                 #endregion
 
             }
@@ -425,6 +445,89 @@ public class EmployeeDataController : Controller
 
                     // حفظ المسار النسبي في قاعدة البيانات
                     existingEmployee.NidPath = Path.Combine("Uploads", "NidPath", fileName).Replace("\\", "/");
+                }
+                var Epmloyeebalance=db.HrEmployeeLeaveBalances.Where(a=>a.EmployeeId==model.Id).FirstOrDefault();
+                if (Epmloyeebalance==null)
+                {
+                    var age = NationalIdExtensions.GetAge(model.Nid);
+
+                    // -------------------------
+                    // حساب مدة الخدمة
+                    // -------------------------
+                    int yearsOfService = 0;
+
+                    if (model.AppointmentDate != null)
+                    {
+                        var appointDate = model.AppointmentDate.Value.ToDateTime(new TimeOnly(0, 0));
+
+                        yearsOfService = DateTime.Now.Year - appointDate.Year;
+
+                        if (appointDate.Date > DateTime.Now.AddYears(-yearsOfService))
+                            yearsOfService--;
+                    }
+
+                    // -------------------------
+                    // حساب رصيد الإجازات للسنة الجديدة
+                    // -------------------------
+                    int annualLeaveDays = 5;   // رصيد السنة الجديدة الأساسي
+                    int casualLeaveDays = 7;
+                    int totalDays = 0;
+
+                    if (model.Disability == true)
+                    {
+                        totalDays = 45;
+                    }
+                    else if (age >= 50)
+                    {
+                        totalDays = 45;
+                    }
+                    else if (yearsOfService >= 10)
+                    {
+                        totalDays = 30;
+                    }
+                    else
+                    {
+                        totalDays = 21;
+                    }
+
+                    // -------------------------
+                    // إضافة المتبقي من السنة السابقة (حد أقصى 7)
+                    // -------------------------
+                    //int previousYearRemaining = Epmloyeebalance?.AnnualRemainingDays ?? 0;
+                    //int carryOver = 0;
+
+                    //// شرط بداية السنة الجديدة
+                    //bool isNewYear = (DateTime.Now.Month == 1 && DateTime.Now.Day == 1);
+
+                    //if (isNewYear)
+                    //{
+                    //    carryOver = Math.Min(previousYearRemaining, 7);
+
+                    //    // إضافتهم لرصيد السنة الجديدة
+                    //    totalDays += carryOver;
+                    //}
+
+                    // -------------------------
+                    // حفظ رصيد السنة الجديدة
+                    // -------------------------
+                    HrEmployeeLeaveBalance ff = new HrEmployeeLeaveBalance
+                    {
+                        EmployeeId = model.Id,
+                        TotalDaysReminig = totalDays,
+                        AnnualTotalDays= annualLeaveDays,
+                        AnnualRemainingDays = annualLeaveDays,    // ← رصيد السنة الجديدة بعد الإضافة
+                        CasualTotalDays = casualLeaveDays,
+                        CasualRemainingDays = casualLeaveDays,
+                        TotalDays = totalDays,
+                        CreatedDate = DateTime.Now,
+                        Year = DateTime.Now.Year,                // ← أضف تبويب السنة الجديدة
+                        IsActive = true
+                    };
+
+                    db.HrEmployeeLeaveBalances.Add(ff);
+                    await db.SaveChangesAsync();
+
+
                 }
 
                 // تحديث السجل في قاعدة البيانات باستخدام EF Core

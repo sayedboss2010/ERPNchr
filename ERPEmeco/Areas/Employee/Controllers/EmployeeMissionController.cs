@@ -19,8 +19,8 @@ namespace ERPNchr.Areas.Employee.Controllers
             var data = (from l in _context.HrEmployeeOfficialMissions
                         join e in _context.HrEmployees
                             on l.EmployeeId equals e.Id
-                        join d in _context.HrDepartments
-                            on l.DepartmentId equals d.Id      // ← الربط الصحيح مباشرة
+                        //join d in _context.HrDepartments
+                        //    on l.DepartmentId equals d.Id      // ← الربط الصحيح مباشرة
                         where l.IsActive == true
                         orderby l.Id descending
                         select new EmployeeMissionsVM
@@ -29,8 +29,8 @@ namespace ERPNchr.Areas.Employee.Controllers
                             EmployeeId = (int) e.Id,
                             EmplyeeName = e.NameAr,
 
-                            DepartmentId = d.Id,
-                            DepartmentName = d.NameAr,        // ← يظهر في الفيو
+                            //DepartmentId = d.Id,
+                            //DepartmentName = d.NameAr,        // ← يظهر في الفيو
 
                             PurposeOfMission = l.PurposeOfMission,
                             AuthorityOfMission = l.AuthorityOfMission,
@@ -112,14 +112,14 @@ namespace ERPNchr.Areas.Employee.Controllers
 
 
             // إنشاء المعرف الجديد
-            int HrEmployeeMission_ID = _context.Database
-                .SqlQueryRaw<int>("SELECT NEXT VALUE FOR dbo.HR_EmployeeOfficialMission_SEQ")
+            long HrEmployeeMission_ID = _context.Database
+                .SqlQueryRaw<long>("SELECT NEXT VALUE FOR dbo.HR_EmployeeOfficialMission_SEQ")
                 .AsEnumerable()
                 .First();
 
             var entity = new HrEmployeeOfficialMission
             {
-                Id = HrEmployeeMission_ID,
+                Id =(int) HrEmployeeMission_ID,
                 EmployeeId = model.EmployeeId,
                 PurposeOfMission = model.PurposeOfMission,
                 AuthorityOfMission = model.AuthorityOfMission,

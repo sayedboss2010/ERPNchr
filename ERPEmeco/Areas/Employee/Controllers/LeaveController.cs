@@ -311,18 +311,17 @@ namespace YourProjectName.Areas.Employee.Controllers
             _context.HrEmployeeLeaves.Add(entity);
             // HR_Employee_LeaveBalance اجمالى الاجازة للموظف
             var leaveBalance = _context.HrEmployeeLeaveBalances.FirstOrDefault(e => e.Id == model.LeaveBalanceID);
-
+            var totalold = leaveBalance.TotalDays;
             if (leaveBalance != null)
             {
-                // زيادة مجموع المستخدم من كل الأنواع
-                leaveBalance.UsedDays += (int)model.ActualDays;
+                
 
                 // =============================
                 // 1) إجازة عارضة (ID = 1)
                 // =============================
                 if (model.LeaveTypeId == 1)
                 {
-                    leaveBalance.CasualUsedDays = (int)model.ActualDays;
+                    leaveBalance.CasualUsedDays += (int)model.ActualDays;
                     leaveBalance.CasualRemainingDays =
                         (int)(leaveBalance.CasualTotalDays - leaveBalance.CasualUsedDays);
                 }
@@ -332,7 +331,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                 // =============================
                 if (model.LeaveTypeId == 2)
                 {
-                    leaveBalance.UsedDays = (int)model.ActualDays;
+                    leaveBalance.UsedDays += (int)model.ActualDays;
                     leaveBalance.TotalDaysReminig =
                         (int)(leaveBalance.TotalDays - leaveBalance.UsedDays);
                 }
@@ -343,9 +342,13 @@ namespace YourProjectName.Areas.Employee.Controllers
                 //// =============================
                 if (model.LeaveTypeId == 5)
                 {
-                    leaveBalance.AnnualUsedDays = (int)model.ActualDays;
+                    leaveBalance.AnnualUsedDays += (int)model.ActualDays;
                     leaveBalance.AnnualRemainingDays =
                         (int)(leaveBalance.AnnualTotalDays - leaveBalance.AnnualUsedDays);
+                    leaveBalance.UsedDays += (int)model.ActualDays;
+                    leaveBalance.TotalDaysReminig =
+                        (int)(leaveBalance.TotalDays - (int)model.ActualDays);
+
                 }
 
                 //// =============================

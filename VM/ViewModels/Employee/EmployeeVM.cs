@@ -1,6 +1,7 @@
 ﻿using EF.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,6 +73,7 @@ namespace VM.ViewModels
         /// <summary>
         /// الرقم القومي
         /// </summary>
+        [Required(ErrorMessage = "❌ يجب ادخال رقم قومي صحيح")]
         public string? Nid { get; set; }
 
         /// <summary>
