@@ -90,6 +90,7 @@ public partial class AppDbContext : DbContext
             //ignore
         }
     }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AUserLogin>(entity =>
@@ -258,9 +259,6 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.DeletedDate).HasColumnName("Deleted_Date");
             entity.Property(e => e.DeletedUserId).HasColumnName("Deleted_UserId");
             entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
-            entity.Property(e => e.Disability)
-                .HasDefaultValue(false)
-                .HasComment("ذوي الاعاقة 1");
             entity.Property(e => e.Email)
                 .HasMaxLength(50)
                 .IsUnicode(false);

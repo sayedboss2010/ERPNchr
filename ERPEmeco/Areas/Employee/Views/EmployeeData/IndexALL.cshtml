@@ -46,6 +46,9 @@
                     }
                 </td>
                 <td>
+                    <a href="@Url.Action("Index", "Home", new { EmployeeID = item.Id, area = "Account" })" class="btn btn-info btn-sm">عرض</a>
+                </td>
+                <td>
                     <a href="@Url.Action("AddEdite", "EmployeeData", new { EmployeeID = item.Id, area = "Employee" })" class="btn btn-info btn-sm">تعديل</a>
                 </td>
             </tr>
@@ -53,7 +56,7 @@
     </tbody>
 </table>
 
-<a href="@Url.Action("Create", "Leave", new { area = "Employee" })" class="btn btn-primary">إضافة إجازة جديدة</a>
+<a href="@Url.Action("AddEdite", "EmployeeData", new { area = "Employee" })" class="btn btn-primary">إضافة موظف جديد</a>
 
 @section Scripts {
     <script>

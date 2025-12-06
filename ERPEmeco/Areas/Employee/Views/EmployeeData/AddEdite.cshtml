@@ -53,7 +53,7 @@
                                 </a>
                             }
 
-                            <input class="form-control" type="file" name="Nid_File" />
+                            <input class="form-control" type="file" name="NidPath" />
                         </div>
 
                         <!-- البريد -->
@@ -166,6 +166,14 @@
                                    @(Model.IsActive ? "checked" : "") />
                             <input type="hidden" name="IsActive" value="false" />
                             <span>نشط</span>
+                        </div>
+                         <!-- الاعاقه -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">ذوي الاعاقة</label><br />
+                            <input type="checkbox" name="Disability" value="true"
+                                   @(Model.Disability.HasValue? "checked" : "") />
+                            <input type="hidden" name="Disability" value="false" />
+                            <span>اعاقة</span>
                         </div>
 
                     </div>

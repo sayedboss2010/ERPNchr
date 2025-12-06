@@ -149,7 +149,7 @@ public class EmployeeDataController : Controller
                    AddressAr = e.AddressAr,
                    AddressEn = e.AddressEn,
                    PhoneNumber = e.PhoneNumber,
-
+                   Disability=e.Disability.Value,
                    //Birthdate = e.Birthdate.HasValue
                    //    ? DateOnly.FromDateTime(e.Birthdate.Value)
                    //    : null,
@@ -213,7 +213,7 @@ public class EmployeeDataController : Controller
     }
 
     [HttpPost]
-    public async Task<ActionResult> AddEdite(HrEmployee model, IFormFile NID_Path)
+    public async Task<ActionResult> AddEdite(HrEmployee model, IFormFile NidPath)
     {
        
         try
@@ -231,30 +231,30 @@ public class EmployeeDataController : Controller
                 model.Id = HR_Employees_ID;
 
                 // معالجة ملف NID
-                if (NID_Path != null && NID_Path.Length > 0)
+                if (NidPath != null && NidPath.Length > 0)
                 {
                     var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                    string uploadFolder = Path.Combine(webRoot, "uploads", "NID_Path");
+                    string uploadFolder = Path.Combine(webRoot, "uploads", "NidPath");
 
 
 
                     if (!Directory.Exists(uploadFolder))
                         Directory.CreateDirectory(uploadFolder);
                     // اسم ملف فريد
-                    string fileName = $"{Guid.NewGuid()}_{NID_Path.FileName}";
+                    string fileName = $"{Guid.NewGuid()}_{NidPath.FileName}";
                     string filePath = Path.Combine(uploadFolder, fileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        NID_Path.CopyTo(stream);
+                        NidPath.CopyTo(stream);
                     }
 
                     string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
                     model.Password = hashedPassword;
                     // المسار الذي يُخزن في الداتابيز
-                    model.NidPath = $"/uploads/NID_Path/{fileName}"; ;
+                    model.NidPath = $"/uploads/NidPath/{fileName}"; ;
                 }
-
+                
                 model.IsActive = model.IsActive; // من الفيو
                 //model.CreatedDate = DateTime.Now.Date;
                 //model.CreatedUserId = int.Parse(Session["User_ID"].ToString());
@@ -279,6 +279,7 @@ public class EmployeeDataController : Controller
                 // حساب مدة الخدمة من DateOnly
                 // -------------------------
 
+                
                 int yearsOfService = 0;
 
                 if (model.AppointmentDate != null)
@@ -346,7 +347,29 @@ public class EmployeeDataController : Controller
                 var existingEmployee = db.HrEmployees.Find(model.Id);
                 if (existingEmployee == null)
                     return NotFound();
+                // معالجة ملف NID
+                if (NidPath != null && NidPath.Length > 0)
+                {
+                    var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    string uploadFolder = Path.Combine(webRoot, "uploads", "NidPath");
 
+
+
+                    if (!Directory.Exists(uploadFolder))
+                        Directory.CreateDirectory(uploadFolder);
+                    // اسم ملف فريد
+                    string fileName = $"{Guid.NewGuid()}_{NidPath.FileName}";
+                    string filePath = Path.Combine(uploadFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        NidPath.CopyTo(stream);
+                    }
+
+
+                    // المسار الذي يُخزن في الداتابيز
+                    existingEmployee.NidPath = $"/uploads/NidPath/{fileName}"; ;
+                }
                 // تحديث البيانات الأساسية
                 existingEmployee.EmpCode = model.EmpCode;
                 existingEmployee.NameAr = model.NameAr;
@@ -361,12 +384,12 @@ public class EmployeeDataController : Controller
                 existingEmployee.CurrentJobId = model.CurrentJobId;
                 existingEmployee.AppointmentDate = model.AppointmentDate;
                 existingEmployee.CurrentSalary = model.CurrentSalary;
-            
+                existingEmployee.Disability = model.Disability;
                 existingEmployee.Isbank = model.Isbank;
                 existingEmployee.InsuranceNumber = model.InsuranceNumber;
                 existingEmployee.DateIn = model.DateIn;
                 existingEmployee.DateOut = model.DateOut;
-
+               
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
 
                 //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
@@ -381,10 +404,10 @@ public class EmployeeDataController : Controller
                     model.Password = hashedPassword;
                 }
                 // معالجة ملف NID جديد
-                if (NID_Path != null && NID_Path.Length > 0)
+                if (NidPath != null && NidPath.Length > 0)
                 {
                     // مسار حفظ الملفات داخل wwwroot
-                    string uploadsFolder = Path.Combine(_env.WebRootPath, "Uploads", "NID_Path");
+                    string uploadsFolder = Path.Combine(_env.WebRootPath, "Uploads", "NidPath");
 
                     // إنشاء المجلد إذا لم يكن موجوداً
                     if (!Directory.Exists(uploadsFolder))
@@ -392,16 +415,16 @@ public class EmployeeDataController : Controller
                         Directory.CreateDirectory(uploadsFolder);
                     }
 
-                    string fileName = Path.GetFileName(NID_Path.FileName);
+                    string fileName = Path.GetFileName(NidPath.FileName);
                     string fullPath = Path.Combine(uploadsFolder, fileName);
 
                     using (var stream = new FileStream(fullPath, FileMode.Create))
                     {
-                        await NID_Path.CopyToAsync(stream);
+                        await NidPath.CopyToAsync(stream);
                     }
 
                     // حفظ المسار النسبي في قاعدة البيانات
-                    existingEmployee.NidPath = Path.Combine("Uploads", "NID_Path", fileName).Replace("\\", "/");
+                    existingEmployee.NidPath = Path.Combine("Uploads", "NidPath", fileName).Replace("\\", "/");
                 }
 
                 // تحديث السجل في قاعدة البيانات باستخدام EF Core

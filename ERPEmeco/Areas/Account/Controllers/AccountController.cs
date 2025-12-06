@@ -9,6 +9,7 @@ namespace WEB.Areas.Account.Controllers;
 public class AccountController : Controller
 {
     public IActionResult LogIn()
+    
     {
         ViewBag.ErrorMessage = "";
         ViewBag.error = "none";

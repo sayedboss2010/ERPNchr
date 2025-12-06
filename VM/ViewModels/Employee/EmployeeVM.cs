@@ -9,6 +9,7 @@ namespace VM.ViewModels
 {
     public class EmployeeVM
     {
+        public bool? Disability { get; set; }
         public long Id { get; set; }
         public string EmolyeetypeName { get; set; }
         public string DepartmentName { get; set; }
