@@ -75,6 +75,7 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<UserType> UserTypes { get; set; }
 
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         try
@@ -90,7 +91,6 @@ public partial class AppDbContext : DbContext
             //ignore
         }
     }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AUserLogin>(entity =>
@@ -414,13 +414,13 @@ public partial class AppDbContext : DbContext
             entity.ToTable("HR_Employee_LeaveBalance", tb => tb.HasComment("رصيد الإجازات السنوي (اعتيادي + عارضة)"));
 
             entity.Property(e => e.Id).HasColumnName("ID");
-            entity.Property(e => e.AnnualRemainingDays).HasComment("باقي الايام العارضة");
+            entity.Property(e => e.AnnualRemainingDays).HasComment("باقي الايام السنوية");
             entity.Property(e => e.AnnualTotalDays)
                 .HasDefaultValue(7m)
-                .HasComment("إجمالي الإجازات العارضة في السنة")
+                .HasComment("إجمالي الإجازات السنوية في السنة")
                 .HasColumnType("decimal(5, 2)");
             entity.Property(e => e.AnnualUsedDays)
-                .HasComment("ايام العارضة المستخدمة")
+                .HasComment("ايام السنوية المستخدمة")
                 .HasColumnType("decimal(5, 2)");
             entity.Property(e => e.CasualRemainingDays).HasComment("باقي الايام العارضة");
             entity.Property(e => e.CasualTotalDays)
@@ -444,12 +444,13 @@ public partial class AppDbContext : DbContext
                 .HasDefaultValue(30m)
                 .HasComment("إجمالي الإجازات الاعتيادية في السنة")
                 .HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.TotalDaysReminig).HasComment("باقي ايام الاعتيادي");
             entity.Property(e => e.UpdatedDate)
                 .HasColumnType("datetime")
                 .HasColumnName("Updated_Date");
             entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
             entity.Property(e => e.UsedDays)
-                .HasComment("الايام المستخدمه فى السنة")
+                .HasComment("الايام الاعتيادي المستخدمه فى السنة")
                 .HasColumnType("decimal(5, 2)");
 
             entity.HasOne(d => d.Employee).WithMany(p => p.HrEmployeeLeaveBalances)
@@ -470,17 +471,12 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedUserId).HasColumnName("Created_UserId");
             entity.Property(e => e.DeletedDate).HasColumnName("Deleted_Date");
             entity.Property(e => e.DeletedUserId).HasColumnName("Deleted_UserId");
-            entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
             entity.Property(e => e.DepartmentManagerApproval).HasComment("موافقة مدير الادارة");
             entity.Property(e => e.DirectManagerApproval).HasComment("موافقة المدير المباشر");
             entity.Property(e => e.EmployeeId).HasColumnName("Employee_ID");
             entity.Property(e => e.PurposeOfMission).HasMaxLength(100);
             entity.Property(e => e.UpdatedDate).HasColumnName("Updated_Date");
             entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
-
-            entity.HasOne(d => d.Department).WithMany(p => p.HrEmployeeOfficialMissions)
-                .HasForeignKey(d => d.DepartmentId)
-                .HasConstraintName("FK_HR_EmployeeOfficialMission_HR_Departments");
 
             entity.HasOne(d => d.Employee).WithMany(p => p.HrEmployeeOfficialMissions)
                 .HasForeignKey(d => d.EmployeeId)

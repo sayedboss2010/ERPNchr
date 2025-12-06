@@ -1,4 +1,14 @@
 ﻿<!DOCTYPE html>
+
+@{
+    var request = Context.Request;
+
+    int? userId = request.Cookies.ContainsKey("UserId") ? int.Parse(request.Cookies["UserId"]) : null;
+    int? userType = request.Cookies.ContainsKey("UserType") ? int.Parse(request.Cookies["UserType"]) : null;
+    int? branchId = request.Cookies.ContainsKey("BranchID") ? int.Parse(request.Cookies["BranchID"]) : null;
+    int? departmentId = request.Cookies.ContainsKey("DepartmentID") ? int.Parse(request.Cookies["DepartmentID"]) : null;
+}
+
 <html lang="ar"
       class="light-style layout-menu-fixed"
       dir="rtl"
@@ -87,18 +97,115 @@
 
                 <div class="menu-inner-shadow"></div>
 
-                <ul class="menu-inner py-1">
-                    <li class="menu-item">
-                        <a href="~/html/index.html" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                            <div data-i18n="Analytics">الرئيسية</div>
-                        </a>
-                    </li>
+                    
                     @* <li class="menu-item @(Html.IsActive("Index", "Home", "Account", true))">
                     <a href="~/Account/Home/Index/" class="menu-link">
                         <div data-i18n="Without menu">الملف الشخصي</div>
                     </a>
                     </li> *@
+
+                    @if (userType==1)
+                    {
+                      <ul class="menu-inner py-1">
+                        <li class="menu-item">
+                            <a href="~/Employee/Leave/Create" class="menu-link">
+                                <div data-i18n="Without navbar">اضافة أجازه</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="~/Employee/leave/index" class="menu-link">
+                                <div data-i18n="Without navbar">قائمة الاجازات</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="~/Employee/EmployeePermission/Create" class="menu-link">
+                                <div data-i18n="Without navbar">اضافة اذن</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="~/Employee/EmployeePermission/index" class="menu-link">
+                                <div data-i18n="Without navbar">قائمةالاذنون</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="~/Employee/EmployeeMission/Create" class="menu-link">
+                                <div data-i18n="Without navbar">اضافة مأمورية رسمية</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="~/Employee/EmployeeMission/index" class="menu-link">
+                                <div data-i18n="Without navbar">قائمةالمأموريات</div>
+                            </a>
+                        </li>
+
+                    </ul>
+                }
+                @if (userType == 2)
+                    {<ul>
+                        <li class="menu-item">
+                            <a href="~/Employee/Leave/Create" class="menu-link">
+                                <div data-i18n="Without navbar"> اضافة أجازة إدارة</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="~/Employee/leave/index" class="menu-link">
+                                <div data-i18n="Without navbar"> قائمة الاجازات </div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="~/Employee/EmployeePermission/Create" class="menu-link">
+                                <div data-i18n="Without navbar">اضافة اذن ادارة</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="~/Employee/EmployeePermission/index" class="menu-link">
+                                <div data-i18n="Without navbar">قائمةالاذنون</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="~/Employee/EmployeeMission/Create" class="menu-link">
+                                <div data-i18n="Without navbar"> اضافة مأمورية رسمية ادارة</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="~/Employee/EmployeeMission/index" class="menu-link">
+                                <div data-i18n="Without navbar">قائمةالمأموريات</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <i class="menu-icon tf-icons bx bx-layout"></i>
+                                <div data-i18n="Layouts">التقارير </div>
+                            </a>
+
+                            <ul class="menu-sub">
+                                <li class="menu-item @(Html.IsActive("AddEdite", "EmployeeData", "Employee", true))">
+                                    <a href="~/Attendance/AttendanceReport/Index" class="menu-link">
+                                        <div data-i18n="Without navbar">التمام اليومي</div>
+                                    </a>
+                                </li>
+
+
+                                <li class="menu-item">
+                                    <a href="~/Employee/leave/index" class="menu-link">
+                                        <div data-i18n="Without navbar">قائمة تقارير اجازات الادارات</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Employee/leave/index" class="menu-link">
+                                        <div data-i18n="Without navbar">الاجازات خلال مدة</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                        
+                    }
+                   
+                    @if (userType==3)
+                    {
+                        <ul>
                     <li class="menu-item @(Html.IsActive("IndexALL", "EmployeeData", "Employee", true))">
                         <a href="~/Employee/EmployeeData/IndexALL" class="menu-link">
                             <div data-i18n="Without menu">قائمة الموظفين</div>
@@ -215,7 +322,7 @@
 
                             <li class="menu-item">
                                 <a href="~/Employee/leave/index" class="menu-link">
-                                    <div data-i18n="Without navbar">قائمة اجازات الادارات</div>
+                                    <div data-i18n="Without navbar">قائمة تقارير اجازات الادارات</div>
                                 </a>
                             </li>
 
@@ -499,6 +606,20 @@
 
                     </li>
                 </ul>
+                    }
+                   
+                    @if (userType==4)
+                    {
+                        <ul>
+                        <li class="menu-item">
+                            <a href="~/html/index.html" class="menu-link">
+                                <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                                <div data-i18n="Analytics">الرئيسية</div>
+                            </a>
+                        </li>
+                        </ul>
+                        
+                    }
             </aside>
 
 

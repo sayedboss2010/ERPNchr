@@ -21,6 +21,12 @@ public class EmployeeLeaveVM
 
     public byte? LeaveTypeId { get; set; }
 
+    public decimal CasualTotalDays { get; set; }
+    public int? CasualRemainingDays { get; set; }
+    /// <summary>
+    /// ايام العارضة المستخدمة
+    /// </summary>
+    public decimal CasualUsedDays { get; set; }
 
     [Display(Name = "نوع الإجازة")]
     public string? LeaveTypeName { get; set; }  // سنوية / مرضية / طارئة

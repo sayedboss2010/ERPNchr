@@ -23,7 +23,7 @@ public partial class HrEmployeeLeaveBalance
     public decimal TotalDays { get; set; }
 
     /// <summary>
-    /// الايام المستخدمه فى السنة
+    /// الايام الاعتيادي المستخدمه فى السنة
     /// </summary>
     public decimal UsedDays { get; set; }
 
@@ -38,12 +38,12 @@ public partial class HrEmployeeLeaveBalance
     public decimal CasualUsedDays { get; set; }
 
     /// <summary>
-    /// إجمالي الإجازات العارضة في السنة
+    /// إجمالي الإجازات السنوية في السنة
     /// </summary>
     public decimal AnnualTotalDays { get; set; }
 
     /// <summary>
-    /// ايام العارضة المستخدمة
+    /// ايام السنوية المستخدمة
     /// </summary>
     public decimal AnnualUsedDays { get; set; }
 
@@ -63,7 +63,7 @@ public partial class HrEmployeeLeaveBalance
     public bool IsAnnualBalanceCalculated { get; set; }
 
     /// <summary>
-    /// باقي الايام العارضة
+    /// باقي الايام السنوية
     /// </summary>
     public int? AnnualRemainingDays { get; set; }
 
@@ -72,6 +72,9 @@ public partial class HrEmployeeLeaveBalance
     /// </summary>
     public int? CasualRemainingDays { get; set; }
 
+    /// <summary>
+    /// باقي ايام الاعتيادي
+    /// </summary>
     public int? TotalDaysReminig { get; set; }
 
     public virtual HrEmployee Employee { get; set; } = null!;

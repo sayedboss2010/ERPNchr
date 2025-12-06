@@ -216,10 +216,12 @@
             <table class="details">
                 <thead>
                     <tr>
-                        <th>الاجازات المستحقة عن السنه المالية</th>
-                        <th>الاجازات السابق منحها عن السنه</th>
+                        <th>الاجازات الاعتيادي المستحقة عن السنه المالية</th>
+                        <th>الاجازات الاعتيادي السابق منحها عن السنه</th>
                         <th> الرصيد المتبقي</th>
+
                     </tr>
+                    
                 </thead>
                 <tbody>
                     <tr>
@@ -232,7 +234,23 @@
                    
                         
                         <td>@Model.RemainingAfter</td>
-                   
+                   </tr>
+                    <tr>
+                        <th>الاجازات العارضة المستحقة عن السنه المالية</th>
+                        <th>الاجازات العارضة السابق منحها عن السنه</th>
+                        <th> الرصيد المتبقي</th>
+
+                    </tr>
+                   <tr>
+                        <td>@Model.CasualTotalDays</td>
+
+
+                        <td>@Model.CasualUsedDays</td>
+
+
+
+                        <td>@Model.CasualRemainingDays</td>
+                   </tr>
                 </tbody>
             </table>
         }

@@ -442,7 +442,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                 DepartmentID = leave.Employee.DepartmentId,
                 EmployeeCode = leave.Employee.EmpCode,
                 DepartmentName = string.IsNullOrWhiteSpace(leave.Department?.NameAr) ? "-" : leave.Department.NameAr,
-
+                
                 LeaveTypeId = leave.LeaveType.Id,
                 LeaveTypeName = leave.LeaveType.NameAr,
                 StartDate = leave.Leave.StartDate,
@@ -453,7 +453,10 @@ namespace YourProjectName.Areas.Employee.Controllers
                 EmployeeTypeName= string.IsNullOrWhiteSpace(leave.EmployeeType?.EmployeeTypeNameAr) ? "-" : leave.EmployeeType.EmployeeTypeNameAr,
                 TotalDays = lastBalance?.TotalDays ?? 0,
                 UsedDays = lastBalance?.UsedDays ?? 0,
-                RemainingBefore = lastBalance?.TotalDaysReminig ?? 0
+                RemainingBefore = lastBalance?.TotalDaysReminig ?? 0,
+                CasualTotalDays= lastBalance?.CasualTotalDays ?? 0,
+                CasualUsedDays= lastBalance?.CasualUsedDays ?? 0,
+                CasualRemainingDays = lastBalance?.CasualRemainingDays ?? 0,
             };
 
             if (data.LeaveTypeId == 1 || data.LeaveTypeId == 2)

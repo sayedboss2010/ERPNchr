@@ -16,6 +16,8 @@ namespace ERPNchr.Areas.Employee.Controllers
         // 🧾 عرض كل الإجازات
         public ActionResult Index()
         {
+            int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
+
             var data = (from l in _context.HrEmployeePermissions
                         join e in _context.HrEmployees on l.EmployeeId equals e.Id
                         join t in _context.PermissionsTypes on l.PermissionTypeId equals t.Id
@@ -31,7 +33,7 @@ namespace ERPNchr.Areas.Employee.Controllers
                             DirectManagerApproval = l.DirectManagerApproval,
                             DepartmentManagerApproval = l.DepartmentManagerApproval,
 
-                        }).ToList();
+                        }).Where(a => a.EmployeeId == userId).ToList();
 
             return View(data);
         }
@@ -41,6 +43,8 @@ namespace ERPNchr.Areas.Employee.Controllers
 
         public ActionResult Create()
         {
+            int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
+
             var Emplist = (from e in _context.HrEmployees
                            where e.IsActive == true
                            //&& e.CurrentBranchDeptId == 5
@@ -49,7 +53,7 @@ namespace ERPNchr.Areas.Employee.Controllers
                                e.Id,
                                e.NameAr,
                                Display = e.NameAr + " (" + e.EmpCode + ")"  // نضيف النص المعروض بالاسم + الكود
-                           }).ToList();
+                           }).Where(a => a.Id == userId).ToList();
             // هنا نخزن النص المعروض في ViewBag
             ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
             ViewBag.PermissionType = new SelectList(_context.PermissionsTypes, "Id", "NameAr");

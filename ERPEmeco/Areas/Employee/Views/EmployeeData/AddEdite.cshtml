@@ -171,8 +171,8 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">ذوي الاعاقة</label><br />
                           <input type="checkbox" name="Disability" value="true"
-       @(Model.Disability == true ? "checked" : "") />
-<input type="hidden" name="Disability" value="false" />
+                                @(Model.Disability ? "checked" : "") />
+                          <input type="hidden" name="Disability" value="false" />
 
                             <span>اعاقة</span>
                         </div>
