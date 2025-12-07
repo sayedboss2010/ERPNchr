@@ -9,6 +9,7 @@
     int? departmentId = request.Cookies.ContainsKey("DepartmentID") ? int.Parse(request.Cookies["DepartmentID"]) : null;
 }
 
+
 <html lang="ar"
       class="light-style layout-menu-fixed"
       dir="rtl"
@@ -72,6 +73,41 @@
             right: 0;
         }
 
+        /* فقط للموبايل */
+@@media (max-width: 991px) {
+  #layout-menu {
+    position: fixed !important;
+    top: 0;
+    right: -260px;        /* أخفيها يميناً (لـ RTL) */
+    width: 260px;
+    height: 100%;
+    transform: none;     /* نلغي أي translateX غير مرغوب */
+    transition: right .3s ease;
+    z-index: 9999;
+  }
+
+  body.menu-open #layout-menu {
+    right: 0;  /* تظهر المنيو عند فتحها */
+  }
+
+  /* تعامل مع المحتوى overlay */
+  .layout-overlay {
+    display: none; /* أخفي overlay بشكل افتراضي */
+  }
+  body.menu-open .layout-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9998;
+  }
+
+  /* إذا القائمة طويلة: اجعلها قابلة للتمرير */
+  #layout-menu .menu-inner {
+    overflow-y: auto;
+    max-height: 100vh;
+  }
+}
 
     </style>
 </head>
@@ -83,11 +119,11 @@
             <!-- القائمة الجانبية على اليمين -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                 <div class="app-brand demo">
-                    <a href="index.html" class="app-brand-link gap-2">
+                    <a href="#" class="app-brand-link gap-2">
                         <span class="app-brand-logo demo">
                             <img src="~/assets/img/logo/lg.png" alt="EmEco Logo" style="width: 50px; height: auto;">
                         </span>
-                        <span class="app-brand-text demo text-body fw-bolder">EMECO</span>
+                        <span class="app-brand-text demo text-body fw-bolder"></span>
                     </a>
 
                     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -140,6 +176,7 @@
 
                     </ul>
                 }
+          
                 @if (userType == 2)
                     {<ul>
                         <li class="menu-item">
@@ -620,7 +657,8 @@
                         </ul>
                         
                     }
-            </aside>
+      
+                </aside>
 
 
             <!-- / القائمة الجانبية -->
@@ -783,6 +821,18 @@
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 
     @RenderSection("Scripts", required: false)
+    <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggleBtns = document.querySelectorAll(".layout-menu-toggle");
+    const body = document.body;
 
+    toggleBtns.forEach(btn => {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        body.classList.toggle("menu-open");
+      });
+    });
+  });
+</script>
 </body>
 </html>
