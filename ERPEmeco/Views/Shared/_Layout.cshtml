@@ -7,6 +7,25 @@
     int? userType = request.Cookies.ContainsKey("UserType") ? int.Parse(request.Cookies["UserType"]) : null;
     int? branchId = request.Cookies.ContainsKey("BranchID") ? int.Parse(request.Cookies["BranchID"]) : null;
     int? departmentId = request.Cookies.ContainsKey("DepartmentID") ? int.Parse(request.Cookies["DepartmentID"]) : null;
+    string FullName = request.Cookies["FullName"];
+    string UserTypeName = "مسئول";
+    if (userType ==1)
+    {
+        UserTypeName = "موظف";
+    }
+    if (userType == 2)
+    {
+        UserTypeName = "مدير ادارة";
+    }
+    if (userType == 3)
+    {
+        UserTypeName = "رئيس قطاع";
+    }
+    if (userType == 4)
+    {
+        UserTypeName = "رئيس مجلس الادارة";
+    }
+
 }
 
 
@@ -121,7 +140,7 @@
                 <div class="app-brand demo">
                     <a href="#" class="app-brand-link gap-2">
                         <span class="app-brand-logo demo">
-                            <img src="~/assets/img/logo/lg.png" alt="EmEco Logo" style="width: 50px; height: auto;">
+                            <img src="~/assets/img/logo/lg.png" alt="EmEco Logo" style="width: 100px; height: 50px;">
                         </span>
                         <span class="app-brand-text demo text-body fw-bolder"></span>
                     </a>
@@ -687,7 +706,7 @@
                         <!-- / البحث -->
 
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
-                            <li class="nav-item lh-1 me-3">
+                            <li class="nav-item lh-1 me-3" hidden>
                                 <a class="github-button"
                                    href="https://github.com/themeselection/sneat-html-admin-template-free"
                                    data-icon="octicon-star"
@@ -700,7 +719,7 @@
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
-                                        <img src="~/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                        <img src="~/assets/img/Logo/lg.png" alt class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -709,32 +728,32 @@
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
-                                                        <img src="~/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="~/assets/img/Logo/lg.png" alt class="w-px-40 h-auto rounded-circle" />
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <span class="fw-semibold d-block">جون دو</span>
-                                                    <small class="text-muted">مسؤول</small>
+                                                    <span class="fw-semibold d-block">@FullName</span>
+                                                    <small class="text-muted">@UserTypeName</small>
                                                 </div>
                                             </div>
                                         </a>
                                     </li>
-                                    <li>
+                                    <li >
                                         <div class="dropdown-divider"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="#">
+                                        <a class="dropdown-item" href="~/Home/Index?EmployeeID=@userId">
                                             <i class="bx bx-user me-2"></i>
                                             <span class="align-middle">ملفي الشخصي</span>
                                         </a>
                                     </li>
-                                    <li>
+                                    <li hidden>
                                         <a class="dropdown-item" href="#">
                                             <i class="bx bx-cog me-2"></i>
                                             <span class="align-middle">الإعدادات</span>
                                         </a>
                                     </li>
-                                    <li>
+                                    <li hidden>
                                         <a class="dropdown-item" href="#">
                                             <span class="d-flex align-items-center align-middle">
                                                 <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
@@ -743,11 +762,11 @@
                                             </span>
                                         </a>
                                     </li>
-                                    <li>
+                                    <li hidden>
                                         <div class="dropdown-divider"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="auth-login-basic.html">
+                                        <a class="dropdown-item" href="~/Account/login">
                                             <i class="bx bx-power-off me-2"></i>
                                             <span class="align-middle">تسجيل الخروج</span>
                                         </a>
