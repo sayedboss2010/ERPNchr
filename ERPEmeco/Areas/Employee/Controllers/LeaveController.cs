@@ -60,6 +60,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                 .Select(x => new EmployeeLeaveVM
                 {
                     Id = x.l.Id,
+                    EmployeeTypeId = x.e.EmployeeTypeId,
                     EmployeeId = x.e.Id,
                     EmployeeName = x.e.NameAr,
                     LeaveTypeId = x.t.Id,

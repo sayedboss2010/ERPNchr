@@ -31,7 +31,9 @@
                
                 <td>@item.LeaveDays</td>
                 <td>@item.Reason</td>
-                <td>
+                @if (item.EmployeeTypeId==1)
+                {
+                    <td>
                     <span>: المدير المباشر</span>
                     @if (item.DirectManagerApproval == true)
                     {
@@ -49,6 +51,31 @@
 
                     }
                 </td>
+                }
+                else if (item.EmployeeTypeId==2)
+                {  <td>
+                    <span>: المدير المباشر</span>
+                    @if (item.DirectManagerApproval == true)
+                    {
+                        <span class="text-success">تم القبول</span>
+
+                        <input type="checkbox" class="activateLeave" data-id="@item.Id" />
+                    }
+                    else if (item.DirectManagerApproval == false)
+                    {
+                        <span class="text-success">تم رفض الاجازة</span>
+                    }
+                    else
+                    {
+                        <span class="text-success">لم يتم النظر</span>
+
+                    }
+                </td>
+                    
+                }
+       
+                
+
                 <td>
                     <a href="@Url.Action("PrintNew", "Leave", new { id = item.Id, area = "Employee" })" class="btn btn-info btn-sm">طباعة</a>
                 </td>
