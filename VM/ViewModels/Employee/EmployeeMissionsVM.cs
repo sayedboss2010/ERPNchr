@@ -10,6 +10,7 @@ namespace VM.ViewModels.Employee
 {
     public class EmployeeMissionsVM
     {
+        public string? AttachmentPath { get; set; }
         public int? Id { get; set; }
         public string? EmplyeeName { get; set; }
         public int? EmployeeId { get; set; }

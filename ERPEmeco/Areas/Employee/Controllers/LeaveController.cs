@@ -471,6 +471,44 @@ namespace YourProjectName.Areas.Employee.Controllers
             return View("PrintNew", data);
         }
 
+        [HttpPost]
+        public IActionResult DirectManagerAction(int id, bool isApproved,string type)
+        {
+            var leave = _context.HrEmployeeLeaves.FirstOrDefault(x => x.Id == id);
+            if (leave == null)
+                return Json(new { success = false, message = "لم يتم العثور على الإجازة" });
+
+            DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+
+            // منع الموافقة او الرفض لو اليوم > تاريخ الاجازة
+            if (today > leave.StartDate)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "لا يمكن الموافقة أو الرفض بعد موعد بداية الإجازة."
+                });
+            }
+
+            // في حالة مسموح
+            if (type=="direct")
+            {
+                leave.DirectManagerApproval = isApproved;
+
+            }
+            else if (type == "sector")
+            {
+
+                leave.DepartmentManagerApproval = isApproved;
+            }
+               ;
+            leave.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+
+            _context.SaveChanges();
+
+            return Json(new { success = true, message = "تم تحديث حالة الإجازة بنجاح" });
+        }
+
 
 
 

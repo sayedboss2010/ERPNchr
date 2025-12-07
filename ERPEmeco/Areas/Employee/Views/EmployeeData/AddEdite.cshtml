@@ -1,85 +1,73 @@
 ﻿@model VM.ViewModels.EmployeeVM
 @{
-
     ViewData["Title"] = "Index";
     Layout = "_Layout";
 }
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">الرئيسية/</span>الموظفين </h4>
-    @* @using (Html.BeginForm("AddEdite", "EmployeeData", FormMethod.Post, new { area = "Employee", enctype = "multipart/form-data" })) *@
+    
     @using (Html.BeginForm("AddEdite", "EmployeeData", new { area = "Employee" }, FormMethod.Post, true, new { enctype = "multipart/form-data" }))
     {
-         @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.Id)
 
         <div class="row">
-
             <!-- بيانات الموظف -->
             <div class="col-xxl">
                 <div class="card mb-4">
-
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">بيانات الموظف</h5>
                     </div>
-
                     <div class="card-body">
-
-                        <!-- كود الموظف -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">كود الموظف</label>
                             <input class="form-control" name="EmpCode" value="@Model.EmpCode" />
+                            @Html.ValidationMessageFor(m => m.EmpCode, "", new { @class = "text-danger" })
                         </div>
 
-                        <!-- اسم الموظف -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">اسم الموظف</label>
                             <input class="form-control" name="NameAr" value="@Model.NameAr" />
+                            @Html.ValidationMessageFor(m => m.NameAr, "", new { @class = "text-danger" })
                         </div>
 
-                        <!-- الرقم القومي -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">الرقم القومي</label>
                             <input class="form-control" name="Nid" value="@Model.Nid" />
+                            @Html.ValidationMessageFor(m => m.Nid, "", new { @class = "text-danger" })
                         </div>
 
-                        <!-- تحميل البطاقة -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">صورة البطاقة</label><br />
-
                             @if (!string.IsNullOrEmpty(Model.NidPath))
                             {
-                                <a href="@Model.NidPath"
-                                   class="btn btn-info mb-2" target="_blank">
-                                    تحميل البطاقة
-                                </a>
+                                <a href="@Model.NidPath" class="btn btn-info mb-2" target="_blank">تحميل البطاقة</a>
                             }
-
                             <input class="form-control" type="file" name="NidPath" />
                         </div>
 
-                        <!-- البريد -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">البريد الإلكتروني</label>
                             <input class="form-control" name="Email" value="@Model.Email" />
+                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
                         </div>
-                        <!-- البريد -->
+
                         <div class="mb-3">
- <div class="mb-3">
-                        <label class="fw-bold">الرقم السري:</label>
-                        <input type="password" class="form-control" name="Password" value="@Model.Password" />
-                    </div>
+                            <label class="fw-bold">الرقم السري:</label>
+                            <input type="password" class="form-control" name="Password" value="@Model.Password" />
+                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
                         </div>
-                        <!-- الهاتف -->
+
                         <div class="mb-3">
                             <label class="form-label fw-bold">الهاتف</label>
                             <input class="form-control" name="PhoneNumber" value="@Model.PhoneNumber" />
+                            @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
                         </div>
 
-                        <!-- العنوان -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">العنوان</label>
                             <textarea class="form-control" name="AddressAr">@Model.AddressAr</textarea>
+                            @Html.ValidationMessageFor(m => m.AddressAr, "", new { @class = "text-danger" })
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -87,21 +75,16 @@
             <!-- بيانات الوظيفة -->
             <div class="col-xxl">
                 <div class="card mb-4">
-
                     <div class="card-header bg-secondary text-white">
                         <h5 class="mb-0">البيانات الوظيفية</h5>
                     </div>
-
                     <div class="card-body">
-
-                        <!-- تاريخ التعيين -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">تاريخ التعيين</label>
                             <input type="date" class="form-control" name="AppointmentDate"
                                    value="@(Model.AppointmentDate?.ToString("yyyy-MM-dd"))" />
                         </div>
 
-                        <!-- الإدارة -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">الإدارة</label>
                             <select class="form-select" name="DepartmentId">
@@ -116,7 +99,6 @@
                             </select>
                         </div>
 
-                        <!-- الفرع -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">المحافظة / الفرع</label>
                             <select class="form-select" name="BranchId">
@@ -131,7 +113,6 @@
                             </select>
                         </div>
 
-                        <!-- الوظيفة -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">الوظيفة الحالية</label>
                             <select class="form-select" name="CurrentJobId">
@@ -146,7 +127,6 @@
                             </select>
                         </div>
 
-                        <!-- نوع الموظف -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">نوع الموظف</label><br />
                             @foreach (var item in ViewBag.ListHrEmployeesTypes)
@@ -159,7 +139,6 @@
                             }
                         </div>
 
-                        <!-- الحالة -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">الحالة</label><br />
                             <input type="checkbox" name="IsActive" value="true"
@@ -167,39 +146,33 @@
                             <input type="hidden" name="IsActive" value="false" />
                             <span>نشط</span>
                         </div>
-                         <!-- الاعاقه -->
+
                         <div class="mb-3">
                             <label class="form-label fw-bold">ذوي الاعاقة</label><br />
-                          <input type="checkbox" name="Disability" value="true"
-                                @(Model.Disability ? "checked" : "") />
-                          <input type="hidden" name="Disability" value="false" />
-
+                            <input type="checkbox" name="Disability" value="true"
+                                   @(Model.Disability ? "checked" : "") />
+                            <input type="hidden" name="Disability" value="false" />
                             <span>اعاقة</span>
                         </div>
-
                     </div>
                 </div>
             </div>
-
         </div>
 
-        <!-- زر الحفظ -->
         <div class="row mt-3">
             <div class="col-12 text-end">
                 <button type="submit" class="btn btn-primary">حفــــظ</button>
             </div>
         </div>
     }
-
 </div>
+
 @section Scripts {
     <script>
-
         // DepartmentId
         document.getElementById("CurrentBranchDeptText").addEventListener("input", function () {
             const val = this.value.trim();
             const opts = document.querySelectorAll("#CurrentBranchDeptdatalist option");
-
             let match = Array.from(opts).find(o => o.value.trim() === val);
             document.getElementById("CurrentBranchDeptId").value = match ? match.dataset.id : "";
         });
@@ -208,7 +181,6 @@
         document.getElementById("CurrentBranchText").addEventListener("input", function () {
             const val = this.value.trim();
             const opts = document.querySelectorAll("#CurrentBranchlist option");
-
             let match = Array.from(opts).find(o => o.value.trim() === val);
             document.getElementById("CurrentBranchId").value = match ? match.dataset.id : "";
         });
@@ -217,11 +189,8 @@
         document.getElementById("CurrentJobText").addEventListener("input", function () {
             const val = this.value.trim();
             const opts = document.querySelectorAll("#ListHrJobsDatalistOptions option");
-
             let match = Array.from(opts).find(o => o.value.trim() === val);
             document.getElementById("CurrentJobId").value = match ? match.dataset.id : "";
         });
-
     </script>
-
 }

@@ -25,7 +25,8 @@ namespace VM.ViewModels
         public string? NameAr { get; set; }
 
         public string? NameEn { get; set; }
-
+        [Required(ErrorMessage = "البريد الإلكتروني مطلوب")]
+        [EmailAddress(ErrorMessage = "صيغة البريد الإلكتروني غير صحيحة")]
         public string? Email { get; set; }
 
         public string? Password { get; set; }
@@ -73,7 +74,8 @@ namespace VM.ViewModels
         /// <summary>
         /// الرقم القومي
         /// </summary>
-        [Required(ErrorMessage = "❌ يجب ادخال رقم قومي صحيح")]
+        [Required(ErrorMessage = "الرقم القومي مطلوب")]
+       
         public string? Nid { get; set; }
 
         /// <summary>

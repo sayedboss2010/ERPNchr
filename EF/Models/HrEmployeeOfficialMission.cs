@@ -41,5 +41,7 @@ public partial class HrEmployeeOfficialMission
     /// </summary>
     public bool? DepartmentManagerApproval { get; set; }
 
+    public string? AttachmentPath { get; set; }
+
     public virtual HrEmployee? Employee { get; set; }
 }

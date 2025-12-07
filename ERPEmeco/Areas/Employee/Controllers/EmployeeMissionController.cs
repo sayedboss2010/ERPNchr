@@ -17,30 +17,59 @@ namespace ERPNchr.Areas.Employee.Controllers
         public ActionResult Index()
         {
             int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
-            var data = (from l in _context.HrEmployeeOfficialMissions
-                        join e in _context.HrEmployees
-                            on l.EmployeeId equals e.Id
-                        //join d in _context.HrDepartments
-                        //    on l.DepartmentId equals d.Id      // ← الربط الصحيح مباشرة
+
+            int? userType = Request.Cookies.ContainsKey("UserType") ? int.Parse(Request.Cookies["UserType"]) : null;
+
+            int? branchId = Request.Cookies.ContainsKey("BranchID") ? int.Parse(Request.Cookies["BranchID"]) : null;
+
+            int? departmentId = Request.Cookies.ContainsKey("DepartmentID") ? int.Parse(Request.Cookies["DepartmentID"]) : null;
+
+            var query = from l in _context.HrEmployeeOfficialMissions
+                        join e in _context.HrEmployees on l.EmployeeId equals e.Id
+                        //join t in _context.PermissionsTypes on l. equals t.Id
                         where l.IsActive == true
-                        orderby l.Id descending
-                        select new EmployeeMissionsVM
-                        {
-                            Id = (int)l.Id,
-                            EmployeeId = (int) e.Id,
-                            EmplyeeName = e.NameAr,
+                        select new { l, e };
 
-                            //DepartmentId = d.Id,
-                            //DepartmentName = d.NameAr,        // ← يظهر في الفيو
+            switch (userType)
+            {
+                case 1: // موظف - يشوف بس الطلبات الخاصة به
+                    query = query.Where(x => x.e.Id == userId);
+                    break;
 
-                            PurposeOfMission = l.PurposeOfMission,
-                            AuthorityOfMission = l.AuthorityOfMission,
-                            StartDate = l.StartDate,
-                            EndDate = l.EndDate,
+                case 2: // مدير إدارة - يشوف كل الموظفين في الإدارة
+                    query = query.Where(x =>
+                        x.e.DepartmentId == departmentId &&
+                        x.e.BranchId == branchId
+                    );
+                    break;
 
-                            DirectManagerApproval = l.DirectManagerApproval,
-                            DepartmentManagerApproval = l.DepartmentManagerApproval
-                        }).Where(a=>a.EmployeeId== userId).ToList();
+                case 3: // رئيس قطاع - يشوف كل الموظفين
+                        // لا نضيف أي فلاتر
+                    break;
+            }
+
+            // ----- Final Select -----
+            var data = query
+                .OrderByDescending(x => x.l.Id)
+                
+                .Select(x => new EmployeeMissionsVM
+                {
+                     Id = (int)x.l.Id,
+                     EmployeeId = (int)x.e.Id,
+                     EmplyeeName = x.e.NameAr,
+
+                     //DepartmentId = d.Id,
+                     DepartmentName = x.e.Department.NameAr,        // ← يظهر في الفيو
+
+                     PurposeOfMission = x.l.PurposeOfMission,
+                     AuthorityOfMission = x.l.AuthorityOfMission,
+                     StartDate = x.l.StartDate,
+                     EndDate = x.l.EndDate,
+
+                     DirectManagerApproval = x.l.DirectManagerApproval,
+                     DepartmentManagerApproval = x.l.DepartmentManagerApproval
+                 }).ToList();
+           
 
             return View(data);
         }
@@ -73,17 +102,41 @@ namespace ERPNchr.Areas.Employee.Controllers
         {
             int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
 
-            var Emplist = (from e in _context.HrEmployees
-                           where e.IsActive == true
-                           //&& e.CurrentBranchDeptId == 5
-                           select new
-                           {
-                               e.Id,
-                               e.NameAr,
-                               Display = e.NameAr + " (" + e.EmpCode + ")"  // نضيف النص المعروض بالاسم + الكود
-                           }).Where(a => a.Id == userId).ToList();
-            // هنا نخزن النص المعروض في ViewBag
-            ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
+            int? userType = Request.Cookies.ContainsKey("UserType") ? int.Parse(Request.Cookies["UserType"]) : null;
+
+            int? branchId = Request.Cookies.ContainsKey("BranchID") ? int.Parse(Request.Cookies["BranchID"]) : null;
+
+            int? departmentId = Request.Cookies.ContainsKey("DepartmentID") ? int.Parse(Request.Cookies["DepartmentID"]) : null;
+
+            // ----- Base Query -----
+            var employeesQuery = _context.HrEmployees.Where(e => e.IsActive);
+
+            switch (userType)
+            {
+                case 1: // موظف
+                    employeesQuery = employeesQuery.Where(e => e.Id == userId);
+                    break;
+
+                case 2: // مدير إدارة
+                    employeesQuery = employeesQuery.Where(e => e.DepartmentId == departmentId && e.BranchId == branchId);
+                    break;
+
+                case 3: // رئيس قطاع
+                        // يشوف الكل → لا نضيف أي فلاتر
+                    break;
+            }
+
+            // ----- Build List -----
+            var employeeOptions = employeesQuery
+                .Select(e => new
+                {
+                    e.Id,
+                    Display = e.NameAr + " (" + e.EmpCode + ")"
+                })
+                .ToList();
+
+            ViewBag.EmployeeOptions = new SelectList(employeeOptions, "Id", "Display");
+           
            
             return View();
         }
@@ -91,28 +144,28 @@ namespace ERPNchr.Areas.Employee.Controllers
 
 
         [HttpPost]
-        public IActionResult Create(EmployeeMissionsVM model)
+        public IActionResult Create(EmployeeMissionsVM model, IFormFile AttachmentPath)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    FillViewBags();   // مهم جداً
-            //    return View(model);
-            //}
-            // تحقق من وجود مأمورية لنفس الموظف تتداخل مع الفترة الجديدة
+            if (AttachmentPath == null || AttachmentPath.Length == 0)
+            {
+                ModelState.AddModelError("MissionAttachment", "⚠️ مرفق المأمورية مطلوب.");
+                FillViewBags();
+                return View(model);
+            }
+
+            // تحقق من وجود مأمورية تتداخل مع نفس الفترة
             bool exists = _context.HrEmployeeOfficialMissions
-                .Any(p => p.EmployeeId == model.EmployeeId
-                          && p.IsActive
-                          && p.StartDate <= model.EndDate      // بداية القديمة <= نهاية الجديدة
-                          && p.EndDate >= model.StartDate);   // نهاية القديمة >= بداية الجديدة
+                 .Any(p => p.EmployeeId == model.EmployeeId
+                           && p.IsActive
+                           && p.StartDate <= model.EndDate
+                           && p.EndDate >= model.StartDate);
 
             if (exists)
             {
-                FillViewBags(); // إعادة تعبئة القوائم في ViewBag
-
+                FillViewBags();
                 ModelState.AddModelError("", "⚠️ هذا الموظف لديه مأمورية تتداخل مع نفس الفترة.");
-                return View(model); // إعادة عرض الصفحة مع رسالة الخطأ
+                return View(model);
             }
-
 
             // إنشاء المعرف الجديد
             long HrEmployeeMission_ID = _context.Database
@@ -126,19 +179,47 @@ namespace ERPNchr.Areas.Employee.Controllers
                 EmployeeId = model.EmployeeId,
                 PurposeOfMission = model.PurposeOfMission,
                 AuthorityOfMission = model.AuthorityOfMission,
-               
                 StartDate = model.StartDate,
+                
                 EndDate = model.EndDate,
                 CreatedDate = DateOnly.FromDateTime(DateTime.Now),
-                CreatedUserId = 1, // TODO: استبدلها بالمستخدم الحالي
+                CreatedUserId = 1,
                 IsActive = true,
             };
+
+            // حفظ الملف على السيرفر
+            // إنشاء اسم الملف
+            var fileName = $"{HrEmployeeMission_ID}_{Path.GetFileName(AttachmentPath.FileName)}";
+
+            // تحديد مسار المجلد
+            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "MissionAttachments");
+
+            // التأكد من وجود المجلد، إذا لم يكن موجودًا إنشئه
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            // المسار الكامل للملف
+            var path = Path.Combine(folderPath, fileName);
+
+            // حفظ الملف
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                AttachmentPath.CopyTo(stream);
+            }
+
+            // حفظ المسار في الكيان (Entity) ليتم تخزينه في قاعدة البيانات
+            entity.AttachmentPath = $"/MissionAttachments/{fileName}";
+
+            entity.AttachmentPath = $"/MissionAttachments/{fileName}";
 
             _context.HrEmployeeOfficialMissions.Add(entity);
             _context.SaveChanges();
 
             return RedirectToAction("PrintMissionNew", "EmployeeMission", new { area = "Employee", id = entity.Id });
         }
+
 
         [HttpGet]
         public ActionResult PrintMissionNew(long id)
@@ -158,9 +239,48 @@ namespace ERPNchr.Areas.Employee.Controllers
                             PurposeOfMission = p.PurposeOfMission,
                             StartDate = p.StartDate,
                             EndDate = p.EndDate,
+                            AttachmentPath = p.AttachmentPath
                         }).FirstOrDefault();
 
             return View(data);   // يفتح صفحة الطباعة
         }
+        [HttpPost]
+        public IActionResult DirectManagerAction(int id, bool isApproved, string type)
+        {
+            var mission = _context.HrEmployeeOfficialMissions.FirstOrDefault(x => x.Id == id);
+            if (mission == null)
+                return Json(new { success = false, message = "لم يتم العثور على المامورية" });
+
+            DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+
+            // منع الموافقة او الرفض لو اليوم > تاريخ الاجازة
+            if (today > mission.StartDate)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "لا يمكن الموافقة أو الرفض بعد موعد بداية المامورية."
+                });
+            }
+
+            // في حالة مسموح
+            if (type == "direct")
+            {
+                mission.DirectManagerApproval = isApproved;
+
+            }
+            else if (type == "sector")
+            {
+
+                mission.DepartmentManagerApproval = isApproved;
+            }
+              ;
+            mission.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+
+            _context.SaveChanges();
+
+            return Json(new { success = true, message = "تم تحديث حالة المأمورية بنجاح" });
+        }
+
     }
 }

@@ -170,6 +170,16 @@
                 </span>
             </div>
         </div>
+        @if (!string.IsNullOrEmpty(Model.AttachmentPath))
+        {
+            <div class="row mt-3">
+                <div class="col-12">
+                    <a href="@Model.AttachmentPath" target="_blank" class="btn btn-info">
+                        📎 تحميل المرفق
+                    </a>
+                </div>
+            </div>
+        }
 
        
         <!-- توقيعات -->
