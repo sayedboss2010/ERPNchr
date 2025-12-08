@@ -286,36 +286,28 @@
                  // =====================================================
           // شرط الإجازة الاعتيادية
           // =====================================================
-        if (leaveType == "2" ) {
-        let now = new Date();
-        let today = new Date();
-        today.setHours(0, 0, 0, 0);   // نحدد اليوم فقط بدون ساعات
+              if (leaveType == "2") {
 
-        let start = new Date($("#StartDate").val());
-        start.setHours(0, 0, 0, 0);    // نحدد اليوم فقط
+            let today = new Date();
+            today.setHours(0, 0, 0, 0); // تصفير الوقت
 
-        // حساب الفرق بالأيام
-        let diffDays = (start - today) / (1000 * 60 * 60 * 24);
+            let start = new Date($("#StartDate").val());
+            start.setHours(0, 0, 0, 0);
 
-        // السماح فقط لو الفرق يوم أو يومين
-        if (diffDays === 1 || diffDays === 2) {
-            $("#btnSave").prop("disabled", false); // مسموح
-        } else {
-            alert("❌ الإجازة الاعتيادية يجب أن تكون قبلها بيوم أو يومين فقط.");
-            $("#btnSave").prop("disabled", true);  // يمنع الحفظ
+            // حساب الفرق بالأيام
+            let diffDays = (start - today) / (1000 * 60 * 60 * 24);
+
+            // ممنوع الإجازة اليوم أو قبله
+            if (diffDays < 1) {
+                alert("❌ الإجازة الاعتيادية يجب تقديمها قبل بدايتها على الأقل بيوم واحد.");
+                $("#btnSave").prop("disabled", true);
+                return;
+            }
+
+            // أي مدة قبلها مسموحة (1 يوم إلى ما لا نهاية)
+            $("#btnSave").prop("disabled", false);
         }
 
-
-       
-
-
-      
-
-
-       
-
-        $("#btnSave").prop("disabled", false);
-        }
                   // =====================================================
                   // شرط الإجازة السنوية
                   // =====================================================
