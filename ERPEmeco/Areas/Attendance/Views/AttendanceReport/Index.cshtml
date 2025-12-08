@@ -6,7 +6,7 @@
     var firstRecord = Model.FirstOrDefault();
     var today = firstRecord != null ? firstRecord.Date : DateOnly.FromDateTime(DateTime.Now);
     var totalEmployees = Model.Count();
-    var laundryName = "المغسلة"; // أو اجلبه من ViewBag/Model
+    // var laundryName = "المغسلة"; // أو اجلبه من ViewBag/Model
 }
 <script>
     function printDiv(divId) {
@@ -34,7 +34,7 @@
             <img src="~/assets/img/logo/lg.png" style="height:60px;" />
         </div>
         <div style="flex: 1; text-align: center;">
-            <h3 style="margin: 0;">تقرير الحضور والانصراف عن @laundryName</h3>
+            <h3 style="margin: 0;">تقرير الحضور والانصراف</h3>
         </div>
         <div style="flex: 1; text-align: left;">
             <p style="margin: 0;">التاريخ: @today.ToString("yyyy-MM-dd")</p>
@@ -47,7 +47,7 @@
             <img src="~/assets/img/logo/lg.png" style="height:60px;" />
         </div>
         <div style="flex: 1; text-align: center;">
-            <h3 style="margin: 0;">تقرير الحضور والانصراف عن @laundryName</h3>
+            <h3 style="margin: 0;">تقرير الحضور والانصراف </h3>
         </div>
         <div style="flex: 1; text-align: left;">
             <p style="margin: 0;">التاريخ: @today.ToString("yyyy-MM-dd")</p>
