@@ -108,7 +108,7 @@ namespace ERPNchr.Areas.LookUP.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index", "HRJob", new { area = "LookUP" });
+            return RedirectToAction("Index", "JopData", new { area = "LookUP" });
         }
 
 
@@ -134,7 +134,7 @@ namespace ERPNchr.Areas.LookUP.Controllers
             return Json(new
             {
                 success = true,
-                redirectUrl = Url.Action("Index", "HRJob", new { area = "LookUP" })
+                redirectUrl = Url.Action("Index", "JopData", new { area = "LookUP" })
             });
         }
 
