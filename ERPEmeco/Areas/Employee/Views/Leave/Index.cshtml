@@ -80,7 +80,22 @@
        2) المدير المباشر (UserType = 2)
        ============================ *@
     else if (currentUserType == 2)
-    {
+    { 
+       
+
+        if (item.DepartmentManagerApproval == true)
+        {
+            <span class="text-success">تم القبول من مدير القطاع</span>
+        }
+        else if (item.DepartmentManagerApproval == false)
+        {
+            <span class="text-danger">تم الرفض من مدير القطاع</span>
+        }
+        else
+        {
+            <span class="text-warning">في انتظار موافقة مدير القطاع</span>
+        }
+         <br />
         if (item.DirectManagerApproval == true)
         {
             <span class="text-success">تم القبول</span>
