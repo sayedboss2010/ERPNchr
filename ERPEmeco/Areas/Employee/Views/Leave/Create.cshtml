@@ -118,6 +118,55 @@
 </div>
 
 @section Scripts {
+
+
+    <script>
+        const startInput = document.getElementById("StartDate");
+        const endInput = document.getElementById("EndDate");
+        const actualDaysInput = document.getElementById("ActualDays");
+
+        // StartDate يبدأ من بكرة
+        startInput.min = new Date(Date.now() + 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[0];
+
+        // عند تغيير تاريخ البداية
+        startInput.addEventListener("change", function () {
+            // EndDate لا يبدأ إلا من StartDate
+            endInput.min = this.value;
+
+            // لو نهاية أقل من بداية يتم تصحيحها
+            if (endInput.value < this.value) {
+                endInput.value = this.value;
+            }
+
+            calculateDays();
+        });
+
+        // عند تغيير تاريخ النهاية
+        endInput.addEventListener("change", function () {
+            calculateDays();
+        });
+
+        // دالة حساب عدد الأيام
+        function calculateDays() {
+            if (startInput.value && endInput.value) {
+                const start = new Date(startInput.value);
+                const end = new Date(endInput.value);
+
+                // الفرق بالأيام
+                const diffTime = end - start;
+                const diffDays = diffTime / (1000 * 60 * 60 * 24) + 1; // +1 عشان يشمل اليومين
+
+                if (diffDays > 0) {
+                    actualDaysInput.value = diffDays;
+                } else {
+                    actualDaysInput.value = "";
+                }
+            }
+        }
+    </script>
+
     <script>
 
         $(document).ready(function () {
@@ -191,7 +240,7 @@
             // =====================================================
             // 3) تغيير التواريخ
             // =====================================================
-      $("#StartDate, #EndDate").change(function () {
+             $("#StartDate, #EndDate").change(function () {
                  var leaveType = $("#LeaveTypeId").val();
             var remainingDayes=$("#RemainingDays").val();
                           if(remainingDayes==0 && (leaveType == "2" ||leaveType == "1") ){
@@ -356,6 +405,19 @@
                         return false;
                     }
                 }
+
+                      const actualDaysInput = document.getElementById("ActualDays");
+          const remainingInput = document.getElementById("RemainingDays");
+
+          
+              const actual = parseInt(actualDaysInput.value) || 0;
+              const remaining = parseInt(remainingInput.value) || 0;
+
+              if (actual > remaining) {
+                  alert("عدد أيام الإجازة لا يمكن أن يكون أكبر من المتبقي!");
+                        return false;
+              }
+          
             });
 
         });

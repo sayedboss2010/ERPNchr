@@ -225,14 +225,8 @@
                 </thead>
                 <tbody>
                     <tr>
-                        
-                        <td>@Model.TotalDays</td>
-                    
-                       
-                        <td>@Model.UsedDays</td>
-                    
-                   
-                        
+                        <td>@((int)Model.TotalDays)</td>
+                        <td>@((int)Model.UsedDays)</td>
                         <td>@Model.RemainingAfter</td>
                    </tr>
                     <tr>
@@ -242,13 +236,8 @@
 
                     </tr>
                    <tr>
-                        <td>@Model.CasualTotalDays</td>
-
-
-                        <td>@Model.CasualUsedDays</td>
-
-
-
+                        <td>@((int)Model.CasualTotalDays)</td>
+                        <td>@((int)Model.CasualUsedDays)</td>
                         <td>@Model.CasualRemainingDays</td>
                    </tr>
                 </tbody>

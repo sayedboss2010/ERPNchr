@@ -75,7 +75,6 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<UserType> UserTypes { get; set; }
 
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         try
@@ -414,22 +413,16 @@ public partial class AppDbContext : DbContext
             entity.ToTable("HR_Employee_LeaveBalance", tb => tb.HasComment("رصيد الإجازات السنوي (اعتيادي + عارضة)"));
 
             entity.Property(e => e.Id).HasColumnName("ID");
-            entity.Property(e => e.AnnualRemainingDays).HasComment("باقي الايام السنوية");
+            entity.Property(e => e.AnnualRemainingDays).HasComputedColumnSql("([AnnualTotalDays]-[AnnualUsedDays])", true);
             entity.Property(e => e.AnnualTotalDays)
-                .HasDefaultValue(7m)
-                .HasComment("إجمالي الإجازات السنوية في السنة")
-                .HasColumnType("decimal(5, 2)");
-            entity.Property(e => e.AnnualUsedDays)
-                .HasComment("ايام السنوية المستخدمة")
-                .HasColumnType("decimal(5, 2)");
-            entity.Property(e => e.CasualRemainingDays).HasComment("باقي الايام العارضة");
+                .HasDefaultValue(7)
+                .HasComment("إجمالي الإجازات السنوية في السنة");
+            entity.Property(e => e.AnnualUsedDays).HasComment("ايام السنوية المستخدمة");
+            entity.Property(e => e.CasualRemainingDays).HasComputedColumnSql("([CasualTotalDays]-[CasualUsedDays])", true);
             entity.Property(e => e.CasualTotalDays)
-                .HasDefaultValue(7m)
-                .HasComment("إجمالي الإجازات العارضة في السنة")
-                .HasColumnType("decimal(5, 2)");
-            entity.Property(e => e.CasualUsedDays)
-                .HasComment("ايام العارضة المستخدمة")
-                .HasColumnType("decimal(5, 2)");
+                .HasDefaultValue(7)
+                .HasComment("إجمالي الإجازات العارضة في السنة");
+            entity.Property(e => e.CasualUsedDays).HasComment("ايام العارضة المستخدمة");
             entity.Property(e => e.CreatedDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -441,17 +434,14 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsAnnualBalanceCalculated).HasComment("تم احتساب الإجازة على باقي الرصيد الاعتيادي (0 = لا، 1 = نعم)");
             entity.Property(e => e.TotalDays)
-                .HasDefaultValue(30m)
-                .HasComment("إجمالي الإجازات الاعتيادية في السنة")
-                .HasColumnType("decimal(5, 2)");
-            entity.Property(e => e.TotalDaysReminig).HasComment("باقي ايام الاعتيادي");
+                .HasDefaultValue(30)
+                .HasComment("إجمالي الإجازات الاعتيادية في السنة");
+            entity.Property(e => e.TotalDaysReminig).HasComputedColumnSql("([TotalDays]-[UsedDays])", false);
             entity.Property(e => e.UpdatedDate)
                 .HasColumnType("datetime")
                 .HasColumnName("Updated_Date");
             entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
-            entity.Property(e => e.UsedDays)
-                .HasComment("الايام الاعتيادي المستخدمه فى السنة")
-                .HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.UsedDays).HasComment("الايام الاعتيادي المستخدمه فى السنة");
 
             entity.HasOne(d => d.Employee).WithMany(p => p.HrEmployeeLeaveBalances)
                 .HasForeignKey(d => d.EmployeeId)
@@ -809,6 +799,10 @@ public partial class AppDbContext : DbContext
         modelBuilder.HasSequence<int>("DataUpdatesLogTb_SEQ")
             .HasMin(1L)
             .IsCyclic();
+        modelBuilder.HasSequence<int>("EmployeeType_SEQ")
+            .StartsAt(5L)
+            .HasMin(1L)
+            .IsCyclic();
         modelBuilder.HasSequence<int>("ExceptionLogTb_SEQ")
             .HasMin(1L)
             .IsCyclic();
@@ -817,11 +811,11 @@ public partial class AppDbContext : DbContext
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("HR_Branches_SEQ")
-            .StartsAt(2L)
+            .StartsAt(3L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("HR_Departments_SEQ")
-            .StartsAt(11L)
+            .StartsAt(12L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence("HR_Employee_Attendance_SEQ")
@@ -831,15 +825,23 @@ public partial class AppDbContext : DbContext
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence("HR_Employee_LeaveBalance_SEQ")
+            .StartsAt(243L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence("HR_Employee_Leaves_SEQ")
+            .StartsAt(30L)
             .HasMin(1L)
             .IsCyclic();
-        modelBuilder.HasSequence("HR_EmployeeOfficialMission_SEQ").HasMin(1L);
-        modelBuilder.HasSequence("HR_EmployeePermissions_SEQ").HasMin(1L);
+        modelBuilder.HasSequence("HR_EmployeeOfficialMission_SEQ")
+            .StartsAt(7L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence("HR_EmployeePermissions_SEQ")
+            .StartsAt(9L)
+            .HasMin(1L)
+            .IsCyclic();
         modelBuilder.HasSequence("HR_Employees_SEQ")
-            .StartsAt(17L)
+            .StartsAt(34L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("HR_JobGrades_SEQ")
@@ -850,7 +852,7 @@ public partial class AppDbContext : DbContext
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<byte>("HR_LeaveTypes_SEQ")
-            .StartsAt(4L)
+            .StartsAt(6L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<byte>("HR_Machine_IP_SEQ")
@@ -862,7 +864,11 @@ public partial class AppDbContext : DbContext
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("LogInHistoryTb_SEQ")
-            .StartsAt(110L)
+            .StartsAt(227L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("PermissionsTypes_SEQ")
+            .StartsAt(4L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("PR_Group_SEQ")

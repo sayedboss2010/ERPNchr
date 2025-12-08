@@ -1,4 +1,4 @@
-Scaffold-DbContext "Server=DESKTOP-R5ET6G3;Database=HR_Nchr;Trusted_Connection=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Context "AppDbContext" -ContextDir Data -Force
+Scaffold-DbContext "Server=DESKTOP-NOQBEUP;Database=HR_Nchr;Trusted_Connection=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Context "AppDbContext" -ContextDir Data -Force
 
 
 

@@ -333,8 +333,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                 if (model.LeaveTypeId == 2)
                 {
                     leaveBalance.UsedDays += (int)model.ActualDays;
-                    leaveBalance.TotalDaysReminig =
-                        (int)(leaveBalance.TotalDays - leaveBalance.UsedDays);
+                    leaveBalance.TotalDaysReminig =(int)(leaveBalance.TotalDays - leaveBalance.UsedDays);
                 }
 
                 //// =============================
@@ -347,8 +346,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                     leaveBalance.AnnualRemainingDays =
                         (int)(leaveBalance.AnnualTotalDays - leaveBalance.AnnualUsedDays);
                     leaveBalance.UsedDays += (int)model.ActualDays;
-                    leaveBalance.TotalDaysReminig =
-                        (int)(leaveBalance.TotalDays - (int)model.ActualDays);
+                    leaveBalance.TotalDaysReminig =(int)(leaveBalance.TotalDays - (int)model.ActualDays);
 
                 }
 

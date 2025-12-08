@@ -70,6 +70,13 @@
 
     <!-- تعديل الـ CSS لتحديد مكان المنيو على اليمين -->
     <style>
+
+        .dropdown-menu-end[data-bs-popper]        Specificity: (0,2,0) {
+            /* right: 0; */
+            /* left: auto; */
+        }
+
+
         .menu-item.active > .menu-link {
             background-color: #007bff;
             color: #fff !important;
@@ -462,7 +469,7 @@
 
 
                         <!-- البصمة -->
-                        <li class="menu-item">
+                        <li class="menu-item" hidden>
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
                                 <i class="menu-icon tf-icons bx bx-fingerprint"></i>
                                 <div>البصمات</div>
