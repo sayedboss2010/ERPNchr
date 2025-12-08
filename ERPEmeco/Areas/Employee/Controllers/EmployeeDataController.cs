@@ -291,10 +291,12 @@ public class EmployeeDataController : Controller
             // =========================
             // معالجة كلمة المرور
             // =========================
-            if (!string.IsNullOrWhiteSpace(model.Password))
-            {
-                employee.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
-            }
+
+            employee.Password = model.Password;
+            //if (!string.IsNullOrWhiteSpace(model.Password))
+            //{
+            //    employee.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            //}
 
             // =========================
             // رفع ملف Nid
