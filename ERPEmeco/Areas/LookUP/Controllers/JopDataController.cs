@@ -72,7 +72,7 @@ namespace ERPNchr.Areas.LookUP.Controllers
             if (HRJobs.Id == 0)   // CREATE
             {
                 int newId = _context.Database
-                    .SqlQueryRaw<int>("SELECT NEXT VALUE FOR dbo.HR_HRJob_SEQ")
+                    .SqlQueryRaw<int>("SELECT NEXT VALUE FOR dbo.HR_Jobs_SEQ")
                     .AsEnumerable()
                     .First();
 
