@@ -83,7 +83,7 @@ namespace ERPNchr.Areas.LookUP.Controllers
                     TitleEn = HRJobs.TitleEn,
                     CreatedDate = DateOnly.FromDateTime(DateTime.Now),
                     CreatedUserId = 1,
-                    IsActive = false
+                    IsActive = true
                 };
 
                 _context.HrJobs.Add(entity);
