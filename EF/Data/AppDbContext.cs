@@ -1,8 +1,7 @@
-﻿using EF.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using EF.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EF.Data;
 
@@ -75,21 +74,12 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<UserType> UserTypes { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        try
-        {
-            string c = Directory.GetCurrentDirectory();
-            IConfigurationRoot configuration =
-                new ConfigurationBuilder().SetBasePath(c).AddJsonFile("appsettings.json").Build();
+    public virtual DbSet<VwEmployeeActivity> VwEmployeeActivities { get; set; }
 
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DBConnection"));
-        }
-        catch
-        {
-            //ignore
-        }
-    }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=DESKTOP-NOQBEUP;Database=HR_Nchr;Trusted_Connection=True;TrustServerCertificate=True;");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AUserLogin>(entity =>
@@ -793,6 +783,28 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("ID");
         });
+
+        modelBuilder.Entity<VwEmployeeActivity>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("vw_EmployeeActivities");
+
+            entity.Property(e => e.BranchId).HasColumnName("BranchID");
+            entity.Property(e => e.BranchName).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasColumnName("Created_Date");
+            entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
+            entity.Property(e => e.DepartmentName).HasMaxLength(100);
+            entity.Property(e => e.DeptManagerStatus).HasMaxLength(12);
+            entity.Property(e => e.Details).HasMaxLength(200);
+            entity.Property(e => e.DirectManagerStatus).HasMaxLength(12);
+            entity.Property(e => e.EmployeeId).HasColumnName("Employee_ID");
+            entity.Property(e => e.EmployeeName).HasMaxLength(100);
+            entity.Property(e => e.ExtraInfo).HasMaxLength(200);
+            entity.Property(e => e.RecordType)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+        });
         modelBuilder.HasSequence("A__User_Login_SEQ")
             .HasMin(1L)
             .IsCyclic();
@@ -829,7 +841,7 @@ public partial class AppDbContext : DbContext
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence("HR_Employee_Leaves_SEQ")
-            .StartsAt(30L)
+            .StartsAt(34L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence("HR_EmployeeOfficialMission_SEQ")
@@ -837,7 +849,7 @@ public partial class AppDbContext : DbContext
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence("HR_EmployeePermissions_SEQ")
-            .StartsAt(9L)
+            .StartsAt(10L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence("HR_Employees_SEQ")
