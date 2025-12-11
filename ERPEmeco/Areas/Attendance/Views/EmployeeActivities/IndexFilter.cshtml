@@ -1,0 +1,173 @@
+﻿@model VM.ViewModels.EmployeeActivityReportVM
+
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "تقرير الأنشطة اليومية للموظفين";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">الرئيسية/</span>
+        <span class="text-muted fw-light">تقارير/</span>
+        تقرير الأنشطة اليومية للموظفين
+    </h4>
+
+    @using (Html.BeginForm("IndexFilter", "EmployeeActivities", new { area = "Attendance" }, FormMethod.Get, true, new { enctype = "multipart/form-data" }))
+    {
+        <!-- فلتر البحث -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">بيانات الفلتر</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <!-- الصف الأول: الإدارة، الفرع، الموظف، نوع السجل -->
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <label class="form-label fw-bold">الإدارة:</label>
+                        <select name="departmentId" class="form-select">
+                            <option value="">الكل</option>
+                            @foreach (var d in ViewBag.Departments)
+                            {
+                                <option value="@d.Id">@d.NameAr</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <label class="form-label fw-bold">الفرع:</label>
+                        <select name="branchId" class="form-select">
+                            <option value="">الكل</option>
+                            @foreach (var b in ViewBag.Branches)
+                            {
+                                <option value="@b.Id">@b.NameAr</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <label class="form-label fw-bold">الموظف:</label>
+                        <select name="employeeId" class="form-select">
+                            <option value="">الكل</option>
+                            @foreach (var e in ViewBag.Employees)
+                            {
+                                <option value="@e.Id">@e.NameAr</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <label class="form-label fw-bold">نوع السجل:</label>
+                        <select name="recordType" class="form-select">
+                            <option value="">الكل</option>
+                            @foreach (var rt in ViewBag.RecordTypes)
+                            {
+                                <option value="@rt">@rt</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- الصف الثاني: من وإلى + زر العرض -->
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <label class="form-label fw-bold">من:</label>
+                        <input type="date" name="fromDate" class="form-control" />
+                    </div>
+
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <label class="form-label fw-bold">إلى:</label>
+                        <input type="date" name="toDate" class="form-control" />
+                    </div>
+
+                    <div class="col-lg-6 col-md-12 text-end mt-3">
+                        <button type="submit" class="btn btn-primary">عرض</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+
+    <!-- جدول إجماليات حسب نوع السجل -->
+    <h3>إجماليات حسب نوع السجل</h3>
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white fw-bold">
+            <h5 class="mb-0">إجماليات حسب نوع السجل</h5>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-striped table-hover mb-0">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th>نوع السجل</th>
+                        <th>عدد السجلات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Summary)
+                    {
+                        <tr>
+                            <td>@item.RecordType</td>
+                            <td>@item.Count</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <hr />
+
+    <!-- جدول التفاصيل حسب الإدارة -->
+    <h3>التفاصيل حسب الإدارة</h3>
+@if (Model.ByDepartment.Any())
+{
+    @foreach (var dept in Model.ByDepartment)
+    {
+        @if (dept.Records.Any())
+        {
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white fw-bold">
+                        <h5 class="mb-0">@dept.DepartmentName</h5>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-bordered table-striped table-hover mb-0">
+                            <thead class="bg-primary text-white">
+                                <tr>
+                                    <th>اسم الموظف</th>
+                                    <th>الفرع</th>
+                                    <th>نوع السجل</th>
+                                    <th>التفاصيل</th>
+                                    <th>معلومات إضافية</th>
+                                    <th>تاريخ البداية</th>
+                                    <th>تاريخ النهاية</th>
+                                    <th>عدد أيام الإجازة</th>
+                                    <th>حالة موافقة المدير المباشر</th>
+                                    <th>حالة موافقة رئيس الإدارة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in dept.Records)
+                                {
+                                    <tr>
+                                        <td>@item.EmployeeName </td>
+                                        <td>@item.BranchName </td>
+                                        <td>@item.RecordType </td>
+                                        <td>@item.Details </td>
+                                        <td>@item.ExtraInfo </td>
+                                        <td>@(item.StartDate?.ToString("yyyy-MM-dd"))</td>
+                                        <td>@(item.EndDate?.ToString("yyyy-MM-dd"))</td>
+                                        <td>@(item.LeaveDays?.ToString())</td>
+                                        <td>@item.DirectManagerStatus </td>
+                                        <td>@item.DeptManagerStatus </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+        }
+    }
+}
+else
+{
+        <p>لا توجد بيانات للعرض.</p>
+}
+

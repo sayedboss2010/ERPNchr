@@ -5,7 +5,7 @@
 }
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">الرئيسية/</span>الموظفين </h4>
-    
+
     @using (Html.BeginForm("AddEdite", "EmployeeData", new { area = "Employee" }, FormMethod.Post, true, new { enctype = "multipart/form-data" }))
     {
         @Html.HiddenFor(m => m.Id)
@@ -148,14 +148,14 @@
                         </div>
 
                         <div class="mb-3">
-    <label class="form-label fw-bold">ذوي الاعاقة</label><br />
+                            <label class="form-label fw-bold">ذوي الاعاقة</label><br />
 
-    <input type="checkbox" name="Disability" value="true"
-           @((Model.Disability ?? false) ? "checked" : "") />
+                            <input type="checkbox" name="Disability" value="true"
+                                   @((Model.Disability ?? false) ? "checked" : "") />
 
-    <input type="hidden" name="Disability" value="false" />
-    <span>اعاقة</span>
-</div>
+                            <input type="hidden" name="Disability" value="false" />
+                            <span>اعاقة</span>
+                        </div>
 
                     </div>
                 </div>
