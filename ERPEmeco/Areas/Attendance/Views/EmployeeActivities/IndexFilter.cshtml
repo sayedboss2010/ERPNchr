@@ -104,7 +104,26 @@
                     @foreach (var item in Model.Summary)
                     {
                         <tr>
-                            <td>@item.RecordType</td>
+                            <td>
+                                @switch (item.RecordType)
+                                {
+                                    case "إذن":
+                                        <span class="badge bg-info">إذن</span>
+                                        break;
+
+                                    case "مأمورية":
+                                        <span class="badge bg-warning">مأمورية</span>
+                                        break;
+
+                                    case "اجازة":
+                                        <span class="badge bg-success">اجازة</span>
+                                        break;
+
+                                    default:
+                                        <span class="badge bg-secondary">غير معروف</span>
+                                        break;
+                                }
+                            </td>
                             <td>@item.Count</td>
                         </tr>
                     }
@@ -121,53 +140,89 @@
 {
     @foreach (var dept in Model.ByDepartment)
     {
-        @if (dept.Records.Any())
+        if (dept.Records.Any())
         {
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white fw-bold">
-                        <h5 class="mb-0">@dept.DepartmentName</h5>
-                    </div>
-                    <div class="card-body table-responsive">
-                        <table class="table table-bordered table-striped table-hover mb-0">
-                            <thead class="bg-primary text-white">
-                                <tr>
-                                    <th>اسم الموظف</th>
-                                    <th>الفرع</th>
-                                    <th>نوع السجل</th>
-                                    <th>التفاصيل</th>
-                                    <th>معلومات إضافية</th>
-                                    <th>تاريخ البداية</th>
-                                    <th>تاريخ النهاية</th>
-                                    <th>عدد أيام الإجازة</th>
-                                    <th>حالة موافقة المدير المباشر</th>
-                                    <th>حالة موافقة رئيس الإدارة</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in dept.Records)
-                                {
-                                    <tr>
-                                        <td>@item.EmployeeName </td>
-                                        <td>@item.BranchName </td>
-                                        <td>@item.RecordType </td>
-                                        <td>@item.Details </td>
-                                        <td>@item.ExtraInfo </td>
-                                        <td>@(item.StartDate?.ToString("yyyy-MM-dd"))</td>
-                                        <td>@(item.EndDate?.ToString("yyyy-MM-dd"))</td>
-                                        <td>@(item.LeaveDays?.ToString())</td>
-                                        <td>@item.DirectManagerStatus </td>
-                                        <td>@item.DeptManagerStatus </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+
+            var permissionCount = dept.Records.Count(r => r.RecordType == "إذن");
+            var missionCount = dept.Records.Count(r => r.RecordType == "مأمورية");
+            var leaveCount = dept.Records.Count(r => r.RecordType == "اجازة");
+            
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        @dept.DepartmentName
+                    </h5>
+
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-info">
+                                إذن: @permissionCount
+                        </span>
+                        <span class="badge bg-warning text-dark">
+                            مأموريات: @missionCount
+                        </span>
+                        <span class="badge bg-success">
+                                اجازة: @leaveCount
+                        </span>
                     </div>
                 </div>
+
+                <div class="card-body table-responsive">
+                    <table class="table table-bordered table-striped table-hover mb-0">
+                        <thead class="bg-primary text-white">
+                            <tr>
+                                <th>اسم الموظف</th>
+                                <th>الفرع</th>
+                                <th>نوع السجل</th>
+                                <th>التفاصيل</th>
+                                <th>معلومات إضافية</th>
+                                <th>تاريخ البداية</th>
+                                <th>تاريخ النهاية</th>
+                                <th>عدد أيام الإجازة</th>
+                                <th>حالة موافقة المدير المباشر</th>
+                                <th>حالة موافقة رئيس الإدارة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in dept.Records)
+                            {
+                                <tr>
+                                    <td>@item.EmployeeName</td>
+                                    <td>@item.BranchName</td>
+                                    <td>
+                                        @switch (item.RecordType)
+                                        {
+                                                case "إذن":
+                                                <span class="badge bg-info">إذن</span>
+                                                break;
+
+                                                case "مأمورية":
+                                                <span class="badge bg-warning text-dark">مأمورية</span>
+                                                break;
+
+                                                case "اجازة":
+                                                <span class="badge bg-success">اجازة</span>
+                                                break;
+
+                                            default:
+                                                <span class="badge bg-secondary">غير معروف</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>@item.Details</td>
+                                    <td>@item.ExtraInfo</td>
+                                    <td>@(item.StartDate?.ToString("yyyy-MM-dd"))</td>
+                                    <td>@(item.EndDate?.ToString("yyyy-MM-dd"))</td>
+                                    <td>@item.LeaveDays</td>
+                                    <td>@item.DirectManagerStatus</td>
+                                    <td>@item.DeptManagerStatus</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         }
     }
-}
-else
-{
-        <p>لا توجد بيانات للعرض.</p>
 }
 

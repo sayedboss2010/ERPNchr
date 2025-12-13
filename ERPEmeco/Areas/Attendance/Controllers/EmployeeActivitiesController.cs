@@ -178,7 +178,7 @@ namespace ERPNchr.Areas.Attendance.Controllers
                         .Select(e => new { e.Id, e.NameAr }).ToListAsync();
                     break;
             }
-            ViewBag.RecordTypes = new List<string> { "Mission", "Permission", "Leave" };
+            ViewBag.RecordTypes = new List<string> { "مأمورية", "إذن", "اجازة" };
 
             // جلب البيانات من Stored Procedure
             var activities = await _context.VwEmployeeActivities
