@@ -23,4 +23,7 @@ public class LogInUserVm
     public int? BranchId { get; set; }
 
     public int? DepartmentId { get; set; }
+
+    public bool? IsChange { get; set; }
+
 }

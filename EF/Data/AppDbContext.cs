@@ -1,8 +1,8 @@
-﻿using EF.Models;
+﻿using System;
+using System.Collections.Generic;
+using EF.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
 
 namespace EF.Data;
 
@@ -595,6 +595,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedUserId).HasColumnName("Created_UserId");
             entity.Property(e => e.DeletedDate).HasColumnName("Deleted_Date");
             entity.Property(e => e.DeletedUserId).HasColumnName("Deleted_UserId");
+            entity.Property(e => e.LastPullDate).HasComment("اخر موعد لسحب البصمات");
             entity.Property(e => e.MachineIp)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -813,9 +814,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.EmployeeId).HasColumnName("Employee_ID");
             entity.Property(e => e.EmployeeName).HasMaxLength(100);
             entity.Property(e => e.ExtraInfo).HasMaxLength(200);
-            entity.Property(e => e.RecordType)
-                .HasMaxLength(10)
-                .IsUnicode(false);
+            entity.Property(e => e.RecordType).HasMaxLength(7);
         });
         modelBuilder.HasSequence("A__User_Login_SEQ")
             .HasMin(1L)

@@ -10,4 +10,6 @@ public class UserCredentialsVm
     public int DepartmentId { get; set; }
 
     public bool IsDeleted { get; set; }
+    public bool? IsChange { get; set; }
+
 }

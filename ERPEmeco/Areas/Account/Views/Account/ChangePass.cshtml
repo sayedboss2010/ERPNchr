@@ -1,0 +1,110 @@
+﻿@model VM.ViewModels.ChangePassVM
+@{
+    Layout = null;
+}
+<style>
+    .input-group:not(.has-validation) > :not(:last-child):not(.dropdown-toggle):not(.dropdown-menu), .input-group:not(.has-validation) > .dropdown-toggle:nth-last-child(n+3) {
+        /* border-top-right-radius: 0; */
+        /* border-bottom-right-radius: 0; */
+    }
+
+    .input-group-merge .form-control:not(:last-child) {
+        /* padding-right: 0; */
+        /* border-right: 0; */
+    }
+</style>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"
+      class="light-style customizer-hide"
+      data-theme="theme-default"
+      data-assets-path="~/assets/"
+      data-template="vertical-menu-template-free">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>تسجيل الدخول | المجلس القومي لحقوق الانسان</title>
+    <meta name="description" content="" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="~/assets/img/favicon/favicon.ico" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="~/assets/vendor/fonts/boxicons.css" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="~/assets/vendor/css/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="~/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="~/assets/css/demo.css" />
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="~/assets/vendor/css/pages/page-auth.css" />
+
+    <!-- Helpers -->
+    <script src="~/assets/vendor/js/helpers.js"></script>
+    <script src="~/assets/js/config.js"></script>
+</head>
+
+<body style="font-family: 'Cairo', sans-serif;">
+    <div class="container-xxl flex-grow-1 container-p-y">
+
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">الرئيسية /</span> تغيير كلمة المرور
+        </h4>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["Success"]
+            </div>
+        }
+
+        @using (Html.BeginForm("ChangePass", "Account", new { area = "Account" }, FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            @Html.HiddenFor(m => m.EmployeeId)
+            <div class="row">
+                <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">بيانات المستخدم</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">البريد الإلكتروني</label>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">كلمة المرور الجديدة</label>
+                        @Html.PasswordFor(m => m.NewPassword, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.NewPassword, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">تأكيد كلمة المرور</label>
+                        @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+                    </div>
+
+                </div>
+            </div>
+            </div>
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">حفــــظ</button>
+            </div>
+        }
+    </div>
+</body>
+</html>

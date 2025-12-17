@@ -33,6 +33,7 @@ public static class LoginDal
                     var user = new LogInUserVm
                     {
                         Id = checkedEmalil.Id,
+                        IsChange = checkedEmalil.IsChange,
                         UserName = checkedEmalil.Email,
                         UserTypeId = checkedEmalil.EmployeeTypeId,
                         FullName = checkedEmalil.NameAr,
