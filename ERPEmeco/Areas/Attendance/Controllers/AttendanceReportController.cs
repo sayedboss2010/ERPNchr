@@ -22,7 +22,13 @@ namespace ERPNchr.Areas.Attendance.Controllers
         public IActionResult Index()
         {
             var targetDate = DateTime.Now.Date;
-            int branchDeptId = 5;
+            
+            // قراءة الكوكيز
+            int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
+            int? userType = Request.Cookies.ContainsKey("UserType") ? int.Parse(Request.Cookies["UserType"]) : null;
+            int? branchCookieId = Request.Cookies.ContainsKey("BranchID") ? int.Parse(Request.Cookies["BranchID"]) : null;
+            int? branchDeptId = Request.Cookies.ContainsKey("DepartmentID") ? int.Parse(Request.Cookies["DepartmentID"]) : null;
+
             var data = new List<EmployeeAttendanceVM>();
 
             using (var connection = new SqlConnection(_context.Database.GetDbConnection().ConnectionString))

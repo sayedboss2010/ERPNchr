@@ -198,7 +198,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                     break;
 
                 case 2: // مدير إدارة
-                    employeesQuery = employeesQuery.Where(e => e.DepartmentId == departmentId&& e.BranchId == branchId);
+                    employeesQuery = employeesQuery.Where(e => e.DepartmentId == departmentId);
                     break;
 
                 case 3: // رئيس قطاع
