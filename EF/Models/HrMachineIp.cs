@@ -39,6 +39,8 @@ public partial class HrMachineIp
 
     public int? Port { get; set; }
 
+    public virtual ICollection<AttendanceDeviceLog> AttendanceDeviceLogs { get; set; } = new List<AttendanceDeviceLog>();
+
     public virtual HrBranch? Branch { get; set; }
 
     public virtual ICollection<HrEmployeeAttendance> HrEmployeeAttendances { get; set; } = new List<HrEmployeeAttendance>();

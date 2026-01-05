@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using EF.Models;
+﻿using EF.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
 
 namespace EF.Data;
 
@@ -18,6 +18,12 @@ public partial class AppDbContext : DbContext
     }
 
     public virtual DbSet<AUserLogin> AUserLogins { get; set; }
+
+    public virtual DbSet<AttendanceDeviceLog> AttendanceDeviceLogs { get; set; }
+
+    public virtual DbSet<AttendanceSyncDeviceLog> AttendanceSyncDeviceLogs { get; set; }
+
+    public virtual DbSet<AttendanceSyncErrorLog> AttendanceSyncErrorLogs { get; set; }
 
     public virtual DbSet<DataUpdatesLogTb> DataUpdatesLogTbs { get; set; }
 
@@ -77,6 +83,7 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<VwEmployeeActivity> VwEmployeeActivities { get; set; }
 
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         try
@@ -110,6 +117,37 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("Login_Date");
             entity.Property(e => e.UserId).HasColumnName("User_Id");
+        });
+
+        modelBuilder.Entity<AttendanceDeviceLog>(entity =>
+        {
+            entity.HasIndex(e => e.DeviceId, "IX_AttendanceDeviceLogs_DeviceId");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.EnrollNumber).HasMaxLength(100);
+            entity.Property(e => e.ScanType).HasMaxLength(100);
+            entity.Property(e => e.Source).HasMaxLength(100);
+
+            entity.HasOne(d => d.Device).WithMany(p => p.AttendanceDeviceLogs)
+                .HasForeignKey(d => d.DeviceId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<AttendanceSyncDeviceLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Attendan__3214EC0741C0E810");
+
+            entity.Property(e => e.DeviceIp).HasMaxLength(50);
+            entity.Property(e => e.RunTime).HasColumnType("datetime");
+            entity.Property(e => e.Status).HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<AttendanceSyncErrorLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Attendan__3214EC072F7DCCB6");
+
+            entity.Property(e => e.DeviceIp).HasMaxLength(50);
+            entity.Property(e => e.RunTime).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<DataUpdatesLogTb>(entity =>

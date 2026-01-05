@@ -22,4 +22,10 @@
     <None Include="wwwroot\modules\EmployeeData-module.js" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="zkteco-attendance-api">
+      <HintPath>zkteco-attendance-api.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
