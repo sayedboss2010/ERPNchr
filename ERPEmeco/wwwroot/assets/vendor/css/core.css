@@ -6321,18 +6321,25 @@ label.btn {
   border-color: #788393;
   transform: translateY(-1px);
 }
-.btn-check:focus + .btn-secondary, .btn-secondary:focus, .btn-secondary.focus {
+.btn-check:focus , .btn-secondary:focus, .btn-secondary.focus {
   color: #fff;
   background-color: #788393;
   border-color: #788393;
   transform: translateY(0);
   box-shadow: none;
 }
-.btn-check:checked + .btn-secondary, .btn-check:active + .btn-secondary, .btn-secondary:active, .btn-secondary.active, .show > .btn-secondary.dropdown-toggle {
-  color: #fff;
-  background-color: #717c8b;
-  border-color: #717c8b;
-}
+    .btn-check:checked + .btn-secondary, .btn-check:active + .btn-secondary, .btn-secondary:active, .btn-secondary.active, .show > .btn-secondary.dropdown-toggle {
+        background: #fff;
+        color: #555;
+        padding: 12px 30px;
+        font-size: 16px;
+        border-radius: 50px;
+        border: 2px solid #dee2e6;
+        transition: all 0.3s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
 .btn-check:checked + .btn-secondary:focus, .btn-check:active + .btn-secondary:focus, .btn-secondary:active:focus, .btn-secondary.active:focus, .show > .btn-secondary.dropdown-toggle:focus {
   box-shadow: none;
 }
@@ -16660,3 +16667,4 @@ div#div_print {
     background: #fff;
     padding: 20px;
 }
+/*******/
