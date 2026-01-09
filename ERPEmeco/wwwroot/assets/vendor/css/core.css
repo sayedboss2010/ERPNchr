@@ -15765,7 +15765,7 @@ html:not(.layout-footer-fixed) .content-wrapper {
   cursor: pointer;
 }
 .avatar img {
-  width: 100px !important;
+  width: 50px !important;
   height: 100%;
 }
 .avatar .avatar-initial {

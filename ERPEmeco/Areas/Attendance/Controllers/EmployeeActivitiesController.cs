@@ -128,79 +128,124 @@ namespace ERPNchr.Areas.Attendance.Controllers
             return View(model);
         }
         [HttpGet]
-        public async Task<IActionResult> IndexFilter(int? departmentId, int? branchId, int? employeeId, string recordType, DateTime? fromDate, DateTime? toDate)
+        public async Task<IActionResult> IndexFilter(
+    int? departmentId,
+    int? branchId,
+    int? employeeId,
+    string recordType,
+    DateTime? fromDate,
+    DateTime? toDate)
         {
-            // قراءة الكوكيز
-            int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
-            int? userType = Request.Cookies.ContainsKey("UserType") ? int.Parse(Request.Cookies["UserType"]) : null;
-            int? branchCookieId = Request.Cookies.ContainsKey("BranchID") ? int.Parse(Request.Cookies["BranchID"]) : null;
-            int? departmentCookieId = Request.Cookies.ContainsKey("DepartmentID") ? int.Parse(Request.Cookies["DepartmentID"]) : null;
+            // ================== قراءة الكوكيز ==================
+            int userId = int.Parse(Request.Cookies["UserId"]);
+            int employeeTypeID = int.Parse(Request.Cookies["UserType"]);      // الصلاحية
+            int branchDeptID = int.Parse(Request.Cookies["BranchID"]);
+            int departmentID = int.Parse(Request.Cookies["DepartmentID"]);
 
-            // 🔹 جلب القوائم للـ Dropdowns حسب الصلاحيات
-            switch (userType)
+            // ================== ضبط الفلاتر حسب الصلاحية ==================
+            switch (employeeTypeID)
             {
                 case 1: // موظف
-                    ViewBag.Departments = await _context.HrDepartments
-                        .Where(d => false) // الموظف العادي ممكن لا يحتاج اختيار الإدارة
-                        .Select(d => new { d.Id, d.NameAr }).ToListAsync();
-
-                    ViewBag.Branches = await _context.HrBranches
-                        .Where(b => false) // الموظف العادي ممكن لا يحتاج اختيار الفرع
-                        .Select(b => new { b.Id, b.NameAr }).ToListAsync();
-
-                    ViewBag.Employees = await _context.HrEmployees
-                        .Where(e => e.Id == userId.Value)
-                        .Select(e => new { e.Id, e.NameAr }).ToListAsync();
+                    departmentId = departmentID;
+                    branchId = branchDeptID;
+                    employeeId = userId;
                     break;
 
                 case 2: // مدير إدارة
-                    ViewBag.Departments = await _context.HrDepartments
-                        .Where(d => d.Id == departmentCookieId.Value)
-                        .Select(d => new { d.Id, d.NameAr }).ToListAsync();
-
-                    ViewBag.Branches = await _context.HrBranches
-                        .Where(b => b.Id == branchCookieId.Value)
-                        .Select(b => new { b.Id, b.NameAr }).ToListAsync();
-
-                    ViewBag.Employees = await _context.HrEmployees
-                        .Where(e => e.DepartmentId == departmentCookieId.Value && e.BranchId == branchCookieId.Value)
-                        .Select(e => new { e.Id, e.NameAr }).ToListAsync();
+                    departmentId ??= departmentID;
+                    branchId ??= branchDeptID;
                     break;
 
                 case 3: // رئيس قطاع
-                    ViewBag.Departments = await _context.HrDepartments
-                        .Select(d => new { d.Id, d.NameAr }).ToListAsync();
-
-                    ViewBag.Branches = await _context.HrBranches
-                        .Select(b => new { b.Id, b.NameAr }).ToListAsync();
-
-                    ViewBag.Employees = await _context.HrEmployees
-                        .Select(e => new { e.Id, e.NameAr }).ToListAsync();
+                case 4: // الأمين العام
+                        // له الحرية الكاملة
                     break;
             }
+
+            // ================== تحميل القوائم (Dropdowns) ==================
+            if (employeeTypeID == 1)
+            {
+                ViewBag.Departments = new List<object>();
+                ViewBag.Branches = new List<object>();
+
+                ViewBag.Employees = await _context.HrEmployees
+                    .Where(e => e.Id == userId)
+                    .Select(e => new { e.Id, e.NameAr })
+                    .ToListAsync();
+            }
+            else if (employeeTypeID == 2)
+            {
+                ViewBag.Departments = await _context.HrDepartments
+                    .Where(d => d.Id == departmentID)
+                    .Select(d => new { d.Id, d.NameAr })
+                    .ToListAsync();
+
+                ViewBag.Branches = await _context.HrBranches
+                    .Where(b => b.Id == branchDeptID)
+                    .Select(b => new { b.Id, b.NameAr })
+                    .ToListAsync();
+
+                ViewBag.Employees = await _context.HrEmployees
+                    .Where(e => e.DepartmentId == departmentID && e.BranchId == branchDeptID)
+                    .Select(e => new { e.Id, e.NameAr })
+                    .ToListAsync();
+            }
+            else
+            {
+                ViewBag.Departments = await _context.HrDepartments
+                    .Select(d => new { d.Id, d.NameAr })
+                    .ToListAsync();
+
+                ViewBag.Branches = await _context.HrBranches
+                    .Select(b => new { b.Id, b.NameAr })
+                    .ToListAsync();
+
+                ViewBag.Employees = await _context.HrEmployees
+                    .Select(e => new { e.Id, e.NameAr })
+                    .ToListAsync();
+            }
+
             ViewBag.RecordTypes = new List<string> { "مأمورية", "إذن", "اجازة" };
 
-            // جلب البيانات من Stored Procedure
+            // ================== استدعاء Stored Procedure ==================
             var activities = await _context.VwEmployeeActivities
                 .FromSqlRaw(
-                    "EXEC dbo.sp_GetEmployeeActivities @DepartmentID={0}, @BranchID={1}, @EmployeeID={2}, @RecordType={3}, @FromDate={4}, @ToDate={5}",
-                    departmentId, branchId, employeeId, recordType, fromDate, toDate
+                    @"EXEC dbo.sp_GetEmployeeActivities
+              @DepartmentID={0},
+              @BranchID={1},
+              @EmployeeID={2},
+              @RecordType={3},
+              @FromDate={4},
+              @ToDate={5}",
+                    departmentId,
+                    branchId,
+                    employeeId,
+                    recordType,
+                    fromDate,
+                    toDate
                 )
+                .AsNoTracking()
                 .ToListAsync();
 
-            activities = activities ?? new List<VwEmployeeActivity>();
+            activities ??= new List<VwEmployeeActivity>();
 
-            
-
-            // بناء ViewModel
+            // ================== Summary ==================
             var summary = activities
                 .GroupBy(a => a.RecordType ?? "غير محدد")
-                .Select(g => new RecordSummaryVM { RecordType = g.Key, Count = g.Count() })
+                .Select(g => new RecordSummaryVM
+                {
+                    RecordType = g.Key,
+                    Count = g.Count()
+                })
                 .ToList();
 
             var byDepartment = activities
                 .GroupBy(a => a.DepartmentName ?? "غير محدد")
-                .Select(g => new DepartmentRecordsVM { DepartmentName = g.Key, Records = g.ToList() })
+                .Select(g => new DepartmentRecordsVM
+                {
+                    DepartmentName = g.Key,
+                    Records = g.ToList()
+                })
                 .ToList();
 
             var model = new EmployeeActivityReportVM
@@ -212,6 +257,7 @@ namespace ERPNchr.Areas.Attendance.Controllers
 
             return View(model);
         }
+
 
         //public async Task<IActionResult> IndexFilter(int? departmentId,int? branchId,int? employeeId,string recordType,DateTime? fromDate,DateTime? toDate)
         //{

@@ -10,48 +10,51 @@
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
+            <th>#</th>
             <th>الاسم</th>
             <th>الكود</th>
             <th>الرقم القومي</th>
             <th>الاميل</th>
             <th>الحالة</th>
-            <th>الاجراء</th>
-           
+            <th colspan="2">الاجراء</th>
         </tr>
     </thead>
     <tbody>
+        @{
+            int i = 1;
+        }
         @foreach (var item in Model)
         {
             <tr>
+                <td>@i</td>
                 <td>@item.NameAr</td>
                 <td>@item.EmpCode</td>
                 <td>@item.Nid</td>
                 <td>@item.Email</td>
-                @* <td>@item.?.ToString("yyyy/MM/dd")</td> *@
-               
                 <td>
                     @if (item.IsActive == true)
                     {
                         <span class="text-success">فعال</span>
-
                     }
                     else if (item.IsActive == false)
                     {
-                        <span class="text-success">غير فعال</span>
+                        <span class="text-danger">غير فعال</span>
                     }
                     else
                     {
-                        <span class="text-success">لم يتم النظر</span>
-
+                        <span class="text-warning">لم يتم النظر</span>
                     }
                 </td>
                 <td>
-                    <a href="@Url.Action("Index", "Home", new { EmployeeID = item.Id, area = "Account" })" class="btn btn-info btn-sm">عرض</a>
+                    <a href="@Url.Action("Index", "Home", new { EmployeeID = item.Id, area = "Account" })"
+                       class="btn btn-info btn-sm">عرض</a>
                 </td>
                 <td>
-                    <a href="@Url.Action("AddEdite", "EmployeeData", new { EmployeeID = item.Id, area = "Employee" })" class="btn btn-info btn-sm">تعديل</a>
+                    <a href="@Url.Action("AddEdite", "EmployeeData", new { EmployeeID = item.Id, area = "Employee" })"
+                       class="btn btn-info btn-sm">تعديل</a>
                 </td>
             </tr>
+            i++;
         }
     </tbody>
 </table>
