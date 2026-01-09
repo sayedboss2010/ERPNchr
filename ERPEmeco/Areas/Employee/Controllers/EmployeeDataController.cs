@@ -27,77 +27,53 @@ public class EmployeeDataController : Controller
     {
         _env = env;
     }
-    public IActionResult IndexALL()
+    public IActionResult IndexALL(string search)
     {
-        var employees = db.HrEmployees
-    .Select(e => new EmployeeVM
-    {
-        Id = e.Id,
-        EmpCode = e.EmpCode,
-        NameAr = e.NameAr,
-        NameEn = e.NameEn,
-        Email = e.Email,
-        Password = e.Password,
-        AddressAr = e.AddressAr,
-        AddressEn = e.AddressEn,
-        PhoneNumber = e.PhoneNumber,
+        var query = db.HrEmployees.AsQueryable();
 
-        //Birthdate = e.Birthdate.HasValue
-        //    ? DateOnly.FromDateTime(e.Birthdate.Value)
-        //    : null,
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(e =>
+                e.NameAr.Contains(search) ||
+                e.EmpCode.Contains(search) ||
+                e.Nid.Contains(search) ||
+                e.Email.Contains(search)
+            );
+        }
 
-        //HireDate = e.HireDate.HasValue
-        //    ? DateOnly.FromDateTime(e.HireDate.Value)
-        //    : null,
-
-        CurrentJobId = e.CurrentJobId,
-        CurrentSalary = e.CurrentSalary,
-        CurrentFunctionalDegreeId = e.CurrentFunctionalDegreeId,
-        IsMananger = e.IsMananger,
-        IsActive = e.IsActive,
-        CreatedUserId = e.CreatedUserId,
-        //CreatedDate = e.CreatedDate,
-        UpdatedUserId = e.UpdatedUserId,
-
-        //UpdatedDate = e.UpdatedDate.HasValue
-        //    ? DateOnly.FromDateTime(e.UpdatedDate.Value)
-        //    : null,
-
-        DeletedUserId = e.DeletedUserId,
-
-        //DeletedDate = e.DeletedDate.HasValue
-        //    ? DateOnly.FromDateTime(e.DeletedDate.Value)
-        //    : null,
-
-        InsuranceNumber = e.InsuranceNumber,
-        Nid = e.Nid,
-
-        //DateIn = e.DateIn.HasValue
-        //    ? DateOnly.FromDateTime(e.DateIn.Value)
-        //    : null,
-
-        //DateOut = e.DateOut.HasValue
-        //    ? DateOnly.FromDateTime(e.DateOut.Value)
-        //    : null,
-
-        NidPath = e.NidPath,
-        Mobile = e.Mobile,
-        EmpCodeNew = e.EmpCodeNew,
-        Isbank = e.Isbank,
-
-        //AppointmentDate = e.AppointmentDate.HasValue
-        //    ? DateOnly.FromDateTime(e.AppointmentDate.Value)
-        //    : null,
-
-        HrJobGradesId = e.HrJobGradesId,
-        EmployeeTypeId = e.EmployeeTypeId,
-        BranchId = e.BranchId,
-        DepartmentId = e.DepartmentId
-    })
-    .ToList();
+        var employees = query.Select(e => new EmployeeVM
+        {
+            Id = e.Id,
+            EmpCode = e.EmpCode,
+            NameAr = e.NameAr,
+            NameEn = e.NameEn,
+            Email = e.Email,
+            AddressAr = e.AddressAr,
+            AddressEn = e.AddressEn,
+            PhoneNumber = e.PhoneNumber,
+            CurrentJobId = e.CurrentJobId,
+            CurrentSalary = e.CurrentSalary,
+            CurrentFunctionalDegreeId = e.CurrentFunctionalDegreeId,
+            IsMananger = e.IsMananger,
+            IsActive = e.IsActive,
+            CreatedUserId = e.CreatedUserId,
+            UpdatedUserId = e.UpdatedUserId,
+            DeletedUserId = e.DeletedUserId,
+            InsuranceNumber = e.InsuranceNumber,
+            Nid = e.Nid,
+            NidPath = e.NidPath,
+            Mobile = e.Mobile,
+            EmpCodeNew = e.EmpCodeNew,
+            Isbank = e.Isbank,
+            HrJobGradesId = e.HrJobGradesId,
+            EmployeeTypeId = e.EmployeeTypeId,
+            BranchId = e.BranchId,
+            DepartmentId = e.DepartmentId
+        }).ToList();
 
         return View(employees);
     }
+
     public IActionResult AddEdite(long EmployeeID = 0)
     {
         //var userId = int.Parse(Request.Cookies.FirstOrDefault(c => c.Key == "UserId").Value);
