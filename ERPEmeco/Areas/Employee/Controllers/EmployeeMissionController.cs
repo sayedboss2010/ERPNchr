@@ -14,62 +14,62 @@ namespace ERPNchr.Areas.Employee.Controllers
         private readonly AppDbContext _context = new AppDbContext();
 
         // 🧾 عرض كل الإجازات
-        public ActionResult Index()
+        public ActionResult Index(string search)
         {
             int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
-
             int? userType = Request.Cookies.ContainsKey("UserType") ? int.Parse(Request.Cookies["UserType"]) : null;
-
             int? branchId = Request.Cookies.ContainsKey("BranchID") ? int.Parse(Request.Cookies["BranchID"]) : null;
-
             int? departmentId = Request.Cookies.ContainsKey("DepartmentID") ? int.Parse(Request.Cookies["DepartmentID"]) : null;
 
             var query = from l in _context.HrEmployeeOfficialMissions
                         join e in _context.HrEmployees on l.EmployeeId equals e.Id
-                        //join t in _context.PermissionsTypes on l. equals t.Id
                         where l.IsActive == true
                         select new { l, e };
 
+            // 🔍 البحث
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(x =>
+                    (x.e.NameAr != null && x.e.NameAr.Contains(search)) ||
+                    (x.e.Department.NameAr != null && x.e.Department.NameAr.Contains(search)) ||
+                    (x.l.AuthorityOfMission != null && x.l.AuthorityOfMission.Contains(search)) ||
+                    (x.l.PurposeOfMission != null && x.l.PurposeOfMission.Contains(search))
+                );
+            }
+
             switch (userType)
             {
-                case 1: // موظف - يشوف بس الطلبات الخاصة به
+                case 1:
                     query = query.Where(x => x.e.Id == userId);
                     break;
 
-                case 2: // مدير إدارة - يشوف كل الموظفين في الإدارة
+                case 2:
                     query = query.Where(x =>
                         x.e.DepartmentId == departmentId &&
                         x.e.BranchId == branchId
                     );
                     break;
 
-                case 3: // رئيس قطاع - يشوف كل الموظفين
-                        // لا نضيف أي فلاتر
+                case 3:
                     break;
             }
 
-            // ----- Final Select -----
             var data = query
                 .OrderByDescending(x => x.l.Id)
-                
                 .Select(x => new EmployeeMissionsVM
                 {
-                     Id = (int)x.l.Id,
-                     EmployeeId = (int)x.e.Id,
-                     EmplyeeName = x.e.NameAr,
-
-                     //DepartmentId = d.Id,
-                     DepartmentName = x.e.Department.NameAr,        // ← يظهر في الفيو
-
-                     PurposeOfMission = x.l.PurposeOfMission,
-                     AuthorityOfMission = x.l.AuthorityOfMission,
-                     StartDate = x.l.StartDate,
-                     EndDate = x.l.EndDate,
-
-                     DirectManagerApproval = x.l.DirectManagerApproval,
-                     DepartmentManagerApproval = x.l.DepartmentManagerApproval
-                 }).ToList();
-           
+                    Id = (int)x.l.Id,
+                    EmployeeId = (int)x.e.Id,
+                    EmplyeeName = x.e.NameAr,
+                    DepartmentName = x.e.Department.NameAr,
+                    PurposeOfMission = x.l.PurposeOfMission,
+                    AuthorityOfMission = x.l.AuthorityOfMission,
+                    StartDate = x.l.StartDate,
+                    EndDate = x.l.EndDate,
+                    DirectManagerApproval = x.l.DirectManagerApproval,
+                    DepartmentManagerApproval = x.l.DepartmentManagerApproval
+                })
+                .ToList();
 
             return View(data);
         }

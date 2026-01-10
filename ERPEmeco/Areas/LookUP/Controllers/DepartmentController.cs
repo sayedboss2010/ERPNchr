@@ -12,21 +12,33 @@ namespace ERPNchr.Areas.LookUP.Controllers
     {
         private readonly AppDbContext _context = new AppDbContext();
 
-        public IActionResult Index()
+        public IActionResult Index(string search)
         {
-            var data = (from l in _context.HrDepartments                     
-                        //where l.IsActive == true
-                        orderby l.Id descending
-                        select new DepartmentVM
-                        {
-                            Id = l.Id,
-                            NameAr=l.NameAr,
-                            NameEn=l.NameEn,
-                            IsActive=l.IsActive,
-                        }).ToList();
+            var query = _context.HrDepartments.AsQueryable();
+
+            // 🔍 البحث (عربي / إنجليزي)
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(d =>
+                    (d.NameAr != null && d.NameAr.Contains(search)) ||
+                    (d.NameEn != null && d.NameEn.Contains(search))
+                );
+            }
+
+            var data = query
+                .OrderByDescending(d => d.Id)
+                .Select(d => new DepartmentVM
+                {
+                    Id = d.Id,
+                    NameAr = d.NameAr,
+                    NameEn = d.NameEn,
+                    IsActive = d.IsActive
+                })
+                .ToList();
 
             return View(data);
         }
+
         [HttpGet]
 
         public ActionResult CreateEdite(int TypePage, int? DepartmentID)

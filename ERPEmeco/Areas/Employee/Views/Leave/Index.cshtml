@@ -6,6 +6,22 @@
 
 <h2 class="text-center">قائمة الإجازات</h2>
 <hr />
+<form method="get" asp-action="Index" class="row mb-3">
+    <div class="col-md-4">
+        <input type="text"
+               name="search"
+               value="@Context.Request.Query["search"]"
+               class="form-control"
+               placeholder="بحث باسم الموظف / نوع الإجازة / السبب" />
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary">بحث</button>
+        <a href="@Url.Action("Index", "Leave", new { area = "Employee" })"
+           class="btn btn-secondary">
+            عرض الكل
+        </a>
+    </div>
+</form>
 
  <table class="table table-bordered table-striped">
     <thead>

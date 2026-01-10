@@ -9,6 +9,26 @@
 <a href="@Url.Action("CreateEdite", "Branches", new { TypePage = 1, area = "LookUP" })" class="btn btn-primary btn-sm">
     إنشاء فرع جديدة
 </a>
+<form method="get" asp-action="Index" class="row mb-3">
+    <div class="col-md-4">
+        <input type="text"
+               name="search"
+               value="@Context.Request.Query["search"]"
+               class="form-control"
+               placeholder="بحث باسم الفرع" />
+    </div>
+
+    <div class="col-md-4">
+        <button type="submit" class="btn btn-primary">
+            بحث
+        </button>
+
+        <a href="@Url.Action("Index", "Branches", new { area = "LookUP" })"
+           class="btn btn-secondary">
+            عرض الكل
+        </a>
+    </div>
+</form>
 
 <table class="table table-bordered table-striped">
     <thead>

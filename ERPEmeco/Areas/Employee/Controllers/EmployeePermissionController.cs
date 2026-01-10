@@ -14,64 +14,59 @@ namespace ERPNchr.Areas.Employee.Controllers
         private readonly AppDbContext _context = new AppDbContext();
 
         // 🧾 عرض كل الإجازات
-        public ActionResult Index()
-        
+        public ActionResult Index(string search)
         {
             int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
-
             int? userType = Request.Cookies.ContainsKey("UserType") ? int.Parse(Request.Cookies["UserType"]) : null;
-
             int? branchId = Request.Cookies.ContainsKey("BranchID") ? int.Parse(Request.Cookies["BranchID"]) : null;
-
             int? departmentId = Request.Cookies.ContainsKey("DepartmentID") ? int.Parse(Request.Cookies["DepartmentID"]) : null;
 
             var query = from l in _context.HrEmployeePermissions
                         join t in _context.PermissionsTypes on l.PermissionTypeId equals t.Id
                         join e in _context.HrEmployees on l.EmployeeId equals e.Id
-                        //join t in _context.PermissionsTypes on l. equals t.Id
                         where l.IsActive == true
-                        select new { l,t, e };
+                        select new { l, t, e };
+
+            // 🔍 البحث
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(x =>
+                    (x.e.NameAr != null && x.e.NameAr.Contains(search)) ||
+                    (x.t.NameAr != null && x.t.NameAr.Contains(search))
+                );
+            }
 
             switch (userType)
             {
-                case 1: // موظف - يشوف بس الطلبات الخاصة به
+                case 1:
                     query = query.Where(x => x.e.Id == userId);
                     break;
 
-                case 2: // مدير إدارة - يشوف كل الموظفين في الإدارة
+                case 2:
                     query = query.Where(x =>
                         x.e.DepartmentId == departmentId &&
                         x.e.BranchId == branchId
                     );
                     break;
 
-                case 3: // رئيس قطاع - يشوف كل الموظفين
-                        // لا نضيف أي فلاتر
+                case 3:
                     break;
             }
 
-            // ----- Final Select -----
             var data = query
                 .OrderByDescending(x => x.l.Id)
-
                 .Select(x => new EmployeePermissionVM
                 {
                     Id = (int)x.l.Id,
                     EmployeeId = (int)x.e.Id,
                     EmplyeeName = x.e.NameAr,
-
-                    //DepartmentId = d.Id,
-                   // DepartmentName = x.e.Department.NameAr,        // ← يظهر في الفيو
-
                     PermissionTypeId = x.l.PermissionTypeId,
-                    PermissionTypeName = x.l.PermissionType.NameAr,
+                    PermissionTypeName = x.t.NameAr,
                     DateOfPermission = x.l.DateOfPermission,
-                   
-
                     DirectManagerApproval = x.l.DirectManagerApproval,
                     DepartmentManagerApproval = x.l.DepartmentManagerApproval
-                }).ToList();
-
+                })
+                .ToList();
 
             return View(data);
         }

@@ -34,11 +34,12 @@ public class EmployeeDataController : Controller
         if (!string.IsNullOrWhiteSpace(search))
         {
             query = query.Where(e =>
-                e.NameAr.Contains(search) ||
-                e.EmpCode.Contains(search) ||
-                e.Nid.Contains(search) ||
-                e.Email.Contains(search)
-            );
+      e.NameAr.Contains(search) ||
+      e.Nid.Contains(search) ||
+      e.Email.Contains(search) ||
+      (e.EmpCode != null && e.EmpCode.ToString().Contains(search))
+  );
+
         }
 
         var employees = query.Select(e => new EmployeeVM

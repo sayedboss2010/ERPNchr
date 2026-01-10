@@ -18,9 +18,11 @@
         <button type="submit" class="btn btn-primary">
             بحث
         </button>
-        <a asp-action="IndexALL" class="btn btn-secondary">
+        <a href="@Url.Action("IndexALL", "EmployeeData", new { area = "Employee" })"
+           class="btn btn-secondary">
             عرض الكل
         </a>
+
     </div>
 </form>
 

@@ -12,21 +12,30 @@ namespace ERPNchr.Areas.LookUP.Controllers
     {
         private readonly AppDbContext _context = new AppDbContext();
 
-        public IActionResult Index()
+        public IActionResult Index(string search)
         {
-            var data = (from l in _context.HrBranches
-                        //where l.IsActive == true
-                        orderby l.Id descending
-                        select new BranchVM
-                        {
-                            Id = l.Id,
-                            NameAr = l.NameAr,
-                            NameEn = l.NameEn,
-                            IsActive = l.IsActive,
-                        }).ToList();
+            var query = _context.HrBranches.AsQueryable();
+
+            // 🔍 البحث بالاسم
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(b =>
+                    b.NameAr != null && b.NameAr.Contains(search)
+                );
+            }
+
+            var data = query
+                .Select(b => new BranchVM
+                {
+                    Id = b.Id,
+                    NameAr = b.NameAr,
+                    IsActive = b.IsActive
+                })
+                .ToList();
 
             return View(data);
         }
+
 
 
         [HttpGet]

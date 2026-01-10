@@ -19,15 +19,11 @@ namespace YourProjectName.Areas.Employee.Controllers
             _env = env;
         }
         // 🧾 عرض كل الإجازات
-        public ActionResult Index()
+        public ActionResult Index(string search)
         {
-
             int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
-
             int? userType = Request.Cookies.ContainsKey("UserType") ? int.Parse(Request.Cookies["UserType"]) : null;
-
             int? branchId = Request.Cookies.ContainsKey("BranchID") ? int.Parse(Request.Cookies["BranchID"]) : null;
-
             int? departmentId = Request.Cookies.ContainsKey("DepartmentID") ? int.Parse(Request.Cookies["DepartmentID"]) : null;
 
             var query = from l in _context.HrEmployeeLeaves
@@ -36,31 +32,38 @@ namespace YourProjectName.Areas.Employee.Controllers
                         where l.IsActive == true
                         select new { l, e, t };
 
+            // 🔍 البحث
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(x =>
+                    (x.e.NameAr != null && x.e.NameAr.Contains(search)) ||
+                    (x.t.NameAr != null && x.t.NameAr.Contains(search)) ||
+                    (x.l.Reason != null && x.l.Reason.Contains(search))
+                );
+            }
+
             switch (userType)
             {
-                case 1: // موظف - يشوف بس الطلبات الخاصة به
+                case 1:
                     query = query.Where(x => x.e.Id == userId);
                     break;
 
-                case 2: // مدير إدارة - يشوف كل الموظفين في الإدارة
+                case 2:
                     query = query.Where(x =>
                         x.e.DepartmentId == departmentId &&
                         x.e.BranchId == branchId
                     );
                     break;
 
-                case 3: // رئيس قطاع - يشوف كل الموظفين
-                        // لا نضيف أي فلاتر
+                case 3:
                     break;
             }
 
-            // ----- Final Select -----
             var data = query
                 .OrderByDescending(x => x.l.Id)
                 .Select(x => new EmployeeLeaveVM
                 {
                     Id = x.l.Id,
-                    EmployeeTypeId = x.e.EmployeeTypeId,
                     EmployeeId = x.e.Id,
                     EmployeeName = x.e.NameAr,
                     LeaveTypeId = x.t.Id,
@@ -73,28 +76,6 @@ namespace YourProjectName.Areas.Employee.Controllers
                     DepartmentManagerApproval = x.l.DepartmentManagerApproval
                 })
                 .ToList();
-            //var data = (from l in _context.HrEmployeeLeaves
-            //            join e in _context.HrEmployees on l.EmployeeId equals e.Id
-            //            join t in _context.HrLeaveTypes on l.LeaveTypeId equals t.Id
-            //            where l.IsActive == true
-            //            orderby l.Id descending
-            //            select new EmployeeLeaveVM
-            //            {
-            //                Id = l.Id,
-            //                EmployeeId = e.Id,
-            //                EmployeeName = e.NameAr,
-            //                LeaveTypeId = t.Id,
-            //                LeaveTypeName = t.NameAr,
-            //                StartDate = l.StartDate,
-            //                EndDate = l.EndDate,
-            //                LeaveDays = l.LeaveDays,
-            //                Reason = l.Reason,
-            //                DirectManagerApproval = l.DirectManagerApproval,
-            //                DepartmentManagerApproval = l.DepartmentManagerApproval,
-
-            //            }).ToList();
-
-
 
             return View(data);
         }
