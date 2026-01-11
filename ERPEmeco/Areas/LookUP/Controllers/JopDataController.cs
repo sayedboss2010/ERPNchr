@@ -12,19 +12,12 @@ namespace ERPNchr.Areas.LookUP.Controllers
     {
         private readonly AppDbContext _context = new AppDbContext();
 
-        public IActionResult Index(string search)
+        public IActionResult Index()
         {
             var query = _context.HrJobs.AsQueryable();
 
             // 🔍 البحث (عربي / إنجليزي)
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                query = query.Where(j =>
-                    (j.TitleAr != null && j.TitleAr.Contains(search)) ||
-                    (j.TitleEn != null && j.TitleEn.Contains(search))
-                );
-            }
-
+          
             var data = query
                 .OrderByDescending(j => j.Id)
                 .Select(j => new JopDataVM

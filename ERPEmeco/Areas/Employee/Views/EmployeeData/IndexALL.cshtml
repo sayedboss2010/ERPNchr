@@ -6,25 +6,7 @@
 
 <h2 class="text-center">قائمة الموظفين</h2>
 <hr />
-<form method="get" asp-action="IndexALL" class="row mb-3">
-    <div class="col-md-4">
-        <input type="text"
-               name="search"
-               value="@Context.Request.Query["search"]"
-               class="form-control"
-               placeholder="ابحث بالاسم / الكود / الرقم القومي / الإيميل" />
-    </div>
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-primary">
-            بحث
-        </button>
-        <a href="@Url.Action("IndexALL", "EmployeeData", new { area = "Employee" })"
-           class="btn btn-secondary">
-            عرض الكل
-        </a>
 
-    </div>
-</form>
 
 <table class="table table-bordered table-striped">
     <thead>
