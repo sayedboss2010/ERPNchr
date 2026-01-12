@@ -9,7 +9,7 @@
     int? departmentId = request.Cookies.ContainsKey("DepartmentID") ? int.Parse(request.Cookies["DepartmentID"]) : null;
     string FullName = request.Cookies["FullName"];
     string UserTypeName = "مسئول";
-    if (userType ==1)
+    if (userType == 1)
     {
         UserTypeName = "موظف";
     }
@@ -71,7 +71,7 @@
     <!-- تعديل الـ CSS لتحديد مكان المنيو على اليمين -->
     <style>
 
-        .dropdown-menu-end[data-bs-popper]        Specificity: (0,2,0) {
+        .dropdown-menu-end[data-bs-popper] Specificity: (0,2,0) {
             /* right: 0; */
             /* left: auto; */
         }
@@ -100,40 +100,39 @@
         }
 
         /* فقط للموبايل */
-@@media (max-width: 991px) {
-  #layout-menu {
-    position: fixed !important;
-    top: 0;
-    right: -260px;        /* أخفيها يميناً (لـ RTL) */
-    width: 260px;
-    height: 100%;
-    transform: none;     /* نلغي أي translateX غير مرغوب */
-    transition: right .3s ease;
-    z-index: 9999;
-  }
+        @@media (max-width: 991px) {
+            #layout-menu {
+                position: fixed !important;
+                top: 0;
+                right: -260px; /* أخفيها يميناً (لـ RTL) */
+                width: 260px;
+                height: 100%;
+                transform: none; /* نلغي أي translateX غير مرغوب */
+                transition: right .3s ease;
+                z-index: 9999;
+            }
 
-  body.menu-open #layout-menu {
-    right: 0;  /* تظهر المنيو عند فتحها */
-  }
+            body.menu-open #layout-menu {
+                right: 0; /* تظهر المنيو عند فتحها */
+            }
+            /* تعامل مع المحتوى overlay */
+            .layout-overlay {
+                display: none; /* أخفي overlay بشكل افتراضي */
+            }
 
-  /* تعامل مع المحتوى overlay */
-  .layout-overlay {
-    display: none; /* أخفي overlay بشكل افتراضي */
-  }
-  body.menu-open .layout-overlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 9998;
-  }
-
-  /* إذا القائمة طويلة: اجعلها قابلة للتمرير */
-  #layout-menu .menu-inner {
-    overflow-y: auto;
-    max-height: 100vh;
-  }
-}
+            body.menu-open .layout-overlay {
+                display: block;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9998;
+            }
+            /* إذا القائمة طويلة: اجعلها قابلة للتمرير */
+            #layout-menu .menu-inner {
+                overflow-y: auto;
+                max-height: 100vh;
+            }
+        }
 
     </style>
 </head>
@@ -142,7 +141,6 @@
     <!-- حاوية الصفحة -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
-
             <!-- القائمة الجانبية على اليمين -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                 <div class="app-brand demo">
@@ -160,8 +158,8 @@
 
                 <div class="menu-inner-shadow"></div>
 
-                    
-                    @* <li class="menu-item @(Html.IsActive("Index", "Home", "Account", true))">
+
+                @* <li class="menu-item @(Html.IsActive("Index", "Home", "Account", true))">
                     <a href="~/Account/Home/Index/" class="menu-link">
                         <div data-i18n="Without menu">الملف الشخصي</div>
                     </a>
@@ -464,7 +462,7 @@
                                     </a>
                                 </li>
 
-                               @*  <li class="menu-item">
+                                @*  <li class="menu-item">
                                     <a href="~/LookUP/LeaveTypes/Index" class="menu-link">
                                         <div>أنواع الإجازات</div>
                                     </a>
@@ -536,10 +534,10 @@
                     </ul>
                 }
 
-                @if (userType==4)
-                    {
-                        <ul>
-                      @*   <li class="menu-item">
+                @if (userType == 4)
+                {
+                    <ul>
+                        @*   <li class="menu-item">
                             <a href="~/html/index.html" class="menu-link">
                                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
                                 <div data-i18n="Analytics">الرئيسية</div>
@@ -578,11 +576,11 @@
                                 </li>
                             </ul>
                         </li>
-                        </ul>
-                        
-                    }
-      
-                </aside>
+                    </ul>
+
+                }
+
+            </aside>
 
 
             <!-- / القائمة الجانبية -->
@@ -602,20 +600,17 @@
                         <div class="navbar-nav align-items-center">
                             <div class="nav-item d-flex align-items-center">
                                 <i class="bx bx-search fs-4 lh-0"></i>
-                                <input id="searchInput" type="text"
+
+                                <input id="searchInput"  type="text"
                                        class="form-control border-0 shadow-none"
                                        placeholder="بحث..."
                                        aria-label="بحث..." />
-   
-
-
-
                             </div>
                         </div>
                         <!-- / البحث -->
 
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
-                            <li class="nav-item lh-1 me-3">
+                            <li class="nav-item lh-1 me-3" hidden>
                                 <a class="github-button"
                                    href="https://github.com/themeselection/sneat-html-admin-template-free"
                                    data-icon="octicon-star"
@@ -628,7 +623,7 @@
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
-                                        <img src="~/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                        <img src="~/assets/img/Logo/lg.png" alt class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -637,12 +632,12 @@
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
-                                                        <img src="~/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="~/assets/img/Logo/lg.png" alt class="w-px-40 h-auto rounded-circle" />
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <span class="fw-semibold d-block">جون دو</span>
-                                                    <small class="text-muted">مسؤول</small>
+                                                    <span class="fw-semibold d-block">@FullName</span>
+                                                    <small class="text-muted">@UserTypeName</small>
                                                 </div>
                                             </div>
                                         </a>
@@ -651,18 +646,18 @@
                                         <div class="dropdown-divider"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="#">
+                                        <a class="dropdown-item" href="~/Home/Index?EmployeeID=@userId">
                                             <i class="bx bx-user me-2"></i>
                                             <span class="align-middle">ملفي الشخصي</span>
                                         </a>
                                     </li>
-                                    <li>
+                                    <li hidden>
                                         <a class="dropdown-item" href="#">
                                             <i class="bx bx-cog me-2"></i>
                                             <span class="align-middle">الإعدادات</span>
                                         </a>
                                     </li>
-                                    <li>
+                                    <li hidden>
                                         <a class="dropdown-item" href="#">
                                             <span class="d-flex align-items-center align-middle">
                                                 <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
@@ -671,11 +666,11 @@
                                             </span>
                                         </a>
                                     </li>
-                                    <li>
+                                    <li hidden>
                                         <div class="dropdown-divider"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="auth-login-basic.html">
+                                        <a class="dropdown-item" href="~/Account/login">
                                             <i class="bx bx-power-off me-2"></i>
                                             <span class="align-middle">تسجيل الخروج</span>
                                         </a>
@@ -686,7 +681,6 @@
                         </ul>
                     </div>
                 </nav>
-
                 <!-- / الشريط العلوي -->
                 <!-- محتوى الصفحة -->
                 <div class="content-wrapper">
@@ -752,28 +746,26 @@
     @RenderSection("Scripts", required: false)
     <script>
 
-             
+        document.getElementById("searchInput").addEventListener("keyup", function () {
+            let value = this.value.toLowerCase();
+            document.querySelectorAll("tbody tr").forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(value)
+                    ? ""
+                    : "none";
+            });
+        });
 
-          document.getElementById("searchInput").addEventListener("keyup", function () {
-              let value = this.value.toLowerCase();
-              document.querySelectorAll("tbody tr").forEach(row => {
-                  row.style.display = row.innerText.toLowerCase().includes(value)
-                      ? ""
-                      : "none";
-              });
+        document.addEventListener("DOMContentLoaded", function () {
+          const toggleBtns = document.querySelectorAll(".layout-menu-toggle");
+          const body = document.body;
+
+          toggleBtns.forEach(btn => {
+            btn.addEventListener("click", function (e) {
+              e.preventDefault();
+              body.classList.toggle("menu-open");
+            });
           });
-
-  document.addEventListener("DOMContentLoaded", function () {
-    const toggleBtns = document.querySelectorAll(".layout-menu-toggle");
-    const body = document.body;
-
-    toggleBtns.forEach(btn => {
-      btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        body.classList.toggle("menu-open");
-      });
-    });
-  });
-</script>
+        });
+    </script>
 </body>
 </html>
