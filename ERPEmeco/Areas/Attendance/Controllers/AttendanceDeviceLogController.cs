@@ -125,187 +125,187 @@ namespace ERPNchr.BackgroundTasks
         //}
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                var runTime = DateTime.UtcNow;
-                int totalNewLogs = 0;
+            //while (!stoppingToken.IsCancellationRequested)
+            //{
+            //    var runTime = DateTime.UtcNow;
+            //    int totalNewLogs = 0;
 
-                try
-                {
-                    using (var scope = _scopeFactory.CreateScope())
-                    {
-                        var _context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                        var devices = await _context.HrMachineIps.Where(d => d.IsActive).ToListAsync();
+            //    try
+            //    {
+            //        using (var scope = _scopeFactory.CreateScope())
+            //        {
+            //            var _context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            //            var devices = await _context.HrMachineIps.Where(d => d.IsActive).ToListAsync();
 
-                        foreach (var device in devices)
-                        {
-                            int deviceNewLogs = 0;
-                            string status = "Success";
-                            string message = "";
+            //            foreach (var device in devices)
+            //            {
+            //                int deviceNewLogs = 0;
+            //                string status = "Success";
+            //                string message = "";
 
-                            try
-                            {
-                                ZkTeco zk = null;
-                                try
-                                {
-                                    zk = new ZkTeco(device.MachineIp);
-                                    if (!zk.Connect())
-                                    {
-                                        status = "Failed";
-                                        message = "Could not connect";
-                                        throw new Exception(message);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    status = "Failed";
-                                    message = $"Connection error: {ex.Message}";
+            //                try
+            //                {
+            //                    ZkTeco zk = null;
+            //                    try
+            //                    {
+            //                        zk = new ZkTeco(device.MachineIp);
+            //                        if (!zk.Connect())
+            //                        {
+            //                            status = "Failed";
+            //                            message = "Could not connect";
+            //                            throw new Exception(message);
+            //                        }
+            //                    }
+            //                    catch (Exception ex)
+            //                    {
+            //                        status = "Failed";
+            //                        message = $"Connection error: {ex.Message}";
 
-                                    _context.AttendanceSyncErrorLogs.Add(new AttendanceSyncErrorLog
-                                    {
-                                        RunTime = runTime,
-                                        DeviceIp = device.MachineIp,
-                                        ErrorMessage = message
-                                    });
+            //                        _context.AttendanceSyncErrorLogs.Add(new AttendanceSyncErrorLog
+            //                        {
+            //                            RunTime = runTime,
+            //                            DeviceIp = device.MachineIp,
+            //                            ErrorMessage = message
+            //                        });
 
-                                    throw;
-                                }
+            //                        throw;
+            //                    }
 
-                                var logs = await _context.AttendanceDeviceLogs
-                                    .Where(l => l.DeviceId == device.Id)
-                                    .Select(l => l.ScanTime)
-                                    .ToListAsync();
+            //                    var logs = await _context.AttendanceDeviceLogs
+            //                        .Where(l => l.DeviceId == device.Id)
+            //                        .Select(l => l.ScanTime)
+            //                        .ToListAsync();
 
-                                var latestScanTime = logs.Any() ? logs.Max() : DateTime.MinValue;
-                                var attendances = zk.GetAttendance();
+            //                    var latestScanTime = logs.Any() ? logs.Max() : DateTime.MinValue;
+            //                    var attendances = zk.GetAttendance();
 
-                                foreach (var att in attendances)
-                                {
-                                    try
-                                    {
-                                        var scanTime = att.Timestamp.Kind == DateTimeKind.Unspecified
-                                        ? DateTime.SpecifyKind(att.Timestamp, DateTimeKind.Utc)
-                                        : att.Timestamp.ToUniversalTime();
+            //                    foreach (var att in attendances)
+            //                    {
+            //                        try
+            //                        {
+            //                            var scanTime = att.Timestamp.Kind == DateTimeKind.Unspecified
+            //                            ? DateTime.SpecifyKind(att.Timestamp, DateTimeKind.Utc)
+            //                            : att.Timestamp.ToUniversalTime();
 
-                                        if (scanTime <= latestScanTime)
-                                            continue;
+            //                            if (scanTime <= latestScanTime)
+            //                                continue;
 
-                                        bool alreadyExists = await _context.AttendanceDeviceLogs.AnyAsync(l =>
-                                            l.DeviceId == device.Id &&
-                                            l.EnrollNumber == att.UserId &&
-                                            l.ScanTime == scanTime);
+            //                            bool alreadyExists = await _context.AttendanceDeviceLogs.AnyAsync(l =>
+            //                                l.DeviceId == device.Id &&
+            //                                l.EnrollNumber == att.UserId &&
+            //                                l.ScanTime == scanTime);
 
-                                        if (alreadyExists)
-                                            continue;
+            //                            if (alreadyExists)
+            //                                continue;
 
-                                        _context.AttendanceDeviceLogs.Add(new EF.Models.AttendanceDeviceLog
-                                        {
-                                            DeviceId = device.Id,
-                                            EnrollNumber = att.UserId,
-                                            ScanTime = scanTime,
-                                            ScanType = att.Status.ToString(),
-                                            Verified = true,
-                                            Source = "Biometric",
-                                            CreatedAt = DateTime.UtcNow
-                                        });
-                                        try
-                                        {
-                                            var attendance = new HrEmployeeAttendance
-                                            {
-                                                Id = await _context.Database.ExecuteSqlRawAsync("SELECT NEXT VALUE FOR dbo.HR_Employee_Attendance_SEQ"), // Sequence
-                                                EmployeeId =long.Parse( att.UserId),
-                                                MachineId = device.Id,
-                                                MoveCodeId =byte.Parse( att.Status.ToString()),
-                                                ModeDate = DateOnly.FromDateTime( scanTime.Date),
-                                                MoveTime = TimeOnly.FromDateTime(scanTime)
-                                            };
+            //                            _context.AttendanceDeviceLogs.Add(new EF.Models.AttendanceDeviceLog
+            //                            {
+            //                                DeviceId = device.Id,
+            //                                EnrollNumber = att.UserId,
+            //                                ScanTime = scanTime,
+            //                                ScanType = att.Status.ToString(),
+            //                                Verified = true,
+            //                                Source = "Biometric",
+            //                                CreatedAt = DateTime.UtcNow
+            //                            });
+            //                            try
+            //                            {
+            //                                var attendance = new HrEmployeeAttendance
+            //                                {
+            //                                    Id = await _context.Database.ExecuteSqlRawAsync("SELECT NEXT VALUE FOR dbo.HR_Employee_Attendance_SEQ"), // Sequence
+            //                                    EmployeeId =long.Parse( att.UserId),
+            //                                    MachineId = device.Id,
+            //                                    MoveCodeId =byte.Parse( att.Status.ToString()),
+            //                                    ModeDate = DateOnly.FromDateTime( scanTime.Date),
+            //                                    MoveTime = TimeOnly.FromDateTime(scanTime)
+            //                                };
 
-                                            _context.HrEmployeeAttendances.Add(attendance);
-                                            await _context.SaveChangesAsync();
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            // تجاهل أي خطأ أو سجل اللوج
-                                            Console.WriteLine($"Failed to insert HR_Employee_Attendance: {ex.Message}");
-                                        }
-                                        deviceNewLogs++;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        deviceNewLogs = deviceNewLogs;
-                                        if (string.IsNullOrEmpty(message))
-                                        {
-                                            message = ex.Message;
+            //                                _context.HrEmployeeAttendances.Add(attendance);
+            //                                await _context.SaveChangesAsync();
+            //                            }
+            //                            catch (Exception ex)
+            //                            {
+            //                                // تجاهل أي خطأ أو سجل اللوج
+            //                                Console.WriteLine($"Failed to insert HR_Employee_Attendance: {ex.Message}");
+            //                            }
+            //                            deviceNewLogs++;
+            //                        }
+            //                        catch (Exception ex)
+            //                        {
+            //                            deviceNewLogs = deviceNewLogs;
+            //                            if (string.IsNullOrEmpty(message))
+            //                            {
+            //                                message = ex.Message;
 
-                                            _context.AttendanceSyncErrorLogs.Add(new AttendanceSyncErrorLog
-                                            {
-                                                RunTime = runTime,
-                                                DeviceIp = device.MachineIp,
-                                                ErrorMessage = message
-                                            });
-                                        }
-                                        status = "Failed";
-                                    }
+            //                                _context.AttendanceSyncErrorLogs.Add(new AttendanceSyncErrorLog
+            //                                {
+            //                                    RunTime = runTime,
+            //                                    DeviceIp = device.MachineIp,
+            //                                    ErrorMessage = message
+            //                                });
+            //                            }
+            //                            status = "Failed";
+            //                        }
 
-                                }
+            //                    }
 
-                                totalNewLogs += deviceNewLogs;
-                                zk.Disconnect();
-                                message = $"Synced {deviceNewLogs} new logs";
-                            }
-                            catch (Exception ex)
-                            {
-                                if (string.IsNullOrEmpty(message))
-                                {
-                                    message = ex.Message;
+            //                    totalNewLogs += deviceNewLogs;
+            //                    zk.Disconnect();
+            //                    message = $"Synced {deviceNewLogs} new logs";
+            //                }
+            //                catch (Exception ex)
+            //                {
+            //                    if (string.IsNullOrEmpty(message))
+            //                    {
+            //                        message = ex.Message;
 
-                                    _context.AttendanceSyncErrorLogs.Add(new AttendanceSyncErrorLog
-                                    {
-                                        RunTime = runTime,
-                                        DeviceIp = device.MachineIp,
-                                        ErrorMessage = message
-                                    });
-                                }
-                                status = "Failed";
-                            }
+            //                        _context.AttendanceSyncErrorLogs.Add(new AttendanceSyncErrorLog
+            //                        {
+            //                            RunTime = runTime,
+            //                            DeviceIp = device.MachineIp,
+            //                            ErrorMessage = message
+            //                        });
+            //                    }
+            //                    status = "Failed";
+            //                }
 
-                            // سجل كل جهاز
-                            _context.AttendanceSyncDeviceLogs.Add(new AttendanceSyncDeviceLog
-                            {
-                                RunTime = runTime,
-                                DeviceIp = device.MachineIp,
-                                NewLogs = deviceNewLogs,
-                                Status = status,
-                                Message = message
-                            });
+            //                // سجل كل جهاز
+            //                _context.AttendanceSyncDeviceLogs.Add(new AttendanceSyncDeviceLog
+            //                {
+            //                    RunTime = runTime,
+            //                    DeviceIp = device.MachineIp,
+            //                    NewLogs = deviceNewLogs,
+            //                    Status = status,
+            //                    Message = message
+            //                });
 
-                            Console.WriteLine($"[{DateTime.Now}] Device {device.MachineIp}: {status} - {message}");
-                        }
+            //                Console.WriteLine($"[{DateTime.Now}] Device {device.MachineIp}: {status} - {message}");
+            //            }
 
-                        await _context.SaveChangesAsync();
+            //            await _context.SaveChangesAsync();
 
-                        Console.WriteLine($"[{DateTime.Now}] Total new logs in this sync: {totalNewLogs}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    using (var scope = _scopeFactory.CreateScope())
-                    {
-                        var _context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                        _context.AttendanceSyncErrorLogs.Add(new AttendanceSyncErrorLog
-                        {
-                            RunTime = runTime,
-                            DeviceIp = null,
-                            ErrorMessage = ex.Message
-                        });
-                        await _context.SaveChangesAsync();
-                    }
+            //            Console.WriteLine($"[{DateTime.Now}] Total new logs in this sync: {totalNewLogs}");
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        using (var scope = _scopeFactory.CreateScope())
+            //        {
+            //            var _context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            //            _context.AttendanceSyncErrorLogs.Add(new AttendanceSyncErrorLog
+            //            {
+            //                RunTime = runTime,
+            //                DeviceIp = null,
+            //                ErrorMessage = ex.Message
+            //            });
+            //            await _context.SaveChangesAsync();
+            //        }
 
-                    Console.WriteLine($"[{DateTime.Now}] General sync error: {ex.Message}");
-                }
+            //        Console.WriteLine($"[{DateTime.Now}] General sync error: {ex.Message}");
+            //    }
 
-                await Task.Delay(TimeSpan.FromMinutes(60), stoppingToken);
-            }
+            //    await Task.Delay(TimeSpan.FromMinutes(60), stoppingToken);
+            //}
         }
     }
 }
