@@ -61,20 +61,22 @@ namespace YourProjectName.Areas.Employee.Controllers
 
             var data = query
                 .OrderByDescending(x => x.l.Id)
-                .Select(x => new EmployeeLeaveVM
-                {
-                    Id = x.l.Id,
-                    EmployeeId = x.e.Id,
-                    EmployeeName = x.e.NameAr,
-                    LeaveTypeId = x.t.Id,
-                    LeaveTypeName = x.t.NameAr,
-                    StartDate = x.l.StartDate,
-                    EndDate = x.l.EndDate,
-                    LeaveDays = x.l.LeaveDays,
-                    Reason = x.l.Reason,
-                    DirectManagerApproval = x.l.DirectManagerApproval,
-                    DepartmentManagerApproval = x.l.DepartmentManagerApproval
-                })
+              .Select(x => new EmployeeLeaveVM
+              {
+                  Id = x.l.Id,
+                  EmployeeId = x.e.Id,
+                  EmployeeName = x.e.NameAr,
+                  LeaveTypeId = x.t.Id,
+                  LeaveTypeName = x.t.NameAr,
+                  StartDate = x.l.StartDate,
+                  EndDate = x.l.EndDate,
+                  LeaveDays = x.l.LeaveDays,
+                  Reason = x.l.Reason,
+                  DirectManagerApproval = x.l.DirectManagerApproval,
+                  DepartmentManagerApproval = x.l.DepartmentManagerApproval,
+                  EmployeeUserType = x.e.EmployeeTypeId.Value   // ⭐ مهم
+              })
+
                 .ToList();
 
             return View(data);
@@ -208,41 +210,7 @@ namespace YourProjectName.Areas.Employee.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(EmployeeLeaveVM model, IFormFile AttachmentFile)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    var detailedErrors = ModelState
-            //        .Where(ms => ms.Value.Errors.Count > 0)
-            //        .Select(ms => new
-            //        {
-            //            Field = ms.Key,                                      // اسم الحقل
-            //            Errors = ms.Value.Errors.Select(e => e.ErrorMessage), // رسالة الخطأ
-            //            AttemptedValue = ms.Value.AttemptedValue              // القيمة اللي دخلت وعملت مشكلة
-            //        })
-            //        .ToList();
-
-            //    foreach (var error in detailedErrors)
-            //    {
-            //        Console.WriteLine($"Field: {error.Field}");
-            //        Console.WriteLine($"Attempted Value: {error.AttemptedValue}");
-            //        Console.WriteLine($"Errors: {string.Join(", ", error.Errors)}");
-            //        Console.WriteLine("----------------------------");
-            //    }
-
-            //    // إعادة تحميل القوائم
-            //    var Emplist = (from e in _context.HrEmployees
-            //                   where e.IsActive == true
-            //                   select new
-            //                   {
-            //                       e.Id,
-            //                       e.NameAr,
-            //                       Display = e.NameAr + " (" + e.EmpCode + ")"
-            //                   }).ToList();
-
-            //    ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
-            //    ViewBag.LeaveTypeId = new SelectList(_context.HrLeaveTypes.Where(a => a.IsActive == true), "Id", "NameAr", model.LeaveTypeId);
-
-            //    return View(model);
-            //}
+            
             string attachmentPath = null;
 
             if (AttachmentFile != null && AttachmentFile.Length > 0)
@@ -433,18 +401,29 @@ namespace YourProjectName.Areas.Employee.Controllers
                 EmployeeTypeName= string.IsNullOrWhiteSpace(leave.EmployeeType?.EmployeeTypeNameAr) ? "-" : leave.EmployeeType.EmployeeTypeNameAr,
                 TotalDays = lastBalance?.TotalDays ?? 0,
                 UsedDays = lastBalance?.UsedDays ?? 0,
-                RemainingBefore = lastBalance?.TotalDaysReminig ?? 0,
+                
                 CasualTotalDays= lastBalance?.CasualTotalDays ?? 0,
                 CasualUsedDays= lastBalance?.CasualUsedDays ?? 0,
                 CasualRemainingDays = lastBalance?.CasualRemainingDays ?? 0,
+                
             };
 
-            if (data.LeaveTypeId == 1 || data.LeaveTypeId == 2)
-            { int remainingBefore = data.RemainingBefore.Value; data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0); }
-
-            else
+            if (data.LeaveTypeId == 2){
+                data.RemainingBefore = lastBalance?.TotalDays ?? 0;
+             int remainingBefore = data.RemainingBefore.Value;
+                data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0); 
+            }
+            else if(data.LeaveTypeId == 1)
             {
-                data.RemainingAfter = 0;
+                data.RemainingBefore = lastBalance?.CasualTotalDays ?? 0;
+                    int remainingBefore = data.RemainingBefore.Value;
+                data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0);
+            }
+            else if(data.LeaveTypeId==5)
+            {
+                data.RemainingBefore = lastBalance?.TotalDays ?? 0;
+                int remainingBefore = data.RemainingBefore.Value;
+                data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0);
             }
 
             return View("PrintNew", data);
