@@ -14,19 +14,24 @@ namespace ERPNchr.Areas.LookUP.Controllers
 
         public IActionResult Index()
         {
-            var data = (from l in _context.HrDepartments                     
-                        //where l.IsActive == true
-                        orderby l.Id descending
-                        select new DepartmentVM
-                        {
-                            Id = l.Id,
-                            NameAr=l.NameAr,
-                            NameEn=l.NameEn,
-                            IsActive=l.IsActive,
-                        }).ToList();
+            var query = _context.HrDepartments.AsQueryable();
+
+           
+
+            var data = query
+                .OrderByDescending(d => d.Id)
+                .Select(d => new DepartmentVM
+                {
+                    Id = d.Id,
+                    NameAr = d.NameAr,
+                    NameEn = d.NameEn,
+                    IsActive = d.IsActive
+                })
+                .ToList();
 
             return View(data);
         }
+
         [HttpGet]
 
         public ActionResult CreateEdite(int TypePage, int? DepartmentID)

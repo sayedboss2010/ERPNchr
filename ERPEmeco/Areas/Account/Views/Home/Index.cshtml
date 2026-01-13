@@ -1,293 +1,127 @@
-﻿@model EF.Models.HrEmployee
+﻿@model VM.ViewModels.EmployeeVM
+
 @{
-
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "تفاصيل الموظف";
     Layout = "_Layout";
-
 }
+
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">الرئيسية/</span>الموظفين </h4>
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">الرئيسية /</span> تفاصيل الموظف
+    </h4>
 
-    <!-- Basic Layout & Basic with Icons -->
     <div class="row">
-        <!-- Basic with Icons -->
+        <!-- بيانات الموظف -->
         <div class="col-xxl">
             <div class="card mb-4">
-                <div class="card-header d-flex align-items-center justify-content-between">
+                <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">بيانات الموظف</h5>
-                    <small class="text-muted float-end">البيانات الاساسية</small>
                 </div>
+
                 <div class="card-body">
-                    <form>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="EmpCode">كود الموظف</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="EmpCode" class="input-group-text"><i class="bx bx-user"></i></span>
-                                    <input type="text" class="form-control" name="EmpCode" id="EmpCode" placeholder="كود الموظف" aria-label="كود الموظف" aria-describedby="basic-icon-default-fullname2" />
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">إسم الموظف</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="basic-icon-default-fullname2" class="input-group-text">
-                                        <i class="bx bx-user"></i>
-                                    </span>
-                                    <input type="text" class="form-control" id="basic-icon-default-fullname" placeholder="John Doe" aria-label="John Doe" aria-describedby="basic-icon-default-fullname2" />
-                                </div>
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">كود الموظف:</label>
+                        <div class="form-control bg-light">@Model.EmpCode</div>
+                    </div>
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="basic-icon-default-company">الرقم القومي</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="basic-icon-default-company2" class="input-group-text">
-                                        <i class="bx bx-buildings"></i>
-                                    </span>
-                                    <input type="text" id="basic-icon-default-company" class="form-control" placeholder="ACME Inc." aria-label="ACME Inc." aria-describedby="basic-icon-default-company2" />
-                                </div>
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">اسم الموظف:</label>
+                        <div class="form-control bg-light">@Model.NameAr</div>
+                    </div>
 
-                        <div class="row mb-3">
-                            <label for="formFile" class="col-sm-2 col-form-label">تحميل القومي</label>
-                            <div class="col-sm-10">
-                                <input class="form-control" type="file" id="formFile" />
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">الرقم القومي:</label>
+                        <div class="form-control bg-light">@Model.Nid</div>
+                    </div>
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="basic-default-email">البريد الالكتروني</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <input type="text"
-                                           id="basic-default-email"
-                                           class="form-control"
-                                           placeholder="john.doe"
-                                           aria-label="john.doe"
-                                           aria-describedby="basic-default-email2" />
-                                    <span class="input-group-text" id="basic-default-email2">@@gmail.com</span>
-                                </div>
-                                <div class="form-text">You can use letters, numbers & periods</div>
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">ملف البطاقة:</label><br />
+                        @if (!string.IsNullOrEmpty(Model.NidPath))
+                        {
+                            <a href="@Model.NidPath" target="_blank"
+                               class="btn btn-info">تحميل البطاقة</a>
+                        }
+                        else
+                        {
+                            <span class="text-danger">لا يوجد ملف</span>
+                        }
+                    </div>
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 form-label" for="basic-icon-default-phone">الهاتف</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="basic-icon-default-phone2" class="input-group-text">
-                                        <i class="bx bx-phone"></i>
-                                    </span>
-                                    <input type="text"
-                                           id="basic-icon-default-phone"
-                                           class="form-control phone-mask"
-                                           placeholder="658 799 8941"
-                                           aria-label="658 799 8941"
-                                           aria-describedby="basic-icon-default-phone2" />
-                                </div>
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">البريد الإلكتروني:</label>
+                        <div class="form-control bg-light">@Model.Email</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">الرقم السري:</label>
+                        <div class="form-control bg-light">@Model.Password</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">الهاتف:</label>
+                        <div class="form-control bg-light">@Model.PhoneNumber</div>
+                    </div>
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 form-label" for="basic-icon-default-message">العنوان</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="basic-icon-default-message2" class="input-group-text">
-                                        <i class="bx bx-comment"></i>
-                                    </span>
-                                    <textarea id="basic-icon-default-message"
-                                              class="form-control"
-                                              placeholder="Hi, Do you have a moment to talk Joe?"
-                                              aria-label="Hi, Do you have a moment to talk Joe?"
-                                              aria-describedby="basic-icon-default-message2"></textarea>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">العنوان:</label>
+                        <div class="form-control bg-light">@Model.AddressAr</div>
+                    </div>
 
-                        <div class="card mb-4">
-
-                            <div class="card-body">
-                                <div class="form-check form-switch mb-2">
-                                    <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" />
-                                    <label class="form-check-label" for="flexSwitchCheckDefault">الحالة</label>
-                                </div>
-                                <div class="form-check form-switch mb-2">
-                                    <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked />
-                                    <label class="form-check-label" for="flexSwitchCheckChecked">مدير ادارة</label>
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="row justify-content-end">
-                            <div class="col-sm-10">
-                                <button type="submit" class="btn btn-primary">حفــــظ</button>
-                            </div>
-                        </div>
-                    </form>
                 </div>
             </div>
-
-           
         </div>
 
-        <!-- Basic Layout -->
+        <!-- بيانات الوظيفة -->
         <div class="col-xxl">
-
             <div class="card mb-4">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <h5 class="mb-0">بيانات الوظيفة</h5>
-                    <small class="text-muted float-end">Default label</small>
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">البيانات الوظيفية</h5>
                 </div>
+
                 <div class="card-body">
-                    <form>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="html5-date-input">تاريخ التعيين</label>
-                            <div class="col-sm-10">
-                                <input class="form-control" type="date" value="2021-06-18" id="html5-date-input">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="exampleDataList" class="col-sm-2 col-form-label">الإدارة</label>
-                            <div class="col-sm-10">
-                                <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." />
-                                <datalist id="datalistOptions">
-                                    <option value="San Francisco"></option>
-                                    <option value="New York"></option>
-                                    <option value="Seattle"></option>
-                                    <option value="Los Angeles"></option>
-                                    <option value="Chicago"></option>
-                                </datalist>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="exampleDataList" class="col-sm-2 col-form-label">الوظيفة الحالية</label>
-                            <div class="col-sm-10">
-                                <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." />
-                                <datalist id="datalistOptions">
-                                    <option value="San Francisco"></option>
-                                    <option value="New York"></option>
-                                    <option value="Seattle"></option>
-                                    <option value="Los Angeles"></option>
-                                    <option value="Chicago"></option>
-                                </datalist>
-                            </div>
-                        </div>
-                        
-                    </form>
-                </div>
-            </div>
-            <div class="card mb-4">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <h5 class="mb-0">بيانات المرتب</h5>
-                    <small class="text-muted float-end">Default label</small>
-                </div>
-                <div class="card-body">
-                    <form>
-                        <div class="mb-3 row">
-                            <label class="col-sm-2 col-form-label" for="html5-number-input" >قيمة المرتب</label>
-                            <div class="col-sm-10">
-                                <input class="form-control" type="number" value="18" id="html5-number-input" />
-                            </div>
-                        </div>
-                       
-                       
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="year-select">لسنة</label>
-                            <div class="col-sm-10">
-                                <select class="form-control" id="year-select" name="year">
-                                    <option value="">اختر السنة</option>
-                                    <script>
-                                        const select = document.getElementById("year-select");
-                                        const currentYear = new Date().getFullYear();
-                                        for (let y = currentYear; y >= 1980; y--) {
-                                          const opt = document.createElement("option");
-                                          opt.value = y;
-                                          opt.textContent = y;
-                                          select.appendChild(opt);
-                                        }
-                                    </script>
-                                </select>
-                            </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">تاريخ التعيين:</label>
+                        <div class="form-control bg-light">
+                            @(Model.AppointmentDate?.ToString("yyyy-MM-dd"))
                         </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="month-select">الشهر</label>
-                            <div class="col-sm-10">
-                                <select class="form-control" id="month-select" name="month">
-                                    <option value="">اختر الشهر</option>
-                                    <script>
-                                        const months = [
-                                          "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-                                          "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
-                                        ];
-                                        const monthSelect = document.getElementById("month-select");
-                                        for (let i = 0; i < months.length; i++) {
-                                          const opt = document.createElement("option");
-                                          opt.value = i + 1; // 1 إلى 12
-                                          opt.textContent = months[i];
-                                          monthSelect.appendChild(opt);
-                                        }
-                                    </script>
-                                </select>
-                            </div>
-                        </div>
+                    </div>
 
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="html5-date-input">نوع القبض</label>
-                            <div class="col-sm-10">
-                                <div class="form-check form-check-inline mt-3">
-                                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1" />
-                                    <label class="form-check-label" for="inlineRadio1">بنك</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2" />
-                                    <label class="form-check-label" for="inlineRadio2">خزينة</label>
-                                </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">الإدارة:</label>
+                        <div class="form-control bg-light">@Model.DepartmentName</div>
+                    </div>
 
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">المحافظة / الفرع:</label>
+                        <div class="form-control bg-light">@Model.BranchName</div>
+                    </div>
 
-                    </form>
-                </div>
-            </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">الوظيفة الحالية:</label>
+                        <div class="form-control bg-light">@Model.JobName</div>
+                    </div>
 
-            <div class="card mb-4">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <h5 class="mb-0">بيانات التأمين</h5>
-                    <small class="text-muted float-end">Default label</small>
-                </div>
-                <div class="card-body">
-                    <form>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="basic-default-name">الرقم التأميني</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="basic-default-name" placeholder="John Doe" />
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="html5-date-input">تاريخ الدخول</label>
-                            <div class="col-sm-10">
-                                <input class="form-control" type="date" value="2021-06-18" id="html5-date-input">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="html5-date-input">تاريخ الخروج</label>
-                            <div class="col-sm-10">
-                                <input class="form-control" type="date" value="2021-06-18" id="html5-date-input">
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">نوع الموظف:</label>
+                        <div class="form-control bg-light">@Model.EmolyeetypeName</div>
+                    </div>
 
-                    </form>
+                    <div class="mb-3">
+                        <label class="fw-bold">الحالة:</label>
+                        <div class="form-control bg-light">
+                            @(Model.IsActive ? "نشط" : "غير نشط")
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">ذوي اعاقة:</label>
+                        <div class="form-control bg-light">
+                            @(Model.Disability == true ? "نعم" : "لا")
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
+
 </div>
-
-

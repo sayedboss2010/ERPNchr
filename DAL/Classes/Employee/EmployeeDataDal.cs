@@ -16,6 +16,7 @@ namespace DAL.Classes.Employee
             var obj = dbContext.HrEmployees.Where(a => a.Id == EmployeeID && a.IsActive == true)
                 .Select(f => new EmployeeVM
                 {
+                    Disability=f.Disability,
                     Id = f.Id,
                     EmpCode = f.EmpCode,
                     NameAr = f.NameAr,
@@ -27,9 +28,9 @@ namespace DAL.Classes.Employee
                     Birthdate = f.Birthdate,
                     HireDate = f.HireDate,
                     CurrentJobId = f.CurrentJobId,
-                  
+                    BranchId=f.BranchId,
                     DepartmentId = f.DepartmentId,
-                    
+                    Password=f.Password,
                     CurrentSalary = f.CurrentSalary,
                     CurrentFunctionalDegreeId = f.CurrentFunctionalDegreeId,
                     EmployeeTypeId = f.EmployeeTypeId,

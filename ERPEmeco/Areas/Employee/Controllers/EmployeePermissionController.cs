@@ -12,46 +12,107 @@ namespace ERPNchr.Areas.Employee.Controllers
     {
       
         private readonly AppDbContext _context = new AppDbContext();
-     
-        // 🧾 عرض كل الإجازات
-        public ActionResult Index()
-        {
-            var data = (from l in _context.HrEmployeePermissions
-                        join e in _context.HrEmployees on l.EmployeeId equals e.Id
-                        join t in _context.PermissionsTypes on l.PermissionTypeId equals t.Id
-                        where l.IsActive == true
-                        orderby l.Id descending
-                        select new EmployeePermissionVM
-                        {
-                            Id = l.Id,
-                            EmployeeId = e.Id,
-                            EmplyeeName = e.NameAr,
-                            PermissionTypeName = t.NameAr,                           
-                            DateOfPermission = l.DateOfPermission,                                              
-                            DirectManagerApproval = l.DirectManagerApproval,
-                            DepartmentManagerApproval = l.DepartmentManagerApproval,
 
-                        }).ToList();
+        // 🧾 عرض كل الإجازات
+        public ActionResult Index(string search)
+        {
+            int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
+            int? userType = Request.Cookies.ContainsKey("UserType") ? int.Parse(Request.Cookies["UserType"]) : null;
+            int? branchId = Request.Cookies.ContainsKey("BranchID") ? int.Parse(Request.Cookies["BranchID"]) : null;
+            int? departmentId = Request.Cookies.ContainsKey("DepartmentID") ? int.Parse(Request.Cookies["DepartmentID"]) : null;
+
+            var query = from l in _context.HrEmployeePermissions
+                        join t in _context.PermissionsTypes on l.PermissionTypeId equals t.Id
+                        join e in _context.HrEmployees on l.EmployeeId equals e.Id
+                        where l.IsActive == true
+                        select new { l, t, e };
+
+            // 🔍 البحث
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(x =>
+                    (x.e.NameAr != null && x.e.NameAr.Contains(search)) ||
+                    (x.t.NameAr != null && x.t.NameAr.Contains(search))
+                );
+            }
+
+            switch (userType)
+            {
+                case 1:
+                    query = query.Where(x => x.e.Id == userId);
+                    break;
+
+                case 2:
+                    query = query.Where(x =>
+                        x.e.DepartmentId == departmentId &&
+                        x.e.BranchId == branchId
+                    );
+                    break;
+
+                case 3:
+                    break;
+            }
+
+            var data = query
+                .OrderByDescending(x => x.l.Id)
+                .Select(x => new EmployeePermissionVM
+                {
+                    Id = (int)x.l.Id,
+                    EmployeeId = (int)x.e.Id,
+                    EmplyeeName = x.e.NameAr,
+                    PermissionTypeId = x.l.PermissionTypeId,
+                    PermissionTypeName = x.t.NameAr,
+                    DateOfPermission = x.l.DateOfPermission,
+                    DirectManagerApproval = x.l.DirectManagerApproval,
+                    DepartmentManagerApproval = x.l.DepartmentManagerApproval
+                })
+                .ToList();
 
             return View(data);
         }
+
 
         // ➕ شاشة إضافة جديدة
         [HttpGet]
 
         public ActionResult Create()
         {
-            var Emplist = (from e in _context.HrEmployees
-                           where e.IsActive == true
-                           //&& e.CurrentBranchDeptId == 5
-                           select new
-                           {
-                               e.Id,
-                               e.NameAr,
-                               Display = e.NameAr + " (" + e.EmpCode + ")"  // نضيف النص المعروض بالاسم + الكود
-                           }).ToList();
-            // هنا نخزن النص المعروض في ViewBag
-            ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
+            int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
+
+            int? userType = Request.Cookies.ContainsKey("UserType") ? int.Parse(Request.Cookies["UserType"]) : null;
+
+            int? branchId = Request.Cookies.ContainsKey("BranchID") ? int.Parse(Request.Cookies["BranchID"]) : null;
+
+            int? departmentId = Request.Cookies.ContainsKey("DepartmentID") ? int.Parse(Request.Cookies["DepartmentID"]) : null;
+
+            // ----- Base Query -----
+            var employeesQuery = _context.HrEmployees.Where(e => e.IsActive);
+
+            switch (userType)
+            {
+                case 1: // موظف
+                    employeesQuery = employeesQuery.Where(e => e.Id == userId);
+                    break;
+
+                case 2: // مدير إدارة
+                    employeesQuery = employeesQuery.Where(e => e.DepartmentId == departmentId && e.BranchId == branchId);
+                    break;
+
+                case 3: // رئيس قطاع
+                        // يشوف الكل → لا نضيف أي فلاتر
+                    break;
+            }
+
+            // ----- Build List -----
+            var employeeOptions = employeesQuery
+                .Select(e => new
+                {
+                    e.Id,
+                    Display = e.NameAr + " (" + e.EmpCode + ")"
+                })
+                .ToList();
+
+            ViewBag.EmployeeOptions = new SelectList(employeeOptions, "Id", "Display");
             ViewBag.PermissionType = new SelectList(_context.PermissionsTypes, "Id", "NameAr");
 
             return View();
@@ -141,6 +202,43 @@ namespace ERPNchr.Areas.Employee.Controllers
                         }).FirstOrDefault();
 
             return View(data);   // يفتح صفحة الطباعة
+        }
+        [HttpPost]
+        public IActionResult DirectManagerAction(int id, bool isApproved, string type)
+        {
+            var permission = _context.HrEmployeePermissions.FirstOrDefault(x => x.Id == id);
+            if (permission == null)
+                return Json(new { success = false, message = "لم يتم العثور على الاذن" });
+
+            DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+
+            // منع الموافقة او الرفض لو اليوم > تاريخ الاجازة
+            if (today > permission.DateOfPermission)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "لا يمكن الموافقة أو الرفض بعد موعد الاذن."
+                });
+            }
+
+            // في حالة مسموح
+            if (type == "direct")
+            {
+                permission.DirectManagerApproval = isApproved;
+
+            }
+            else if (type == "sector")
+            {
+
+                permission.DepartmentManagerApproval = isApproved;
+            }
+        
+            permission.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+
+            _context.SaveChanges();
+
+            return Json(new { success = true, message = "تم تحديث حالة الاذن بنجاح" });
         }
 
 

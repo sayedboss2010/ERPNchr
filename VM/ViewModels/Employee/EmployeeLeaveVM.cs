@@ -10,6 +10,8 @@ namespace VM.ViewModels;
 
 public class EmployeeLeaveVM
 {
+    public int? EmployeeTypeId { get; set; }
+    public string EmployeeTypeName{ get; set; }
     public long? Id { get; set; }
     public string AttachmentPath { get; set; } = null!;
     public long? EmployeeId { get; set; }
@@ -20,6 +22,12 @@ public class EmployeeLeaveVM
 
     public byte? LeaveTypeId { get; set; }
 
+    public decimal CasualTotalDays { get; set; }
+    public int? CasualRemainingDays { get; set; }
+    /// <summary>
+    /// ايام العارضة المستخدمة
+    /// </summary>
+    public decimal CasualUsedDays { get; set; }
 
     [Display(Name = "نوع الإجازة")]
     public string? LeaveTypeName { get; set; }  // سنوية / مرضية / طارئة

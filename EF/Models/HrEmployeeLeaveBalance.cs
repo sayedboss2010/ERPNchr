@@ -20,32 +20,38 @@ public partial class HrEmployeeLeaveBalance
     /// <summary>
     /// إجمالي الإجازات الاعتيادية في السنة
     /// </summary>
-    public decimal TotalDays { get; set; }
+    public int TotalDays { get; set; }
 
     /// <summary>
-    /// الايام المستخدمه فى السنة
+    /// الايام الاعتيادي المستخدمه فى السنة
     /// </summary>
-    public decimal UsedDays { get; set; }
+    public int UsedDays { get; set; }
 
-    /// <summary>
-    /// إجمالي الإجازات العارضة في السنة
-    /// </summary>
-    public decimal CasualTotalDays { get; set; }
-
-    /// <summary>
-    /// ايام العارضة المستخدمة
-    /// </summary>
-    public decimal CasualUsedDays { get; set; }
+    public int? TotalDaysReminig { get; set; }
 
     /// <summary>
     /// إجمالي الإجازات العارضة في السنة
     /// </summary>
-    public decimal AnnualTotalDays { get; set; }
+    public int CasualTotalDays { get; set; }
 
     /// <summary>
     /// ايام العارضة المستخدمة
     /// </summary>
-    public decimal AnnualUsedDays { get; set; }
+    public int CasualUsedDays { get; set; }
+
+    public int? CasualRemainingDays { get; set; }
+
+    /// <summary>
+    /// إجمالي الإجازات السنوية في السنة
+    /// </summary>
+    public int AnnualTotalDays { get; set; }
+
+    /// <summary>
+    /// ايام السنوية المستخدمة
+    /// </summary>
+    public int AnnualUsedDays { get; set; }
+
+    public int? AnnualRemainingDays { get; set; }
 
     public int? CreatedUserId { get; set; }
 
@@ -61,18 +67,6 @@ public partial class HrEmployeeLeaveBalance
     /// تم احتساب الإجازة على باقي الرصيد الاعتيادي (0 = لا، 1 = نعم)
     /// </summary>
     public bool IsAnnualBalanceCalculated { get; set; }
-
-    /// <summary>
-    /// باقي الايام العارضة
-    /// </summary>
-    public int? AnnualRemainingDays { get; set; }
-
-    /// <summary>
-    /// باقي الايام العارضة
-    /// </summary>
-    public int? CasualRemainingDays { get; set; }
-
-    public int? TotalDaysReminig { get; set; }
 
     public virtual HrEmployee Employee { get; set; } = null!;
 

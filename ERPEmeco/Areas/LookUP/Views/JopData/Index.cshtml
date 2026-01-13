@@ -6,7 +6,7 @@
 
 <h2 class="text-center">قائمة الوظايف</h2>
 <hr />
-<a href="@Url.Action("CreateEdite", "HRJob", new { TypePage = 1, area = "LookUP" })" class="btn btn-primary btn-sm">
+<a href="@Url.Action("CreateEdite", "JopData", new { TypePage = 1, area = "LookUP" })" class="btn btn-primary btn-sm">
     إنشاء وظيفه جديدة
 </a>
 
@@ -46,11 +46,11 @@
 
                 <td>
 
-                    <a href="@Url.Action("CreateEdite", "HRJob", new { TypePage = 2, JobID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
+                    <a href="@Url.Action("CreateEdite", "JopData", new { TypePage = 2, JobID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
                         تعديل
                     </a>
-                    
-                    <a href="@Url.Action("CreateEdite", "HRJob", new { TypePage = 3, JobID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
+
+                    <a href="@Url.Action("CreateEdite", "JopData", new { TypePage = 3, JobID = item.Id, area = "LookUP" })" class="btn btn-primary btn-sm">
                         عرض
                     </a>
                 </td>
@@ -72,7 +72,7 @@
                         if (confirm("هل أنت متأكد من تفعيل حالة هذا الفرع / هذه المحافظة ؟")) {
 
                     $.ajax({
-                        url: '@Url.Action("ActivateBranch", "HRJob", new { area = "LookUP" })',
+                        url: '@Url.Action("ActivateBranch", "JopData", new { area = "LookUP" })',
                         type: 'POST',
                         data: {
                             id: leaveId,
@@ -96,7 +96,7 @@
                       if (confirm("هل أنت متأكد من عدم تفعيل حالة هذا الفرع / هذه المحافظة ؟")) {
 
                     $.ajax({
-                        url: '@Url.Action("ActivateBranch", "HRJob", new { area = "LookUP" })',
+                        url: '@Url.Action("ActivateBranch", "JopData", new { area = "LookUP" })',
                         type: 'POST',
                         data: {
                             id: leaveId,

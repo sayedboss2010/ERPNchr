@@ -1,6 +1,7 @@
 ﻿using EF.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,9 +10,13 @@ namespace VM.ViewModels
 {
     public class EmployeeVM
     {
+        public bool? Disability { get; set; }
         public long Id { get; set; }
-   
-       
+        public string EmolyeetypeName { get; set; }
+        public string DepartmentName { get; set; }
+        public string BranchName { get; set; }
+        public string JobName { get; set; }
+
         /// <summary>
         /// كود الموظف
         /// </summary>
@@ -20,7 +25,8 @@ namespace VM.ViewModels
         public string? NameAr { get; set; }
 
         public string? NameEn { get; set; }
-
+        [Required(ErrorMessage = "البريد الإلكتروني مطلوب")]
+        [EmailAddress(ErrorMessage = "صيغة البريد الإلكتروني غير صحيحة")]
         public string? Email { get; set; }
 
         public string? Password { get; set; }
@@ -68,6 +74,8 @@ namespace VM.ViewModels
         /// <summary>
         /// الرقم القومي
         /// </summary>
+        [Required(ErrorMessage = "الرقم القومي مطلوب")]
+       
         public string? Nid { get; set; }
 
         /// <summary>
@@ -100,6 +108,9 @@ namespace VM.ViewModels
         public int? BranchId { get; set; }
 
         public int? DepartmentId { get; set; }
+
+        public bool? IsChange { get; set; }
+
 
         public virtual HrBranch? Branch { get; set; }
 

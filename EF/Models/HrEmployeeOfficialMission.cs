@@ -9,8 +9,6 @@ public partial class HrEmployeeOfficialMission
 
     public long? EmployeeId { get; set; }
 
-    public int? DepartmentId { get; set; }
-
     public string? AuthorityOfMission { get; set; }
 
     public string? PurposeOfMission { get; set; }
@@ -43,7 +41,7 @@ public partial class HrEmployeeOfficialMission
     /// </summary>
     public bool? DepartmentManagerApproval { get; set; }
 
-    public virtual HrDepartment? Department { get; set; }
+    public string? AttachmentPath { get; set; }
 
     public virtual HrEmployee? Employee { get; set; }
 }

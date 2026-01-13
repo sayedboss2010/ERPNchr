@@ -14,16 +14,20 @@ namespace ERPNchr.Areas.LookUP.Controllers
 
         public IActionResult Index()
         {
-            var data = (from l in _context.HrJobs
-                        //where l.IsActive == true
-                        orderby l.Id descending
-                        select new JopDataVM
-                        {
-                            Id = l.Id,
-                            TitleAr = l.TitleAr,
-                            TitleEn = l.TitleEn,
-                            IsActive = l.IsActive,
-                        }).ToList();
+            var query = _context.HrJobs.AsQueryable();
+
+            // 🔍 البحث (عربي / إنجليزي)
+          
+            var data = query
+                .OrderByDescending(j => j.Id)
+                .Select(j => new JopDataVM
+                {
+                    Id = j.Id,
+                    TitleAr = j.TitleAr,
+                    TitleEn = j.TitleEn,
+                    IsActive = j.IsActive
+                })
+                .ToList();
 
             return View(data);
         }
@@ -72,7 +76,7 @@ namespace ERPNchr.Areas.LookUP.Controllers
             if (HRJobs.Id == 0)   // CREATE
             {
                 int newId = _context.Database
-                    .SqlQueryRaw<int>("SELECT NEXT VALUE FOR dbo.HR_HRJob_SEQ")
+                    .SqlQueryRaw<int>("SELECT NEXT VALUE FOR dbo.HR_Jobs_SEQ")
                     .AsEnumerable()
                     .First();
 
@@ -83,7 +87,7 @@ namespace ERPNchr.Areas.LookUP.Controllers
                     TitleEn = HRJobs.TitleEn,
                     CreatedDate = DateOnly.FromDateTime(DateTime.Now),
                     CreatedUserId = 1,
-                    IsActive = false
+                    IsActive = true
                 };
 
                 _context.HrJobs.Add(entity);
@@ -108,7 +112,7 @@ namespace ERPNchr.Areas.LookUP.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index", "HRJob", new { area = "LookUP" });
+            return RedirectToAction("Index", "JopData", new { area = "LookUP" });
         }
 
 
@@ -134,7 +138,7 @@ namespace ERPNchr.Areas.LookUP.Controllers
             return Json(new
             {
                 success = true,
-                redirectUrl = Url.Action("Index", "HRJob", new { area = "LookUP" })
+                redirectUrl = Url.Action("Index", "JopData", new { area = "LookUP" })
             });
         }
 

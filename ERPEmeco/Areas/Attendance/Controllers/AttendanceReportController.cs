@@ -1,8 +1,11 @@
 ﻿using EF.Data;
+using EF.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using System.Data;
+using VM.ViewModels;
 
 namespace ERPNchr.Areas.Attendance.Controllers
 {
@@ -22,7 +25,17 @@ namespace ERPNchr.Areas.Attendance.Controllers
         public IActionResult Index()
         {
             var targetDate = DateTime.Now.Date;
-            int branchDeptId = 5;
+            
+            // قراءة الكوكيز
+            int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
+            int? EmployeeTypeID = Request.Cookies.ContainsKey("UserType") ? int.Parse(Request.Cookies["UserType"]) : null;
+            int? BranchDeptID = Request.Cookies.ContainsKey("BranchID") ? int.Parse(Request.Cookies["BranchID"]) : null;
+            int? DepartmentID = Request.Cookies.ContainsKey("DepartmentID") ? int.Parse(Request.Cookies["DepartmentID"]) : null;
+                // @TargetDate DATE,        --تاريخ الحضور
+                //@BranchDeptID INT ,               --الفرع
+                // @DepartmentID INT,               --الإدارة
+                // @EmployeeTypeID INT,           --نوع المستخدم(الصلاحية)
+                // @CurrentEmployeeID INT          --الموظف الحالي(Login User)
             var data = new List<EmployeeAttendanceVM>();
 
             using (var connection = new SqlConnection(_context.Database.GetDbConnection().ConnectionString))
@@ -31,7 +44,10 @@ namespace ERPNchr.Areas.Attendance.Controllers
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.Add(new SqlParameter("@TargetDate", targetDate));
-                    command.Parameters.Add(new SqlParameter("@BranchDeptID", branchDeptId));
+                    command.Parameters.Add(new SqlParameter("@BranchDeptID", BranchDeptID));
+                    command.Parameters.Add(new SqlParameter("@DepartmentID", DepartmentID));
+                    command.Parameters.Add(new SqlParameter("@EmployeeTypeID", EmployeeTypeID));
+                    command.Parameters.Add(new SqlParameter("@CurrentEmployeeID", userId));
 
                     connection.Open();
                     using (var reader = command.ExecuteReader())

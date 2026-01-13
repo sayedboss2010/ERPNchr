@@ -1,0 +1,78 @@
+﻿@model VM.ViewModels.EmployeeActivityReportVM
+
+@{
+    ViewBag.Title = "تقرير الاجازات والمأمويات والازونات اليومي";
+    Layout = "_Layout";
+    var summary = Model.Summary ?? new List<VM.ViewModels.RecordSummaryVM>();
+    var byDepartment = Model.ByDepartment ?? new List<VM.ViewModels.DepartmentRecordsVM>();
+}
+
+<h2>تقرير الاجازات والمأمويات والاذونات اليومي</h2>
+
+<h3>إجماليات حسب نوع السجل</h3>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>نوع السجل</th>
+            <th>عدد السجلات</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in summary)
+        {
+            <tr>
+                <td>@item.RecordType</td>
+                <td>@item.Count</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h3>التفاصيل حسب الإدارة</h3>
+
+@if (byDepartment.Any())
+{
+    @foreach (var dept in byDepartment)
+    {
+        <h4>@dept.DepartmentName</h4>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>اسم الموظف</th>
+                    <th>الفرع</th>
+                    <th>نوع السجل</th>
+                    <th>التفاصيل</th>
+                    <th>معلومات إضافية</th>
+                    <th>تاريخ البداية</th>
+                    <th>تاريخ النهاية</th>
+                    <th>عدد أيام الإجازة</th>
+                    <th>حالة موافقة المدير المباشر</th>
+                    <th>حالة موافقة رئيس الإدارة</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in dept.Records)
+                {
+                    <tr>
+                        <td>@item.EmployeeName</td>
+                        <td>@item.BranchName </td>
+                        <td>@item.RecordType </td>
+                        <td>@item.Details </td>
+                        <td>@item.ExtraInfo </td>
+                        <td>@(item.StartDate?.ToString("yyyy-MM-dd") )</td>
+                        <td>@(item.EndDate?.ToString("yyyy-MM-dd") )</td>
+                        <td>@(item.LeaveDays?.ToString() )</td>
+                        <td>@item.DirectManagerStatus </td>
+                        <td>@item.DeptManagerStatus </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    <p>لا توجد بيانات للعرض.</p>
+}

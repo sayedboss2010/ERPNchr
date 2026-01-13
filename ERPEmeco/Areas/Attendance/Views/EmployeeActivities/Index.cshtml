@@ -1,0 +1,45 @@
+﻿@model IEnumerable<EF.Models.VwEmployeeActivity>
+
+@{
+    ViewBag.Title = "تقرير الاجازات والمأمويات والازونات اليومي";
+    Layout = "_Layout";
+}
+
+<h2>تقرير الاجازات والمأمويات والازونات اليومي</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>اسم الموظف</th>
+            <th>الإدارة</th>
+            <th>الفرع</th>
+            <th>نوع السجل</th>
+            <th>التفاصيل</th>
+            <th>معلومات إضافية</th>
+            <th>تاريخ البداية</th>
+            <th>تاريخ النهاية</th>
+            <th>عدد أيام الإجازة</th>
+            <th>حالة موافقة المدير المباشر</th>
+            <th>حالة موافقة رئيس الإدارة</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.EmployeeName</td>
+                <td>@item.DepartmentName</td>
+                <td>@item.BranchName</td>
+                <td>@item.RecordType</td>
+                <td>@item.Details</td>
+                <td>@item.ExtraInfo</td>
+                <td>@item.StartDate.Value.ToString("yyyy-MM-dd")</td>
+                <td>@item.EndDate.Value.ToString("yyyy-MM-dd")</td>
+                <td>@item.LeaveDays</td>
+                <td>@item.DirectManagerStatus</td>
+                <td>@item.DeptManagerStatus</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using EF.Models;
+﻿using EF.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
 
 namespace EF.Data;
 
@@ -18,6 +18,12 @@ public partial class AppDbContext : DbContext
     }
 
     public virtual DbSet<AUserLogin> AUserLogins { get; set; }
+
+    public virtual DbSet<AttendanceDeviceLog> AttendanceDeviceLogs { get; set; }
+
+    public virtual DbSet<AttendanceSyncDeviceLog> AttendanceSyncDeviceLogs { get; set; }
+
+    public virtual DbSet<AttendanceSyncErrorLog> AttendanceSyncErrorLogs { get; set; }
 
     public virtual DbSet<DataUpdatesLogTb> DataUpdatesLogTbs { get; set; }
 
@@ -75,6 +81,9 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<UserType> UserTypes { get; set; }
 
+    public virtual DbSet<VwEmployeeActivity> VwEmployeeActivities { get; set; }
+
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         try
@@ -108,6 +117,37 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("Login_Date");
             entity.Property(e => e.UserId).HasColumnName("User_Id");
+        });
+
+        modelBuilder.Entity<AttendanceDeviceLog>(entity =>
+        {
+            entity.HasIndex(e => e.DeviceId, "IX_AttendanceDeviceLogs_DeviceId");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.EnrollNumber).HasMaxLength(100);
+            entity.Property(e => e.ScanType).HasMaxLength(100);
+            entity.Property(e => e.Source).HasMaxLength(100);
+
+            entity.HasOne(d => d.Device).WithMany(p => p.AttendanceDeviceLogs)
+                .HasForeignKey(d => d.DeviceId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<AttendanceSyncDeviceLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Attendan__3214EC0741C0E810");
+
+            entity.Property(e => e.DeviceIp).HasMaxLength(50);
+            entity.Property(e => e.RunTime).HasColumnType("datetime");
+            entity.Property(e => e.Status).HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<AttendanceSyncErrorLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Attendan__3214EC072F7DCCB6");
+
+            entity.Property(e => e.DeviceIp).HasMaxLength(50);
+            entity.Property(e => e.RunTime).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<DataUpdatesLogTb>(entity =>
@@ -413,22 +453,16 @@ public partial class AppDbContext : DbContext
             entity.ToTable("HR_Employee_LeaveBalance", tb => tb.HasComment("رصيد الإجازات السنوي (اعتيادي + عارضة)"));
 
             entity.Property(e => e.Id).HasColumnName("ID");
-            entity.Property(e => e.AnnualRemainingDays).HasComment("باقي الايام العارضة");
+            entity.Property(e => e.AnnualRemainingDays).HasComputedColumnSql("([AnnualTotalDays]-[AnnualUsedDays])", true);
             entity.Property(e => e.AnnualTotalDays)
-                .HasDefaultValue(7m)
-                .HasComment("إجمالي الإجازات العارضة في السنة")
-                .HasColumnType("decimal(5, 2)");
-            entity.Property(e => e.AnnualUsedDays)
-                .HasComment("ايام العارضة المستخدمة")
-                .HasColumnType("decimal(5, 2)");
-            entity.Property(e => e.CasualRemainingDays).HasComment("باقي الايام العارضة");
+                .HasDefaultValue(7)
+                .HasComment("إجمالي الإجازات السنوية في السنة");
+            entity.Property(e => e.AnnualUsedDays).HasComment("ايام السنوية المستخدمة");
+            entity.Property(e => e.CasualRemainingDays).HasComputedColumnSql("([CasualTotalDays]-[CasualUsedDays])", true);
             entity.Property(e => e.CasualTotalDays)
-                .HasDefaultValue(7m)
-                .HasComment("إجمالي الإجازات العارضة في السنة")
-                .HasColumnType("decimal(5, 2)");
-            entity.Property(e => e.CasualUsedDays)
-                .HasComment("ايام العارضة المستخدمة")
-                .HasColumnType("decimal(5, 2)");
+                .HasDefaultValue(7)
+                .HasComment("إجمالي الإجازات العارضة في السنة");
+            entity.Property(e => e.CasualUsedDays).HasComment("ايام العارضة المستخدمة");
             entity.Property(e => e.CreatedDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -440,16 +474,14 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsAnnualBalanceCalculated).HasComment("تم احتساب الإجازة على باقي الرصيد الاعتيادي (0 = لا، 1 = نعم)");
             entity.Property(e => e.TotalDays)
-                .HasDefaultValue(30m)
-                .HasComment("إجمالي الإجازات الاعتيادية في السنة")
-                .HasColumnType("decimal(5, 2)");
+                .HasDefaultValue(30)
+                .HasComment("إجمالي الإجازات الاعتيادية في السنة");
+            entity.Property(e => e.TotalDaysReminig).HasComputedColumnSql("([TotalDays]-[UsedDays])", false);
             entity.Property(e => e.UpdatedDate)
                 .HasColumnType("datetime")
                 .HasColumnName("Updated_Date");
             entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
-            entity.Property(e => e.UsedDays)
-                .HasComment("الايام المستخدمه فى السنة")
-                .HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.UsedDays).HasComment("الايام الاعتيادي المستخدمه فى السنة");
 
             entity.HasOne(d => d.Employee).WithMany(p => p.HrEmployeeLeaveBalances)
                 .HasForeignKey(d => d.EmployeeId)
@@ -469,17 +501,12 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedUserId).HasColumnName("Created_UserId");
             entity.Property(e => e.DeletedDate).HasColumnName("Deleted_Date");
             entity.Property(e => e.DeletedUserId).HasColumnName("Deleted_UserId");
-            entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
             entity.Property(e => e.DepartmentManagerApproval).HasComment("موافقة مدير الادارة");
             entity.Property(e => e.DirectManagerApproval).HasComment("موافقة المدير المباشر");
             entity.Property(e => e.EmployeeId).HasColumnName("Employee_ID");
             entity.Property(e => e.PurposeOfMission).HasMaxLength(100);
             entity.Property(e => e.UpdatedDate).HasColumnName("Updated_Date");
             entity.Property(e => e.UpdatedUserId).HasColumnName("Updated_UserId");
-
-            entity.HasOne(d => d.Department).WithMany(p => p.HrEmployeeOfficialMissions)
-                .HasForeignKey(d => d.DepartmentId)
-                .HasConstraintName("FK_HR_EmployeeOfficialMission_HR_Departments");
 
             entity.HasOne(d => d.Employee).WithMany(p => p.HrEmployeeOfficialMissions)
                 .HasForeignKey(d => d.EmployeeId)
@@ -606,6 +633,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedUserId).HasColumnName("Created_UserId");
             entity.Property(e => e.DeletedDate).HasColumnName("Deleted_Date");
             entity.Property(e => e.DeletedUserId).HasColumnName("Deleted_UserId");
+            entity.Property(e => e.LastPullDate).HasComment("اخر موعد لسحب البصمات");
             entity.Property(e => e.MachineIp)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -806,10 +834,34 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("ID");
         });
+
+        modelBuilder.Entity<VwEmployeeActivity>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("vw_EmployeeActivities");
+
+            entity.Property(e => e.BranchId).HasColumnName("BranchID");
+            entity.Property(e => e.BranchName).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasColumnName("Created_Date");
+            entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
+            entity.Property(e => e.DepartmentName).HasMaxLength(100);
+            entity.Property(e => e.DeptManagerStatus).HasMaxLength(12);
+            entity.Property(e => e.Details).HasMaxLength(200);
+            entity.Property(e => e.DirectManagerStatus).HasMaxLength(12);
+            entity.Property(e => e.EmployeeId).HasColumnName("Employee_ID");
+            entity.Property(e => e.EmployeeName).HasMaxLength(100);
+            entity.Property(e => e.ExtraInfo).HasMaxLength(200);
+            entity.Property(e => e.RecordType).HasMaxLength(7);
+        });
         modelBuilder.HasSequence("A__User_Login_SEQ")
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("DataUpdatesLogTb_SEQ")
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("EmployeeType_SEQ")
+            .StartsAt(5L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("ExceptionLogTb_SEQ")
@@ -820,11 +872,11 @@ public partial class AppDbContext : DbContext
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("HR_Branches_SEQ")
-            .StartsAt(2L)
+            .StartsAt(3L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("HR_Departments_SEQ")
-            .StartsAt(11L)
+            .StartsAt(12L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence("HR_Employee_Attendance_SEQ")
@@ -834,15 +886,23 @@ public partial class AppDbContext : DbContext
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence("HR_Employee_LeaveBalance_SEQ")
+            .StartsAt(243L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence("HR_Employee_Leaves_SEQ")
+            .StartsAt(34L)
             .HasMin(1L)
             .IsCyclic();
-        modelBuilder.HasSequence("HR_EmployeeOfficialMission_SEQ").HasMin(1L);
-        modelBuilder.HasSequence("HR_EmployeePermissions_SEQ").HasMin(1L);
+        modelBuilder.HasSequence("HR_EmployeeOfficialMission_SEQ")
+            .StartsAt(7L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence("HR_EmployeePermissions_SEQ")
+            .StartsAt(10L)
+            .HasMin(1L)
+            .IsCyclic();
         modelBuilder.HasSequence("HR_Employees_SEQ")
-            .StartsAt(17L)
+            .StartsAt(34L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("HR_JobGrades_SEQ")
@@ -853,7 +913,7 @@ public partial class AppDbContext : DbContext
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<byte>("HR_LeaveTypes_SEQ")
-            .StartsAt(4L)
+            .StartsAt(6L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<byte>("HR_Machine_IP_SEQ")
@@ -865,7 +925,11 @@ public partial class AppDbContext : DbContext
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("LogInHistoryTb_SEQ")
-            .StartsAt(110L)
+            .StartsAt(227L)
+            .HasMin(1L)
+            .IsCyclic();
+        modelBuilder.HasSequence<int>("PermissionsTypes_SEQ")
+            .StartsAt(4L)
             .HasMin(1L)
             .IsCyclic();
         modelBuilder.HasSequence<int>("PR_Group_SEQ")

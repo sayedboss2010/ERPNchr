@@ -32,6 +32,15 @@ public partial class HrMachineIp
 
     public DateOnly? DeletedDate { get; set; }
 
+    /// <summary>
+    /// اخر موعد لسحب البصمات
+    /// </summary>
+    public DateOnly? LastPullDate { get; set; }
+
+    public int? Port { get; set; }
+
+    public virtual ICollection<AttendanceDeviceLog> AttendanceDeviceLogs { get; set; } = new List<AttendanceDeviceLog>();
+
     public virtual HrBranch? Branch { get; set; }
 
     public virtual ICollection<HrEmployeeAttendance> HrEmployeeAttendances { get; set; } = new List<HrEmployeeAttendance>();

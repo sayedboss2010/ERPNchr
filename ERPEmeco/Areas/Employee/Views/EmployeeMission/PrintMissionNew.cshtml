@@ -135,7 +135,7 @@
         <!-- بيانات الموظف -->
         <div class="row">
             <div class="col-6">
-                <label class="field">الموظف:</label>
+                <label class="field">الاسم:</label>
                 <span>@Model.EmplyeeName</span>
             </div>
             <div class="col-6">
@@ -145,7 +145,7 @@
         </div>
         <div class="row">
             <div col-12>
-                <label class="field">جهة المأمورية:</label>
+                <label class="field">جهة تنفيذ المأمورية:</label>
                 <span>@Model.AuthorityOfMission</span>
             </div>
           
@@ -170,14 +170,30 @@
                 </span>
             </div>
         </div>
+        @if (!string.IsNullOrEmpty(Model.AttachmentPath))
+        {
+            <div class="row mt-3">
+                <div class="col-12">
+                    <a href="@Model.AttachmentPath" target="_blank" class="btn btn-info">
+                        📎 تحميل المرفق
+                    </a>
+                </div>
+            </div>
+        }
 
        
         <!-- توقيعات -->
         <div class="row" style="margin-top:25px;">
-            <div class="col">توقيع الموظف: ____________________</div>
-            <div class="col">موافقة المدير المباشر: ____________________</div>
-            <div class="col">اعتماد الإدارة: ____________________</div>
+            <div class="col"></div>
+            <div class="col"></div>
+            <div class="col">المدير المالي والاداري<br/> محمد نجم</div>
         </div>
-
+        <div class="row">
+            <div class="col"></div>
+            <div class="col">وتفضلوا بقبول وافر الاحترام</div>
+            <div class="col"></div>
+        </div>
+       
     </div>
 </div>
+<br />

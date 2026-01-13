@@ -1,4 +1,34 @@
 ﻿<!DOCTYPE html>
+
+@{
+    var request = Context.Request;
+
+    int? userId = request.Cookies.ContainsKey("UserId") ? int.Parse(request.Cookies["UserId"]) : null;
+    int? userType = request.Cookies.ContainsKey("UserType") ? int.Parse(request.Cookies["UserType"]) : null;
+    int? branchId = request.Cookies.ContainsKey("BranchID") ? int.Parse(request.Cookies["BranchID"]) : null;
+    int? departmentId = request.Cookies.ContainsKey("DepartmentID") ? int.Parse(request.Cookies["DepartmentID"]) : null;
+    string FullName = request.Cookies["FullName"];
+    string UserTypeName = "مسئول";
+    if (userType == 1)
+    {
+        UserTypeName = "موظف";
+    }
+    if (userType == 2)
+    {
+        UserTypeName = "مدير ادارة";
+    }
+    if (userType == 3)
+    {
+        UserTypeName = "رئيس قطاع";
+    }
+    if (userType == 4)
+    {
+        UserTypeName = "رئيس مجلس الادارة";
+    }
+
+}
+
+
 <html lang="ar"
       class="light-style layout-menu-fixed"
       dir="rtl"
@@ -40,6 +70,13 @@
 
     <!-- تعديل الـ CSS لتحديد مكان المنيو على اليمين -->
     <style>
+
+        .dropdown-menu-end[data-bs-popper] Specificity: (0,2,0) {
+            /* right: 0; */
+            /* left: auto; */
+        }
+
+
         .menu-item.active > .menu-link {
             background-color: #007bff;
             color: #fff !important;
@@ -62,6 +99,40 @@
             right: 0;
         }
 
+        /* فقط للموبايل */
+        @@media (max-width: 991px) {
+            #layout-menu {
+                position: fixed !important;
+                top: 0;
+                right: -260px; /* أخفيها يميناً (لـ RTL) */
+                width: 260px;
+                height: 100%;
+                transform: none; /* نلغي أي translateX غير مرغوب */
+                transition: right .3s ease;
+                z-index: 9999;
+            }
+
+            body.menu-open #layout-menu {
+                right: 0; /* تظهر المنيو عند فتحها */
+            }
+            /* تعامل مع المحتوى overlay */
+            .layout-overlay {
+                display: none; /* أخفي overlay بشكل افتراضي */
+            }
+
+            body.menu-open .layout-overlay {
+                display: block;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9998;
+            }
+            /* إذا القائمة طويلة: اجعلها قابلة للتمرير */
+            #layout-menu .menu-inner {
+                overflow-y: auto;
+                max-height: 100vh;
+            }
+        }
 
     </style>
 </head>
@@ -73,11 +144,11 @@
             <!-- القائمة الجانبية على اليمين -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                 <div class="app-brand demo">
-                    <a href="index.html" class="app-brand-link gap-2">
+                    <a href="#" class="app-brand-link gap-2">
                         <span class="app-brand-logo demo">
-                            <img src="~/assets/img/logo/lg.png" alt="EmEco Logo" style="width: 50px; height: auto;">
+                            <img src="~/assets/img/logo/lg.png" alt="EmEco Logo" style="width: 100px; height: 50px;">
                         </span>
-                        <span class="app-brand-text demo text-body fw-bolder">EMECO</span>
+                        <span class="app-brand-text demo text-body fw-bolder"></span>
                     </a>
 
                     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -87,413 +158,428 @@
 
                 <div class="menu-inner-shadow"></div>
 
-                <ul class="menu-inner py-1">
-                    <li class="menu-item">
-                        <a href="~/html/index.html" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                            <div data-i18n="Analytics">الرئيسية</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(Html.IsActive("IndexALL", "EmployeeData", "Employee", true))">
-                        <a href="~/Employee/EmployeeData/AddEdite" class="menu-link">
-                            <div data-i18n="Without menu">قائمة الموظفين</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(Html.IsActive("AddEdite", "EmployeeData", "Employee", true))">
-                        <a href="~/Employee/EmployeeData/AddEdite" class="menu-link">
-                            <div data-i18n="Without menu">بيانات الموظفين</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="~/Employee/leave/index" class="menu-link">
-                            <div data-i18n="Without navbar">قائمة الاجازات</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="~/Employee/Leave/Create" class="menu-link">
-                            <div data-i18n="Without navbar">اضافة أجازه</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="~/Employee/EmployeePermission/Create" class="menu-link">
-                            <div data-i18n="Without navbar">اضافة اذن</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="~/Employee/EmployeePermission/index" class="menu-link">
-                            <div data-i18n="Without navbar">قائمةالاذنون</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="~/Employee/EmployeeMission/Create" class="menu-link">
-                            <div data-i18n="Without navbar">اضافة مأمورية رسمية</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="~/Employee/EmployeeMission/index" class="menu-link">
-                            <div data-i18n="Without navbar">قائمةالمأموريات</div>
-                        </a>
-                    </li>
-                    <!-- البيانات الاساسية -->
-                    <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-layout"></i>
-                            <div data-i18n="Layouts">البيانات الاساسية</div>
-                        </a>
 
-                        <ul class="menu-sub">
-                            <li class="menu-item @(Html.IsActive("Index", "Branches", "LookUP", true))">
-                                <a href="~/LookUP/Branches/Index" class="menu-link">
-                                    <div data-i18n="Without menu">الفروع</div>
-                                </a>
-                            </li>
+                @* <li class="menu-item @(Html.IsActive("Index", "Home", "Account", true))">
+                    <a href="~/Account/Home/Index/" class="menu-link">
+                        <div data-i18n="Without menu">الملف الشخصي</div>
+                    </a>
+                    </li> *@
+
+                @if (userType == 1)
+                {
+                    <ul class="menu-inner py-1">
+
+                        <!-- قسم الأجازات -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Layouts">الأجازات</div>
+                            </a>
+
+                            <ul class="menu-sub">
+                                <li class="menu-item">
+                                    <a href="~/Employee/Leave/Create" class="menu-link">
+                                        <div>إضافة أجازة</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Employee/Leave/Index" class="menu-link">
+                                        <div>قائمة الأجازات</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- قسم الأذونات -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Layouts">الأذونات</div>
+                            </a>
+
+                            <ul class="menu-sub">
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeePermission/Create" class="menu-link">
+                                        <div>إضافة إذن</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeePermission/Index" class="menu-link">
+                                        <div>قائمة الأذونات</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- قسم المأموريات -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Layouts">المأموريات الرسمية</div>
+                            </a>
+
+                            <ul class="menu-sub">
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeeMission/Create" class="menu-link">
+                                        <div>إضافة مأمورية</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeeMission/Index" class="menu-link">
+                                        <div>قائمة المأموريات</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                    </ul>
+                }
+
+                @if (userType == 2)
+                {
+                    <ul class="menu-inner py-1">
+
+                        <!-- قسم الأجازات -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Layouts">الأجازات</div>
+                            </a>
+
+                            <ul class="menu-sub">
+                                <li class="menu-item">
+                                    <a href="~/Employee/Leave/Create" class="menu-link">
+                                        <div>إضافة أجازة إدارة</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Employee/Leave/Index" class="menu-link">
+                                        <div>قائمة الأجازات</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- قسم الأذونات -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Layouts">الأذونات</div>
+                            </a>
+
+                            <ul class="menu-sub">
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeePermission/Create" class="menu-link">
+                                        <div>إضافة إذن إدارة</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeePermission/Index" class="menu-link">
+                                        <div>قائمة الأذونات</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- قسم المأموريات -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Layouts">المأموريات الرسمية</div>
+                            </a>
+
+                            <ul class="menu-sub">
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeeMission/Create" class="menu-link">
+                                        <div>إضافة مأمورية</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeeMission/Index" class="menu-link">
+                                        <div>قائمة المأموريات</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- قسم التقارير -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Layouts">التقارير</div>
+                            </a>
+
+                            <ul class="menu-sub">
+
+                                <li class="menu-item">
+                                    <a href="~/Attendance/AttendanceReport/Index" class="menu-link">
+                                        <div>التمام اليومي</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Attendance/EmployeeActivities/Index" class="menu-link">
+                                        <div>تقارير إجازات والمأموريات اليومي </div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Attendance/EmployeeActivities/IndexDepartment" class="menu-link">
+                                        <div>تقارير إجازات والمأموريات اليومي الإدارات</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="~/Attendance/EmployeeActivities/IndexFilter" class="menu-link">
+                                        <div>تقرير الأنشطة اليومية للموظفين</div>
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+
+                    </ul>
+                }
+
+                @if (userType == 3)
+                {
+                    <ul class="menu-inner py-1">
+
+                        <!-- الموظفين -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <i class="menu-icon tf-icons bx bx-user"></i>
+                                <div>الموظفين</div>
+                            </a>
+
+                            <ul class="menu-sub">
+                                <li class="menu-item @(Html.IsActive("IndexALL", "EmployeeData", "Employee", true))">
+                                    <a href="~/Employee/EmployeeData/IndexALL" class="menu-link">
+                                        <div>قائمة الموظفين</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item @(Html.IsActive("AddEdite", "EmployeeData", "Employee", true))">
+                                    <a href="~/Employee/EmployeeData/AddEdite" class="menu-link">
+                                        <div>إضافة الموظفين</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
 
 
-                            <li class="menu-item">
-                                <a href="~/LookUP/Department/index" class="menu-link">
-                                    <div data-i18n="Without navbar">الادارات</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="~/LookUP/JopData/index" class="menu-link">
-                                    <div data-i18n="Container">الوظايف</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="layouts-fluid.html" class="menu-link">
-                                    <div data-i18n="Fluid">انواع الاجازات</div>
-                                </a>
-                            </li>
-                          
-                        </ul>
-                    </li>
+                        <!-- الإجازات -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <i class="menu-icon tf-icons bx bx-time-five"></i>
+                                <div>الإجازات</div>
+                            </a>
 
-                    <!--ماكينة البصمة-->
-                    <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-layout"></i>
-                            <div data-i18n="Layouts">البصمات </div>
-                        </a>
+                            <ul class="menu-sub">
+                                <li class="menu-item">
+                                    <a href="~/Employee/Leave/Index" class="menu-link">
+                                        <div>قائمة الإجازات</div>
+                                    </a>
+                                </li>
 
-                        <ul class="menu-sub">
-                            <li class="menu-item @(Html.IsActive("AddEdite", "EmployeeData", "Employee", true))">
-                                <a href="~/Employee/EmployeeData/AddEdite" class="menu-link">
-                                    <div data-i18n="Without menu">ماكينات البصمة</div>
-                                </a>
-                            </li>
+                                <li class="menu-item">
+                                    <a href="~/Employee/Leave/Create" class="menu-link">
+                                        <div>إضافة إجازة</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
 
 
-                            <li class="menu-item">
-                                <a href="~/Employee/leave/index" class="menu-link">
-                                    <div data-i18n="Without navbar">سحب البصمة</div>
-                                </a>
-                            </li>
-                         
+                        <!-- الأذونات -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <i class="menu-icon tf-icons bx bx-time"></i>
+                                <div>الإذونات</div>
+                            </a>
 
-                        </ul>
-                    </li>
+                            <ul class="menu-sub">
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeePermission/Create" class="menu-link">
+                                        <div>إضافة إذن</div>
+                                    </a>
+                                </li>
 
-                    <!--ماكينة البصمة-->
-                    <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-layout"></i>
-                            <div data-i18n="Layouts">التقارير </div>
-                        </a>
-
-                        <ul class="menu-sub">
-                            <li class="menu-item @(Html.IsActive("AddEdite", "EmployeeData", "Employee", true))">
-                                <a href="~/Attendance/AttendanceReport/Index" class="menu-link">
-                                    <div data-i18n="Without navbar">التمام اليومي</div>
-                                </a>
-                            </li>
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeePermission/Index" class="menu-link">
+                                        <div>قائمة الأذونات</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
 
 
-                            <li class="menu-item">
-                                <a href="~/Employee/leave/index" class="menu-link">
-                                    <div data-i18n="Without navbar">قائمة اجازات الادارات</div>
-                                </a>
-                            </li>
+                        <!-- المأموريات -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <i class="menu-icon tf-icons bx bx-map"></i>
+                                <div>المأموريات الرسمية</div>
+                            </a>
 
-                            <li class="menu-item">
-                                <a href="~/Employee/leave/index" class="menu-link">
-                                    <div data-i18n="Without navbar">الاجازات خلال مدة</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                <ul class="menu-inner py-1" hidden>
-                    <!-- لوحة القيادة -->
-                    <li class="menu-item">
-                        <a href="index.html" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                            <div data-i18n="Analytics">لوحة القيادة</div>
-                        </a>
+                            <ul class="menu-sub">
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeeMission/Create" class="menu-link">
+                                        <div>إضافة مأمورية</div>
+                                    </a>
+                                </li>
 
-                    </li>
-
-                    <!-- الموظفين -->
-                    <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-layout"></i>
-                            <div data-i18n="Layouts">الموظفين</div>
-                        </a>
-
-                        <ul class="menu-sub">
-                            <li class="menu-item @(Html.IsActive("AddEdite", "EmployeeData", "Employee", true))">
-                                <a href="~/Employee/EmployeeData/AddEdite" class="menu-link">
-                                    <div data-i18n="Without menu">بيانات الموظفين</div>
-                                </a>
-                            </li>
+                                <li class="menu-item">
+                                    <a href="~/Employee/EmployeeMission/Index" class="menu-link">
+                                        <div>قائمة المأموريات</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
 
 
-                            <li class="menu-item">
-                                <a href="~/Employee/leave/index" class="menu-link">
-                                    <div data-i18n="Without navbar">الاجازات</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="layouts-container.html" class="menu-link">
-                                    <div data-i18n="Container">حاوية</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="layouts-fluid.html" class="menu-link">
-                                    <div data-i18n="Fluid">مرن</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="layouts-blank.html" class="menu-link">
-                                    <div data-i18n="Blank">فارغ</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- التصاميم -->
-                    <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-layout"></i>
-                            <div data-i18n="Layouts">الموظفين</div>
-                        </a>
-                        <ul class="menu-inner py-1">
-                            <!-- لوحة التحكم -->
-                            <li class="menu-item">
-                                <a href="index.html" class="menu-link">
-                                    <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                                    <div data-i18n="Analytics">لوحة التحكم</div>
-                                </a>
-                            </li>
+                        <!-- البيانات الأساسية -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <i class="menu-icon tf-icons bx bx-data"></i>
+                                <div>البيانات الأساسية</div>
+                            </a>
 
-                            <!-- التصاميم -->
-                            <li class="menu-item">
-                                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                                    <i class="menu-icon tf-icons bx bx-layout"></i>
-                                    <div data-i18n="Layouts">التصاميم</div>
-                                </a>
+                            <ul class="menu-sub">
 
-                                <ul class="menu-sub">
-                                    <li class="menu-item">
-                                        <a href="layouts-without-menu.html" class="menu-link">
-                                            <div data-i18n="Without menu">بدون قائمة</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="layouts-without-navbar.html" class="menu-link">
-                                            <div data-i18n="Without navbar">بدون شريط تنقل</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="layouts-container.html" class="menu-link">
-                                            <div data-i18n="Container">حاوية</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="layouts-fluid.html" class="menu-link">
-                                            <div data-i18n="Fluid">مرن</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="layouts-blank.html" class="menu-link">
-                                            <div data-i18n="Blank">فارغ</div>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
+                                <li class="menu-item @(Html.IsActive("Index", "Branches", "LookUP", true))">
+                                    <a href="~/LookUP/Branches/Index" class="menu-link">
+                                        <div>الفروع</div>
+                                    </a>
+                                </li>
 
-                            <li class="menu-header small text-uppercase">
-                                <span class="menu-header-text">الصفحات</span>
-                            </li>
-                            <li class="menu-item">
-                                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                                    <i class="menu-icon tf-icons bx bx-dock-top"></i>
-                                    <div data-i18n="Account Settings">إعدادات الحساب</div>
-                                </a>
-                                <ul class="menu-sub">
-                                    <li class="menu-item">
-                                        <a href="pages-account-settings-account.html" class="menu-link">
-                                            <div data-i18n="Account">الحساب</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="pages-account-settings-notifications.html" class="menu-link">
-                                            <div data-i18n="Notifications">الإشعارات</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="pages-account-settings-connections.html" class="menu-link">
-                                            <div data-i18n="Connections">الاتصالات</div>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="menu-item">
-                                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                                    <i class="menu-icon tf-icons bx bx-lock-open-alt"></i>
-                                    <div data-i18n="Authentications">المصادقات</div>
-                                </a>
-                                <ul class="menu-sub">
-                                    <li class="menu-item">
-                                        <a href="auth-login-basic.html" class="menu-link" target="_blank">
-                                            <div data-i18n="Basic">تسجيل الدخول</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="auth-register-basic.html" class="menu-link" target="_blank">
-                                            <div data-i18n="Basic">التسجيل</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="auth-forgot-password-basic.html" class="menu-link" target="_blank">
-                                            <div data-i18n="Basic">نسيت كلمة المرور</div>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="menu-item">
-                                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                                    <i class="menu-icon tf-icons bx bx-cube-alt"></i>
-                                    <div data-i18n="Misc">متنوع</div>
-                                </a>
-                                <ul class="menu-sub">
-                                    <li class="menu-item">
-                                        <a href="pages-misc-error.html" class="menu-link">
-                                            <div data-i18n="Error">خطأ</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="pages-misc-under-maintenance.html" class="menu-link">
-                                            <div data-i18n="Under Maintenance">تحت الصيانة</div>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <!-- المكونات -->
-                            <li class="menu-header small text-uppercase"><span class="menu-header-text">المكونات</span></li>
-                            <!-- البطاقات -->
-                            <li class="menu-item">
-                                <a href="cards-basic.html" class="menu-link">
-                                    <i class="menu-icon tf-icons bx bx-collection"></i>
-                                    <div data-i18n="Basic">البطاقات</div>
-                                </a>
-                            </li>
-                            <!-- واجهة المستخدم -->
-                            <li class="menu-item">
-                                <a href="javascript:void(0)" class="menu-link menu-toggle">
-                                    <i class="menu-icon tf-icons bx bx-box"></i>
-                                    <div data-i18n="User interface">واجهة المستخدم</div>
-                                </a>
-                                <ul class="menu-sub">
-                                    <li class="menu-item">
-                                        <a href="ui-accordion.html" class="menu-link">
-                                            <div data-i18n="Accordion">الأكورديون</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-alerts.html" class="menu-link">
-                                            <div data-i18n="Alerts">التنبيهات</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-badges.html" class="menu-link">
-                                            <div data-i18n="Badges">الشارات</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-buttons.html" class="menu-link">
-                                            <div data-i18n="Buttons">الأزرار</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-carousel.html" class="menu-link">
-                                            <div data-i18n="Carousel">كاروسيل</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-collapse.html" class="menu-link">
-                                            <div data-i18n="Collapse">الطي</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-dropdowns.html" class="menu-link">
-                                            <div data-i18n="Dropdowns">القوائم المنسدلة</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-footer.html" class="menu-link">
-                                            <div data-i18n="Footer">التذييل</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-list-groups.html" class="menu-link">
-                                            <div data-i18n="List Groups">مجموعات القوائم</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-modals.html" class="menu-link">
-                                            <div data-i18n="Modals">النوافذ المنبثقة</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-navbar.html" class="menu-link">
-                                            <div data-i18n="Navbar">شريط التنقل</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-offcanvas.html" class="menu-link">
-                                            <div data-i18n="Offcanvas">القائمة الجانبية</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-pagination-breadcrumbs.html" class="menu-link">
-                                            <div data-i18n="Pagination &amp; Breadcrumbs">التصفح و الفتات</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-progress.html" class="menu-link">
-                                            <div data-i18n="Progress">التقدم</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-spinners.html" class="menu-link">
-                                            <div data-i18n="Spinners">الدوران</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-tabs-pills.html" class="menu-link">
-                                            <div data-i18n="Tabs &amp; Pills">التبويبات والأقراص</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="ui-toasts.html" class="menu-link">
-                                            <div data-i18n="Toasts">التنبيهات المؤقتة</div>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
+                                <li class="menu-item">
+                                    <a href="~/LookUP/Department/Index" class="menu-link">
+                                        <div>الإدارات</div>
+                                    </a>
+                                </li>
 
-                    </li>
-                </ul>
+                                <li class="menu-item">
+                                    <a href="~/LookUP/JopData/Index" class="menu-link">
+                                        <div>الوظائف</div>
+                                    </a>
+                                </li>
+
+                                @*  <li class="menu-item">
+                                    <a href="~/LookUP/LeaveTypes/Index" class="menu-link">
+                                        <div>أنواع الإجازات</div>
+                                    </a>
+                                </li> *@
+
+                            </ul>
+                        </li>
+
+
+                        <!-- البصمة -->
+                        <li class="menu-item" hidden>
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <i class="menu-icon tf-icons bx bx-fingerprint"></i>
+                                <div>البصمات</div>
+                            </a>
+
+                            <ul class="menu-sub">
+
+                                <li class="menu-item">
+                                    <a href="~/Attendance/Devices/Index" class="menu-link">
+                                        <div>ماكينات البصمة</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Attendance/Pull/Index" class="menu-link">
+                                        <div>سحب البصمة</div>
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+
+
+                        <!-- التقارير -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <i class="menu-icon tf-icons bx bx-file"></i>
+                                <div>التقارير</div>
+                            </a>
+
+                            <ul class="menu-sub">
+
+                                <li class="menu-item">
+                                    <a href="~/Attendance/AttendanceReport/Index" class="menu-link">
+                                        <div>التمام اليومي</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Attendance/EmployeeActivities/Index" class="menu-link">
+                                        <div>تقارير إجازات والمأموريات اليومي </div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Attendance/EmployeeActivities/IndexDepartment" class="menu-link">
+                                        <div>تقارير إجازات والمأموريات اليومي الإدارات</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="~/Attendance/EmployeeActivities/IndexFilter" class="menu-link">
+                                        <div>تقرير الأنشطة اليومية للموظفين</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                    </ul>
+                }
+
+                @if (userType == 4)
+                {
+                    <ul>
+                        @*   <li class="menu-item">
+                            <a href="~/html/index.html" class="menu-link">
+                                <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                                <div data-i18n="Analytics">الرئيسية</div>
+                            </a>
+                        </li> *@
+                        <!-- التقارير -->
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <i class="menu-icon tf-icons bx bx-file"></i>
+                                <div>التقارير</div>
+                            </a>
+
+                            <ul class="menu-sub">
+
+                                <li class="menu-item">
+                                    <a href="~/Attendance/AttendanceReport/Index" class="menu-link">
+                                        <div>التمام اليومي</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Attendance/EmployeeActivities/Index" class="menu-link">
+                                        <div>تقارير إجازات والمأموريات اليومي </div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item">
+                                    <a href="~/Attendance/EmployeeActivities/IndexDepartment" class="menu-link">
+                                        <div>تقارير إجازات والمأموريات اليومي الإدارات</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="~/Attendance/EmployeeActivities/IndexFilter" class="menu-link">
+                                        <div>تقرير الأنشطة اليومية للموظفين</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                }
+
             </aside>
 
 
@@ -514,7 +600,8 @@
                         <div class="navbar-nav align-items-center">
                             <div class="nav-item d-flex align-items-center">
                                 <i class="bx bx-search fs-4 lh-0"></i>
-                                <input type="text"
+
+                                <input id="searchInput"  type="text"
                                        class="form-control border-0 shadow-none"
                                        placeholder="بحث..."
                                        aria-label="بحث..." />
@@ -523,7 +610,7 @@
                         <!-- / البحث -->
 
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
-                            <li class="nav-item lh-1 me-3">
+                            <li class="nav-item lh-1 me-3" hidden>
                                 <a class="github-button"
                                    href="https://github.com/themeselection/sneat-html-admin-template-free"
                                    data-icon="octicon-star"
@@ -536,7 +623,7 @@
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
-                                        <img src="~/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                        <img src="~/assets/img/Logo/lg.png" alt class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -545,12 +632,12 @@
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
-                                                        <img src="~/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="~/assets/img/Logo/lg.png" alt class="w-px-40 h-auto rounded-circle" />
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <span class="fw-semibold d-block">جون دو</span>
-                                                    <small class="text-muted">مسؤول</small>
+                                                    <span class="fw-semibold d-block">@FullName</span>
+                                                    <small class="text-muted">@UserTypeName</small>
                                                 </div>
                                             </div>
                                         </a>
@@ -559,18 +646,18 @@
                                         <div class="dropdown-divider"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="#">
+                                        <a class="dropdown-item" href="~/Home/Index?EmployeeID=@userId">
                                             <i class="bx bx-user me-2"></i>
                                             <span class="align-middle">ملفي الشخصي</span>
                                         </a>
                                     </li>
-                                    <li>
+                                    <li hidden>
                                         <a class="dropdown-item" href="#">
                                             <i class="bx bx-cog me-2"></i>
                                             <span class="align-middle">الإعدادات</span>
                                         </a>
                                     </li>
-                                    <li>
+                                    <li hidden>
                                         <a class="dropdown-item" href="#">
                                             <span class="d-flex align-items-center align-middle">
                                                 <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
@@ -579,11 +666,11 @@
                                             </span>
                                         </a>
                                     </li>
-                                    <li>
+                                    <li hidden>
                                         <div class="dropdown-divider"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="auth-login-basic.html">
+                                        <a class="dropdown-item" href="~/Account/login">
                                             <i class="bx bx-power-off me-2"></i>
                                             <span class="align-middle">تسجيل الخروج</span>
                                         </a>
@@ -657,6 +744,28 @@
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 
     @RenderSection("Scripts", required: false)
+    <script>
 
+        document.getElementById("searchInput").addEventListener("keyup", function () {
+            let value = this.value.toLowerCase();
+            document.querySelectorAll("tbody tr").forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(value)
+                    ? ""
+                    : "none";
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+          const toggleBtns = document.querySelectorAll(".layout-menu-toggle");
+          const body = document.body;
+
+          toggleBtns.forEach(btn => {
+            btn.addEventListener("click", function (e) {
+              e.preventDefault();
+              body.classList.toggle("menu-open");
+            });
+          });
+        });
+    </script>
 </body>
 </html>
