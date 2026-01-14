@@ -17,6 +17,7 @@
             <th>تاريخ نهاية المأمورية</th>
             <th>جهةالمأمورية</th>
             <th>الغرض من المأمورية</th>
+               <th> حالة المأمورية</th>
             <th>خيارات</th>
         </tr>
     </thead>
@@ -40,119 +41,158 @@
 }
 
 <td>
-    <span> حالة الإجازة  :</span>
+    <span> حالة الماموية  :</span>
 
     @* ============================
        1) الموظف العادي (UserType = 1)
        ============================ *@
-    @if (currentUserType == 1)
-    {
-        if (item.DirectManagerApproval == true)
-        {
-            <span class="text-success">تم القبول من المدير المباشر</span>
-        }
-        else if (item.DirectManagerApproval == false)
-        {
-            <span class="text-danger">تم الرفض من المدير المباشر</span>
-        }
-        else
-        {
-            <span class="text-warning">في انتظار موافقة المدير المباشر</span>
-        }
 
-        <br />
+                    @* =======================
+                       الموظف العادي
+                       ======================= *@
+                    @if (currentUserType == 1)
+                    {
+                        <div>
+                            المدير المباشر:
+                            @if (item.DirectManagerApproval == true)
+                            {
+                                <span class="text-success">تم القبول</span>
+                            }
+                            else if (item.DirectManagerApproval == false)
+                            {
+                                <span class="text-danger">تم الرفض</span>
+                            }
+                            else
+                            {
+                                <span class="text-warning">في انتظار موافقة المدير المباشر</span>
+                            }
+                        </div>
 
-        if (item.DepartmentManagerApproval == true)
-        {
-            <span class="text-success">تم القبول من مدير القطاع</span>
-        }
-        else if (item.DepartmentManagerApproval == false)
-        {
-            <span class="text-danger">تم الرفض من مدير القطاع</span>
-        }
-        else
-        {
-            <span class="text-warning">في انتظار موافقة مدير القطاع</span>
-        }
-    }
+                        <div>
+                            مدير القطاع:
+                            @if (item.DepartmentManagerApproval == true)
+                            {
+                                <span class="text-success">تم القبول</span>
+                            }
+                            else if (item.DepartmentManagerApproval == false)
+                            {
+                                <span class="text-danger">تم الرفض</span>
+                            }
+                            else
+                            {
+                                <span class="text-warning">في انتظار موافقة مدير القطاع</span>
+                            }
+                        </div>
+                    }
 
+                    @* =======================
+                       المدير المباشر
+                       ======================= *@
+                    else if (currentUserType == 2)
+                    {
+                        @* لو مامورية ماموريته هو → لا يوافق *@
+                        if (item.EmployeeUserType == 2)
+                        {
+                            if (item.DepartmentManagerApproval == true)
+                            {
+                                <span class="text-success">تم القبول من مدير القطاع</span>
+                            }
+                            else if (item.DepartmentManagerApproval == false)
+                            {
+                                <span class="text-danger">تم الرفض من مدير القطاع</span>
+                            }
+                            else
+                            {
+                                <span class="text-warning">في انتظار موافقة مدير القطاع</span>
+                            }
+                        }
+                        else
+                        {
+                            @* ماموية موظف عادي *@
+                            if (item.DirectManagerApproval == true)
+                            {
+                                <span class="text-success">تم القبول</span>
+                            }
+                            else if (item.DirectManagerApproval == false)
+                            {
+                                <span class="text-danger">تم الرفض</span>
+                            }
+                            else
+                            {
+                                <button class="btn btn-success approveBtn" data-id="@item.Id"  data-type="direct" >قبول</button>
+                                <button class="btn btn-danger rejectBtn" data-id="@item.Id"  data-type="direct" >رفض</button>
+                            }
+                        }
+                    }
 
-    @* ============================
-       2) المدير المباشر (UserType = 2)
-       ============================ *@
-    else if (currentUserType == 2)
-    {
-          if (item.DepartmentManagerApproval == true)
-        {
-            <span class="text-success">تم القبول من مدير القطاع</span>
-        }
-        else if (item.DepartmentManagerApproval == false)
-        {
-            <span class="text-danger">تم الرفض من مدير القطاع</span>
-        }
-        else
-        {
-            <span class="text-warning">في انتظار موافقة مدير القطاع</span>
-        }
-         <br />
-        if (item.DirectManagerApproval == true)
-        {
-            <span class="text-success">تم القبول</span>
-        }
-        else if (item.DirectManagerApproval == false)
-        {
-            <span class="text-danger">تم الرفض</span>
-        }
-        else
-        {
-            <button class="btn btn-success approveBtn" data-id="@item.Id" data-type="direct">قبول</button>
-            <button class="btn btn-danger rejectBtn" data-id="@item.Id" data-type="direct">رفض</button>
-        }
-    }
-
-
-    @* ============================
-       3) مدير القطاع (UserType = 3)
-       ============================ *@
-    else if (currentUserType == 3)
-    {
-        @* ❶ لو المدير المباشر لسه ما وافقش أو رفض *@
-        if (item.DirectManagerApproval == null)
-        {
-            <span class="text-warning">في انتظار موافقة المدير المباشر</span>
-        }
-        else
-        {
-            @* ❷ عرض حالة المدير المباشر *@
-            if (item.DirectManagerApproval == true)
-            {
-                <span class="text-success">تم قبول الإجازة من المدير المباشر</span>
-            }
-            else
-            {
-                <span class="text-danger">تم رفض الإجازة من المدير المباشر</span>
-            }
-
-            <br />
-
-            @* ❸ الآن يظهر أزرار المدير القطاع *@
-            if (item.DepartmentManagerApproval == true)
-            {
-                <span class="text-success">تم القبول من مدير القطاع</span>
-            }
-            else if (item.DepartmentManagerApproval == false)
-            {
-                <span class="text-danger">تم الرفض من مدير القطاع</span>
-            }
-            else
-            {
-                <button class="btn btn-success approveBtn" data-id="@item.Id" data-type="sector">قبول</button>
-                <button class="btn btn-danger rejectBtn" data-id="@item.Id" data-type="sector">رفض</button>
-            }
-        }
-    }
-</td>
-                    <td>
+                    @* =======================
+                       مدير القطاع
+                       ======================= *@
+                    else if (currentUserType == 3)
+                    {
+                        @* ماموية مدير مباشر *@
+                        if (item.EmployeeUserType == 2)
+                        {
+                            if (item.DepartmentManagerApproval == true)
+                            {
+                                <span class="text-success">تم القبول</span>
+                            }
+                            else if (item.DepartmentManagerApproval == false)
+                            {
+                                <span class="text-danger">تم الرفض</span>
+                            }
+                            else
+                            {
+                                <button class="btn btn-success approveBtn" data-id="@item.Id"  data-type="sector" >قبول</button>
+                                <button class="btn btn-danger rejectBtn" data-id="@item.Id"  data-type="sector" >رفض</button>
+                            }
+                        }
+                        else if (item.EmployeeUserType == 3)
+                        {
+                            if (item.DepartmentManagerApproval == true)
+                            {
+                                <span class="text-success">تم القبول</span>
+                            }
+                            else if (item.DepartmentManagerApproval == false)
+                            {
+                                <span class="text-danger">تم الرفض</span>
+                            }
+                            else
+                            {
+                                <button class="btn btn-success approveBtn" data-id="@item.Id"  data-type="sector" >قبول</button>
+                                <button class="btn btn-danger rejectBtn" data-id="@item.Id" data-type="sector">رفض</button>
+                            }
+                        }
+                            else
+                        {
+                            @* ماموية موظف عادي *@
+                            if (item.DirectManagerApproval == null)
+                            {
+                                <span class="text-warning">
+                                    في انتظار موافقة المدير المباشر
+                                </span>
+                            }
+                            else
+                            {
+                                if (item.DepartmentManagerApproval == true)
+                                {
+                                    <span class="text-success">تم القبول</span>
+                                }
+                                else if (item.DepartmentManagerApproval == false)
+                                {
+                                    <span class="text-danger">تم الرفض</span>
+                                }
+                                else
+                                {
+                                     <button class="btn btn-success approveBtn" data-id="@item.Id"  data-type="sector" >قبول</button>
+                                    <button class="btn btn-danger rejectBtn" data-id="@item.Id"  data-type="sector" >رفض</button>
+                                }
+                            }
+                        }
+                    }
+                </td>                   
+                
+                <td>
                         <a href="@Url.Action("PrintMissionNew", "EmployeeMission", new { id = item.Id, area = "Employee" })" class="btn btn-info btn-sm">طباعة</a>
                     </td>
                 </tr>
@@ -188,7 +228,7 @@
                 var checkbox = $(this);
                 var leaveId = checkbox.data("id");
 
-                if (confirm("هل أنت متأكد من تفعيل هذه الإجازة؟")) {
+                if (confirm("هل أنت متأكد من تفعيل هذه الماموية؟")) {
                     $.ajax({
                         url: '@Url.Action("ActivateLeave", "Leave", new { area = "Employee" })',
                         type: 'POST',
@@ -197,7 +237,7 @@
                             if (response.success) {
                                 checkbox.replaceWith('<span class="text-success">تم القبول</span>');
                             } else {
-                                alert("حدث خطأ أثناء تفعيل الإجازة");
+                                alert("حدث خطأ أثناء تفعيل الماموية");
                                 checkbox.prop("checked", false);
                             }
                         },

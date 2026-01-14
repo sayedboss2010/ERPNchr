@@ -60,6 +60,7 @@ namespace ERPNchr.Areas.Employee.Controllers
                     Id = (int)x.l.Id,
                     EmployeeId = (int)x.e.Id,
                     EmplyeeName = x.e.NameAr,
+                    EmployeeUserType=x.e.EmployeeTypeId.Value,
                     PermissionTypeId = x.l.PermissionTypeId,
                     PermissionTypeName = x.t.NameAr,
                     DateOfPermission = x.l.DateOfPermission,

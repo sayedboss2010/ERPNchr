@@ -60,6 +60,7 @@ namespace ERPNchr.Areas.Employee.Controllers
                 {
                     Id = (int)x.l.Id,
                     EmployeeId = (int)x.e.Id,
+                    EmployeeUserType = x.e.EmployeeTypeId.Value,
                     EmplyeeName = x.e.NameAr,
                     DepartmentName = x.e.Department.NameAr,
                     PurposeOfMission = x.l.PurposeOfMission,
