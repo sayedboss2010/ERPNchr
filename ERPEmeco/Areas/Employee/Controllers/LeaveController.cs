@@ -422,15 +422,15 @@ namespace YourProjectName.Areas.Employee.Controllers
 
             data.CasualRemainingAfter = casBefore;
 
-            // خصم حسب نوع الإجازة الحالية
-            if (data.LeaveTypeId == 2 || data.LeaveTypeId == 5)
-            {
-                data.RegularRemainingAfter = Math.Max(regBefore - actualDays, 0);
-            }
-            else if (data.LeaveTypeId == 1)
-            {
-                data.CasualRemainingAfter = Math.Max(casBefore - actualDays, 0);
-            }
+            //// خصم حسب نوع الإجازة الحالية
+            //if (data.LeaveTypeId == 2 || data.LeaveTypeId == 5)
+            //{
+                //data.RegularRemainingAfter = Math.Max(regBefore - actualDays, 0);
+            //}
+            //else if (data.LeaveTypeId == 1)
+            //{
+            //    data.CasualRemainingAfter = Math.Max(casBefore - actualDays, 0);
+            //}
 
 
             return View("PrintNew", data);
@@ -535,7 +535,7 @@ namespace YourProjectName.Areas.Employee.Controllers
                         //// =============================
                         if (EmployeeUsertype == 5)
                         {
-                            leaveBalance.AnnualUsedDays = leaveBalance.AnnualUsedDays + ActualDays; ;
+                            leaveBalance.AnnualUsedDays = leaveBalance.AnnualUsedDays + ActualDays;
                            
                             leaveBalance.UsedDays = leaveBalance.UsedDays + ActualDays; ;
 

@@ -109,8 +109,8 @@
                             }
                             else
                             {
-                                 <button class="btn btn-success approveBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="direct" data-leavetypeid="@item.LeaveTypeId">قبول</button>
- <button class="btn btn-danger rejectBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="direct" data-leavetypeid="@item.LeaveTypeId">رفض</button>
+                                <button class="btn btn-success approveBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="direct" data-employeeusertype="@item.LeaveTypeId">قبول</button>
+                                <button class="btn btn-danger rejectBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="direct" data-employeeusertype="@item.LeaveTypeId">رفض</button>
                             }
                         }
                     }
@@ -133,8 +133,8 @@
                             }
                             else
                             {
-                                <button class="btn btn-success approveBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="sector" data-leavetypeid="@item.LeaveTypeId">قبول</button>
- <button class="btn btn-danger rejectBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="sector" data-leavetypeid="@item.LeaveTypeId">رفض</button>
+                                <button class="btn btn-success approveBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="sector" data-employeeusertype="@item.LeaveTypeId">قبول</button>
+                                <button class="btn btn-danger rejectBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="sector" data-employeeusertype="@item.LeaveTypeId">رفض</button>
                             }
                         }
                         else if (item.EmployeeUserType == 3)
@@ -149,8 +149,8 @@
                             }
                             else
                             {
-                                 <button class="btn btn-success approveBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="sector" data-leavetypeid="@item.LeaveTypeId">قبول</button>
- <button class="btn btn-danger rejectBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="sector" data-leavetypeid="@item.LeaveTypeId">رفض</button>
+                                <button class="btn btn-success approveBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="sector" data-employeeusertype="@item.LeaveTypeId">قبول</button>
+                                <button class="btn btn-danger rejectBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="sector" data-employeeusertype="@item.LeaveTypeId">رفض</button>
                             }
                         }
                             else
@@ -175,7 +175,7 @@
                                 else
                                 {
                                      <button class="btn btn-success approveBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="sector" data-employeeusertype="@item.LeaveTypeId">قبول</button>
-                                    <button class="btn btn-danger rejectBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="sector" data-leavetypeid="@item.LeaveTypeId">رفض</button>
+                                    <button class="btn btn-danger rejectBtn" data-id="@item.Id" data-actualdays="@item.LeaveDays" data-type="sector" data-employeeusertype="@item.LeaveTypeId">رفض</button>
                                 }
                             }
                         }
