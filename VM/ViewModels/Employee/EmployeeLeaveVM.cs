@@ -10,6 +10,8 @@ namespace VM.ViewModels;
 
 public class EmployeeLeaveVM
 {
+    public int EmployeeUserType { get; set; }
+
     public int? EmployeeTypeId { get; set; }
     public string EmployeeTypeName{ get; set; }
     public long? Id { get; set; }

@@ -210,7 +210,7 @@
         </div>
         <div class="row">تحريرا في @DateTime.Now.ToString("yyyy/MM/dd")</div>
         <!-- جدول الرصيد (اعتيادي / عارضة فقط) -->
-        @if (Model.LeaveTypeId == 1 || Model.LeaveTypeId == 2)
+        @if (Model.LeaveTypeId == 1 || Model.LeaveTypeId == 2 || Model.LeaveTypeId == 5)
         {
             <h3 style="text-align:center">بيانات تستوفي بمعرفة شئون الافراد</h3>
             <table class="details">

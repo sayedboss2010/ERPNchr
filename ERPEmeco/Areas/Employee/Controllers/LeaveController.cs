@@ -61,20 +61,22 @@ namespace YourProjectName.Areas.Employee.Controllers
 
             var data = query
                 .OrderByDescending(x => x.l.Id)
-                .Select(x => new EmployeeLeaveVM
-                {
-                    Id = x.l.Id,
-                    EmployeeId = x.e.Id,
-                    EmployeeName = x.e.NameAr,
-                    LeaveTypeId = x.t.Id,
-                    LeaveTypeName = x.t.NameAr,
-                    StartDate = x.l.StartDate,
-                    EndDate = x.l.EndDate,
-                    LeaveDays = x.l.LeaveDays,
-                    Reason = x.l.Reason,
-                    DirectManagerApproval = x.l.DirectManagerApproval,
-                    DepartmentManagerApproval = x.l.DepartmentManagerApproval
-                })
+              .Select(x => new EmployeeLeaveVM
+              {
+                  Id = x.l.Id,
+                  EmployeeId = x.e.Id,
+                  EmployeeName = x.e.NameAr,
+                  LeaveTypeId = x.t.Id,
+                  LeaveTypeName = x.t.NameAr,
+                  StartDate = x.l.StartDate,
+                  EndDate = x.l.EndDate,
+                  LeaveDays = x.l.LeaveDays,
+                  Reason = x.l.Reason,
+                  DirectManagerApproval = x.l.DirectManagerApproval,
+                  DepartmentManagerApproval = x.l.DepartmentManagerApproval,
+                  EmployeeUserType = x.e.EmployeeTypeId.Value   // ⭐ مهم
+              })
+
                 .ToList();
 
             return View(data);
@@ -208,41 +210,7 @@ namespace YourProjectName.Areas.Employee.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(EmployeeLeaveVM model, IFormFile AttachmentFile)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    var detailedErrors = ModelState
-            //        .Where(ms => ms.Value.Errors.Count > 0)
-            //        .Select(ms => new
-            //        {
-            //            Field = ms.Key,                                      // اسم الحقل
-            //            Errors = ms.Value.Errors.Select(e => e.ErrorMessage), // رسالة الخطأ
-            //            AttemptedValue = ms.Value.AttemptedValue              // القيمة اللي دخلت وعملت مشكلة
-            //        })
-            //        .ToList();
-
-            //    foreach (var error in detailedErrors)
-            //    {
-            //        Console.WriteLine($"Field: {error.Field}");
-            //        Console.WriteLine($"Attempted Value: {error.AttemptedValue}");
-            //        Console.WriteLine($"Errors: {string.Join(", ", error.Errors)}");
-            //        Console.WriteLine("----------------------------");
-            //    }
-
-            //    // إعادة تحميل القوائم
-            //    var Emplist = (from e in _context.HrEmployees
-            //                   where e.IsActive == true
-            //                   select new
-            //                   {
-            //                       e.Id,
-            //                       e.NameAr,
-            //                       Display = e.NameAr + " (" + e.EmpCode + ")"
-            //                   }).ToList();
-
-            //    ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
-            //    ViewBag.LeaveTypeId = new SelectList(_context.HrLeaveTypes.Where(a => a.IsActive == true), "Id", "NameAr", model.LeaveTypeId);
-
-            //    return View(model);
-            //}
+            
             string attachmentPath = null;
 
             if (AttachmentFile != null && AttachmentFile.Length > 0)
@@ -291,57 +259,57 @@ namespace YourProjectName.Areas.Employee.Controllers
             };
 
             _context.HrEmployeeLeaves.Add(entity);
-            // HR_Employee_LeaveBalance اجمالى الاجازة للموظف
-            var leaveBalance = _context.HrEmployeeLeaveBalances.FirstOrDefault(e => e.Id == model.LeaveBalanceID);
-            var totalold = leaveBalance.TotalDays;
-            if (leaveBalance != null)
-            {
+            //// HR_Employee_LeaveBalance اجمالى الاجازة للموظف
+            //var leaveBalance = _context.HrEmployeeLeaveBalances.FirstOrDefault(e => e.Id == model.LeaveBalanceID);
+            //var totalold = leaveBalance.TotalDays;
+            //if (leaveBalance != null)
+            //{
                 
 
-                // =============================
-                // 1) إجازة عارضة (ID = 1)
-                // =============================
-                if (model.LeaveTypeId == 1)
-                {
-                    leaveBalance.CasualUsedDays += (int)model.ActualDays;
-                    leaveBalance.CasualRemainingDays =
-                        (int)(leaveBalance.CasualTotalDays - leaveBalance.CasualUsedDays);
-                }
+            //    // =============================
+            //    // 1) إجازة عارضة (ID = 1)
+            //    // =============================
+            //    if (model.LeaveTypeId == 1)
+            //    {
+            //        leaveBalance.CasualUsedDays += (int)model.ActualDays;
+            //        leaveBalance.CasualRemainingDays =
+            //            (int)(leaveBalance.CasualTotalDays - leaveBalance.CasualUsedDays);
+            //    }
 
-                // =============================
-                // 2) إجازة اعتيادي (ID = 2)
-                // =============================
-                if (model.LeaveTypeId == 2)
-                {
-                    leaveBalance.UsedDays += (int)model.ActualDays;
-                    leaveBalance.TotalDaysReminig =(int)(leaveBalance.TotalDays - leaveBalance.UsedDays);
-                }
+            //    // =============================
+            //    // 2) إجازة اعتيادي (ID = 2)
+            //    // =============================
+            //    if (model.LeaveTypeId == 2)
+            //    {
+            //        leaveBalance.UsedDays += (int)model.ActualDays;
+            //        leaveBalance.TotalDaysReminig =(int)(leaveBalance.TotalDays - leaveBalance.UsedDays);
+            //    }
 
-                //// =============================
-                //// 3) إجازة سنوي (ID = 5)
-                //// = نفس حساب الاعتيادي
-                //// =============================
-                if (model.LeaveTypeId == 5)
-                {
-                    leaveBalance.AnnualUsedDays += (int)model.ActualDays;
-                    leaveBalance.AnnualRemainingDays =
-                        (int)(leaveBalance.AnnualTotalDays - leaveBalance.AnnualUsedDays);
-                    leaveBalance.UsedDays += (int)model.ActualDays;
-                    leaveBalance.TotalDaysReminig =(int)(leaveBalance.TotalDays - (int)model.ActualDays);
+            //    //// =============================
+            //    //// 3) إجازة سنوي (ID = 5)
+            //    //// = نفس حساب الاعتيادي
+            //    //// =============================
+            //    if (model.LeaveTypeId == 5)
+            //    {
+            //        leaveBalance.AnnualUsedDays += (int)model.ActualDays;
+            //        leaveBalance.AnnualRemainingDays =
+            //            (int)(leaveBalance.AnnualTotalDays - leaveBalance.AnnualUsedDays);
+            //        leaveBalance.UsedDays += (int)model.ActualDays;
+            //        leaveBalance.TotalDaysReminig =(int)(leaveBalance.TotalDays - (int)model.ActualDays);
 
-                }
+            //    }
 
-                //// =============================
-                //// تحديث الإجمالي العام
-                //// =============================
-                //leaveBalance.TotalDaysReminig =
-                //    (int)(leaveBalance.TotalDays - leaveBalance.UsedDays);
+            //    //// =============================
+            //    //// تحديث الإجمالي العام
+            //    //// =============================
+            //    //leaveBalance.TotalDaysReminig =
+            //    //    (int)(leaveBalance.TotalDays - leaveBalance.UsedDays);
 
-                leaveBalance.UpdatedDate = DateTime.Now;
-                leaveBalance.UpdatedUserId = 1;
+            //    leaveBalance.UpdatedDate = DateTime.Now;
+            //    leaveBalance.UpdatedUserId = 1;
 
 
-            }
+            //}
             _context.SaveChanges();
 
             //  return RedirectToAction("index", "Leave", new { area = "Employee" });
@@ -433,26 +401,78 @@ namespace YourProjectName.Areas.Employee.Controllers
                 EmployeeTypeName= string.IsNullOrWhiteSpace(leave.EmployeeType?.EmployeeTypeNameAr) ? "-" : leave.EmployeeType.EmployeeTypeNameAr,
                 TotalDays = lastBalance?.TotalDays ?? 0,
                 UsedDays = lastBalance?.UsedDays ?? 0,
-                RemainingBefore = lastBalance?.TotalDaysReminig ?? 0,
+                
                 CasualTotalDays= lastBalance?.CasualTotalDays ?? 0,
                 CasualUsedDays= lastBalance?.CasualUsedDays ?? 0,
                 CasualRemainingDays = lastBalance?.CasualRemainingDays ?? 0,
+                
             };
 
-            if (data.LeaveTypeId == 1 || data.LeaveTypeId == 2)
-            { int remainingBefore = data.RemainingBefore.Value; data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0); }
-
-            else
+            if (data.LeaveTypeId == 2){
+                data.RemainingBefore = lastBalance?.TotalDays ?? 0;
+             int remainingBefore = data.RemainingBefore.Value;
+                data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0); 
+            }
+            else if(data.LeaveTypeId == 1)
             {
-                data.RemainingAfter = 0;
+                data.RemainingBefore = lastBalance?.CasualTotalDays ?? 0;
+                    int remainingBefore = data.RemainingBefore.Value;
+                data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0);
+            }
+            else if(data.LeaveTypeId==5)
+            {
+                data.RemainingBefore = lastBalance?.TotalDays ?? 0;
+                int remainingBefore = data.RemainingBefore.Value;
+                data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0);
             }
 
             return View("PrintNew", data);
         }
 
         [HttpPost]
-        public IActionResult DirectManagerAction(int id, bool isApproved,string type)
+        //public IActionResult DirectManagerAction(int id, bool isApproved,string type)
+        //{
+        //    var leave = _context.HrEmployeeLeaves.FirstOrDefault(x => x.Id == id);
+        //    if (leave == null)
+        //        return Json(new { success = false, message = "لم يتم العثور على الإجازة" });
+
+        //    DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+
+        //    // منع الموافقة او الرفض لو اليوم > تاريخ الاجازة
+        //    if (today > leave.StartDate)
+        //    {
+        //        return Json(new
+        //        {
+        //            success = false,
+        //            message = "لا يمكن الموافقة أو الرفض بعد موعد بداية الإجازة."
+        //        });
+        //    }
+
+        //    // في حالة مسموح
+        //    if (type=="direct")
+        //    {
+        //        leave.DirectManagerApproval = isApproved;
+
+        //    }
+        //    else if (type == "sector")
+        //    {
+
+        //        leave.DepartmentManagerApproval = isApproved;
+        //    }
+        //       ;
+        //    leave.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+
+        //    _context.SaveChanges();
+
+        //    return Json(new { success = true, message = "تم تحديث حالة الإجازة بنجاح" });
+        //}
+
+        [HttpPost]
+        public IActionResult DirectManagerAction(int id, bool isApproved, string type, int ActualDays,int EmployeeUsertype)
         {
+
+            int? userId = Request.Cookies.ContainsKey("UserId") ? int.Parse(Request.Cookies["UserId"]) : null;
+
             var leave = _context.HrEmployeeLeaves.FirstOrDefault(x => x.Id == id);
             if (leave == null)
                 return Json(new { success = false, message = "لم يتم العثور على الإجازة" });
@@ -470,25 +490,65 @@ namespace YourProjectName.Areas.Employee.Controllers
             }
 
             // في حالة مسموح
-            if (type=="direct")
+            if (type == "direct")
             {
                 leave.DirectManagerApproval = isApproved;
+                
 
             }
             else if (type == "sector")
             {
 
                 leave.DepartmentManagerApproval = isApproved;
+                if (isApproved == true)// فى حالة قبول الاجازة
+                {
+                    var leaveBalance = _context.HrEmployeeLeaveBalances.FirstOrDefault(e => e.EmployeeId == leave.EmployeeId
+                    && e.Year == DateTime.Now.Year);
+                    if (leaveBalance != null)
+                    {
+                        // =============================
+                        // 1) إجازة عارضة (ID = 1)
+                        // =============================
+                        if (EmployeeUsertype == 1)
+                        {
+                            leaveBalance.CasualUsedDays = leaveBalance.CasualUsedDays + ActualDays;                         
+                        }
+
+                        // =============================
+                        // 2) إجازة اعتيادي (ID = 2)
+                        // =============================
+                        if (EmployeeUsertype == 2)
+                        {
+                            leaveBalance.UsedDays = leaveBalance.UsedDays + ActualDays;
+                        }
+
+                        //// =============================
+                        //// 3) إجازة سنوي (ID = 5)
+                        //// = نفس حساب الاعتيادي
+                        //// =============================
+                        if (EmployeeUsertype == 5)
+                        {
+                            leaveBalance.AnnualUsedDays = leaveBalance.AnnualUsedDays + ActualDays; ;
+                           
+                            leaveBalance.UsedDays = leaveBalance.UsedDays + ActualDays; ;
+
+                        }
+
+                       
+                        leaveBalance.UpdatedDate = DateTime.Now;
+                        leaveBalance.UpdatedUserId = userId;
+
+                        _context.SaveChanges();
+                    }
+                }
             }
-               ;
+        ;
             leave.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
 
             _context.SaveChanges();
 
             return Json(new { success = true, message = "تم تحديث حالة الإجازة بنجاح" });
         }
-
-
 
 
 
