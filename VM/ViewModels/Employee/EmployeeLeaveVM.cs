@@ -23,6 +23,8 @@ public class EmployeeLeaveVM
     public int? DepartmentID { get; set; }
 
     public byte? LeaveTypeId { get; set; }
+    public int RegularRemainingAfter { get; set; }
+    public int CasualRemainingAfter { get; set; }
 
     public decimal CasualTotalDays { get; set; }
     public int? CasualRemainingDays { get; set; }
@@ -67,7 +69,7 @@ public class EmployeeLeaveVM
     public int? ActualDays { get; set; } // بعد استبعاد الجمعة
     public decimal? UsedDays { get; set; }    // اللي استخدمه قبل كده
     public int? RemainingBefore { get; set; } // قبل الطلب
-    public int? RemainingAfter { get; set; } // بعد الخصم
+    
     public bool? FinalApproval { get; set; } // موافقة المدير
 
     public decimal? UsedDaysMonth { get; set; } // ايام اجازات الشهر

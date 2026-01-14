@@ -408,23 +408,30 @@ namespace YourProjectName.Areas.Employee.Controllers
                 
             };
 
-            if (data.LeaveTypeId == 2){
-                data.RemainingBefore = lastBalance?.TotalDays ?? 0;
-             int remainingBefore = data.RemainingBefore.Value;
-                data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0); 
-            }
-            else if(data.LeaveTypeId == 1)
+            // الاعتيادي
+            int regTotal = lastBalance?.TotalDays ?? 0;
+            int regUsed = lastBalance?.UsedDays ?? 0;
+            int regBefore = regTotal - regUsed;
+
+            data.RegularRemainingAfter = regBefore;
+
+            // العارضة
+            int casTotal = lastBalance?.CasualTotalDays ?? 0;
+            int casUsed = lastBalance?.CasualUsedDays ?? 0;
+            int casBefore = casTotal - casUsed;
+
+            data.CasualRemainingAfter = casBefore;
+
+            // خصم حسب نوع الإجازة الحالية
+            if (data.LeaveTypeId == 2 || data.LeaveTypeId == 5)
             {
-                data.RemainingBefore = lastBalance?.CasualTotalDays ?? 0;
-                    int remainingBefore = data.RemainingBefore.Value;
-                data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0);
+                data.RegularRemainingAfter = Math.Max(regBefore - actualDays, 0);
             }
-            else if(data.LeaveTypeId==5)
+            else if (data.LeaveTypeId == 1)
             {
-                data.RemainingBefore = lastBalance?.TotalDays ?? 0;
-                int remainingBefore = data.RemainingBefore.Value;
-                data.RemainingAfter = (byte)Math.Max(remainingBefore - actualDays, 0);
+                data.CasualRemainingAfter = Math.Max(casBefore - actualDays, 0);
             }
+
 
             return View("PrintNew", data);
         }

@@ -121,15 +121,19 @@
 
 
     <script>
+        var leaveType = $("#LeaveTypeId").val();
         const startInput = document.getElementById("StartDate");
         const endInput = document.getElementById("EndDate");
         const actualDaysInput = document.getElementById("ActualDays");
 
-        // StartDate يبدأ من بكرة
-        startInput.min = new Date(Date.now() + 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0];
+       //  // StartDate يبدأ من بكرة
+       //  if(leaveType==2){
+       //       startInput.min = new Date(Date.now() + 24 * 60 * 60 * 1000)
+       //       .toISOString()
+       //       .split("T")[0];
 
+       // }
+        
         // عند تغيير تاريخ البداية
         startInput.addEventListener("change", function () {
             // EndDate لا يبدأ إلا من StartDate
@@ -195,6 +199,24 @@
             // 2) تغيير نوع الإجازة
             // =====================================================
             $("#LeaveTypeId").change(function () {
+                       var leaveType = $("#LeaveTypeId").val();
+                            
+              const startInput = document.getElementById("StartDate");
+              const endInput = document.getElementById("EndDate");
+
+
+                     if (leaveType == 2) {
+            // يبدأ من بكرة
+            startInput.min = new Date(Date.now() + 24 * 60 * 60 * 1000)
+                .toISOString()
+                .split("T")[0];
+        } else {
+            // يبدأ من النهارده
+            startInput.min = new Date()
+                .toISOString()
+                .split("T")[0];
+        }
+
                 let type = $(this).val();
 
                 // مرضي → ملف إلزامي
