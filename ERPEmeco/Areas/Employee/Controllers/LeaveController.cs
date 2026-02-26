@@ -368,78 +368,114 @@ namespace YourProjectName.Areas.Employee.Controllers
         }
         public ActionResult PrintNew(long id)
         {
-            // جلب بيانات الإجازة والموظف ونوع الإجازة
-            var leave = (from l in _context.HrEmployeeLeaves
-                         join e in _context.HrEmployees on l.EmployeeId equals e.Id
-                         join w in _context.EmployeeTypes on e.EmployeeTypeId equals w.Id into pt
-                         from w in pt.DefaultIfEmpty() // left join
-                         join t in _context.HrLeaveTypes on l.LeaveTypeId equals t.Id
-                         join d in _context.HrDepartments on e.DepartmentId equals d.Id into dept
-                         from d in dept.DefaultIfEmpty() // left join
-                         where l.Id == id
-                         select new
-                         {
-                             Leave = l,
-                             Employee = e,
-                             Department = d,
-                             LeaveType = t,
-                             EmployeeType = w
-                         }).FirstOrDefault();
+            var leaveData = (from l in _context.HrEmployeeLeaves
+                             join e in _context.HrEmployees on l.EmployeeId equals e.Id
+                             join w in _context.EmployeeTypes on e.EmployeeTypeId equals w.Id into pt
+                             from w in pt.DefaultIfEmpty()
+                             join t in _context.HrLeaveTypes on l.LeaveTypeId equals t.Id
+                             join d in _context.HrDepartments on e.DepartmentId equals d.Id into dept
+                             from d in dept.DefaultIfEmpty()
+                             where l.Id == id
+                             select new
+                             {
+                                 Leave = l,
+                                 Employee = e,
+                                 Department = d,
+                                 LeaveType = t,
+                                 EmployeeType = w
+                             }).FirstOrDefault();
 
-            if (leave == null)
+            if (leaveData == null)
                 return Content("❌ لم يتم العثور على الإجازة");
 
-            // جلب آخر رصيد مسجل للموظف للسنة المطلوبة (إن وجد)
-            int year = leave.Leave.StartDate?.Year ?? DateTime.Now.Year;
-            var lastBalance = _context.HrEmployeeLeaveBalances
-                  .Where(b => b.EmployeeId == leave.Employee.Id && b.Year == year)
-                  .OrderByDescending(b => b.Id)
-                  .FirstOrDefault();
+            // ===== تحديد السنة =====
+            int year = leaveData.Leave.StartDate?.Year ?? DateTime.Now.Year;
 
-            DateTime startDate = leave.Leave.StartDate?.ToDateTime(TimeOnly.MinValue).Date ?? DateTime.Now.Date;
-            DateTime endDate = leave.Leave.EndDate?.ToDateTime(TimeOnly.MinValue).Date ?? DateTime.Now.Date;
+            DateOnly startDate = leaveData.Leave.StartDate ?? DateOnly.FromDateTime(DateTime.Now);
+            DateOnly endDate = leaveData.Leave.EndDate ?? startDate;
 
-            int totalDays = (endDate - startDate).Days + 1;
+            // ===== حساب عدد أيام الإجازة الحالية (بدون الجمعة) =====
+            int totalDays = endDate.DayNumber - startDate.DayNumber + 1;
             totalDays = Math.Max(1, totalDays);
 
             int actualDays = Enumerable.Range(0, totalDays)
-                                       .Select(i => startDate.AddDays(i))
-                                       .Count(d => d.DayOfWeek != DayOfWeek.Friday);
+                .Select(i => startDate.AddDays(i))
+                .Count(d => d.DayOfWeek != DayOfWeek.Friday);
 
-            // ===== حساب الرصيد بعد خصم الإجازة الحالية =====
-            int regTotal = lastBalance?.TotalDays ?? 0;
-            int regUsed = lastBalance?.UsedDays ?? 0;
-            int regRemaining = Math.Max(regTotal - regUsed - (leave.Leave.LeaveTypeId == 2 || leave.Leave.LeaveTypeId == 5 ? actualDays : 0), 0);
+            // ===== جلب الرصيد السنوي =====
+            var balance = _context.HrEmployeeLeaveBalances
+                .Where(b => b.EmployeeId == leaveData.Employee.Id && b.Year == year)
+                .OrderByDescending(b => b.Id)
+                .FirstOrDefault();
 
-            int casTotal = lastBalance?.CasualTotalDays ?? 0;
-            int casUsed = lastBalance?.CasualUsedDays ?? 0;
-            int casRemaining = Math.Max(casTotal - casUsed - (leave.Leave.LeaveTypeId == 1 ? actualDays : 0), 0);
+            int regTotal = balance?.TotalDays ?? 0;
+            int casTotal = balance?.CasualTotalDays ?? 0;
 
-            var data = new EmployeeLeaveVM
+            // ===== جلب الإجازات السابقة فقط (قبل الإجازة الحالية) =====
+            var previousLeaves = _context.HrEmployeeLeaves
+                .Where(l => l.EmployeeId == leaveData.Employee.Id
+                            && l.Id != leaveData.Leave.Id   // استبعاد الحالية
+                            && l.StartDate.HasValue
+                            && l.StartDate.Value.Year == year
+                            && l.StartDate.Value < startDate
+                            && l.IsActive == true
+                            && l.DepartmentManagerApproval == true)
+                .ToList();
+
+            int regUsedBefore = 0;
+            int casUsedBefore = 0;
+
+            foreach (var lv in previousLeaves)
             {
-                Id = leave.Leave.Id,
-                EmployeeName = leave.Employee.NameAr,
-                DepartmentID = leave.Employee.DepartmentId,
-                EmployeeCode = leave.Employee.EmpCode,
-                DepartmentName = string.IsNullOrWhiteSpace(leave.Department?.NameAr) ? "-" : leave.Department.NameAr,
-                LeaveTypeId = leave.LeaveType.Id,
-                LeaveTypeName = leave.LeaveType.NameAr,
-                StartDate = leave.Leave.StartDate,
-                EndDate = leave.Leave.EndDate,
-                Reason = leave.Leave.Reason,
-                AttachmentPath = leave.Leave.AttachmentPath,
+                DateOnly s = lv.StartDate ?? DateOnly.FromDateTime(DateTime.Now);
+                DateOnly e = lv.EndDate ?? s;
+
+                int days = e.DayNumber - s.DayNumber + 1;
+                days = Math.Max(1, days);
+
+                int actual = Enumerable.Range(0, days)
+                    .Select(i => s.AddDays(i))
+                    .Count(d => d.DayOfWeek != DayOfWeek.Friday);
+
+                // اعتيادي
+                if (lv.LeaveTypeId == 2 || lv.LeaveTypeId == 5)
+                    regUsedBefore += actual;
+
+                // عارضة
+                if (lv.LeaveTypeId == 1)
+                    casUsedBefore += actual;
+            }
+
+            // ===== الرصيد وقت أخذ الإجازة =====
+            int regRemainingAtThatTime = Math.Max(regTotal - regUsedBefore, 0);
+            int casRemainingAtThatTime = Math.Max(casTotal - casUsedBefore, 0);
+
+            var vm = new EmployeeLeaveVM
+            {
+                Id = leaveData.Leave.Id,
+                EmployeeName = leaveData.Employee.NameAr,
+                DepartmentID = leaveData.Employee.DepartmentId,
+                EmployeeCode = leaveData.Employee.EmpCode,
+                DepartmentName = leaveData.Department?.NameAr ?? "-",
+                LeaveTypeId = leaveData.LeaveType.Id,
+                LeaveTypeName = leaveData.LeaveType.NameAr,
+                StartDate = leaveData.Leave.StartDate,
+                EndDate = leaveData.Leave.EndDate,
+                Reason = leaveData.Leave.Reason,
+                AttachmentPath = leaveData.Leave.AttachmentPath,
                 ActualDays = actualDays,
-                EmployeeTypeName = string.IsNullOrWhiteSpace(leave.EmployeeType?.EmployeeTypeNameAr) ? "-" : leave.EmployeeType.EmployeeTypeNameAr,
-                TotalDays = lastBalance?.TotalDays ?? 0,
-                UsedDays = lastBalance?.UsedDays ?? 0,
-                CasualTotalDays = lastBalance?.CasualTotalDays ?? 0,
-                CasualUsedDays = lastBalance?.CasualUsedDays ?? 0,
-                CasualRemainingDays = lastBalance?.CasualRemainingDays ?? 0,
-                RegularRemainingAfter = regRemaining,
-                CasualRemainingAfter = casRemaining
+                EmployeeTypeName = leaveData.EmployeeType?.EmployeeTypeNameAr ?? "-",
+
+                // بيانات الرصيد
+                TotalDays = regTotal,
+                UsedDays = regUsedBefore,
+                CasualTotalDays = casTotal,
+                CasualUsedDays = casUsedBefore,
+                RegularRemainingAfter = regRemainingAtThatTime,
+                CasualRemainingAfter = casRemainingAtThatTime
             };
 
-            return View("PrintNew", data);
+            return View("PrintNew", vm);
         }
         private void ReloadViewBags(EmployeeLeaveVM model)
         {

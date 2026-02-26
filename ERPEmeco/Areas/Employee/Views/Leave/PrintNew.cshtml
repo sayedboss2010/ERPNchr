@@ -182,8 +182,10 @@
         <!-- تاريخ الإجازة -->
         <div class="row">
             <div class="col">
-                <label class="field">المدة:&nbsp;&nbsp;<span>@Model.ActualDays يوم</span></label>
-                
+                <label class="field">
+                    المدة:
+                    <span>@(Model.ActualDays > 0 ? Model.ActualDays : 1) يوم</span>
+                </label>
             </div>
             <div class="col">
                 
