@@ -370,11 +370,9 @@ namespace YourProjectName.Areas.Employee.Controllers
         {
             // جلب بيانات الإجازة والموظف ونوع الإجازة
             var leave = (from l in _context.HrEmployeeLeaves
-                        
                          join e in _context.HrEmployees on l.EmployeeId equals e.Id
                          join w in _context.EmployeeTypes on e.EmployeeTypeId equals w.Id into pt
                          from w in pt.DefaultIfEmpty() // left join
-                         where l.Id == id
                          join t in _context.HrLeaveTypes on l.LeaveTypeId equals t.Id
                          join d in _context.HrDepartments on e.DepartmentId equals d.Id into dept
                          from d in dept.DefaultIfEmpty() // left join
@@ -385,9 +383,8 @@ namespace YourProjectName.Areas.Employee.Controllers
                              Employee = e,
                              Department = d,
                              LeaveType = t,
-                             EmployeeType=w
+                             EmployeeType = w
                          }).FirstOrDefault();
-
 
             if (leave == null)
                 return Content("❌ لم يتم العثور على الإجازة");
@@ -409,6 +406,15 @@ namespace YourProjectName.Areas.Employee.Controllers
                                        .Select(i => startDate.AddDays(i))
                                        .Count(d => d.DayOfWeek != DayOfWeek.Friday);
 
+            // ===== حساب الرصيد بعد خصم الإجازة الحالية =====
+            int regTotal = lastBalance?.TotalDays ?? 0;
+            int regUsed = lastBalance?.UsedDays ?? 0;
+            int regRemaining = Math.Max(regTotal - regUsed - (leave.Leave.LeaveTypeId == 2 || leave.Leave.LeaveTypeId == 5 ? actualDays : 0), 0);
+
+            int casTotal = lastBalance?.CasualTotalDays ?? 0;
+            int casUsed = lastBalance?.CasualUsedDays ?? 0;
+            int casRemaining = Math.Max(casTotal - casUsed - (leave.Leave.LeaveTypeId == 1 ? actualDays : 0), 0);
+
             var data = new EmployeeLeaveVM
             {
                 Id = leave.Leave.Id,
@@ -416,7 +422,6 @@ namespace YourProjectName.Areas.Employee.Controllers
                 DepartmentID = leave.Employee.DepartmentId,
                 EmployeeCode = leave.Employee.EmpCode,
                 DepartmentName = string.IsNullOrWhiteSpace(leave.Department?.NameAr) ? "-" : leave.Department.NameAr,
-                
                 LeaveTypeId = leave.LeaveType.Id,
                 LeaveTypeName = leave.LeaveType.NameAr,
                 StartDate = leave.Leave.StartDate,
@@ -424,40 +429,15 @@ namespace YourProjectName.Areas.Employee.Controllers
                 Reason = leave.Leave.Reason,
                 AttachmentPath = leave.Leave.AttachmentPath,
                 ActualDays = actualDays,
-                EmployeeTypeName= string.IsNullOrWhiteSpace(leave.EmployeeType?.EmployeeTypeNameAr) ? "-" : leave.EmployeeType.EmployeeTypeNameAr,
+                EmployeeTypeName = string.IsNullOrWhiteSpace(leave.EmployeeType?.EmployeeTypeNameAr) ? "-" : leave.EmployeeType.EmployeeTypeNameAr,
                 TotalDays = lastBalance?.TotalDays ?? 0,
                 UsedDays = lastBalance?.UsedDays ?? 0,
-                
-                CasualTotalDays= lastBalance?.CasualTotalDays ?? 0,
-                CasualUsedDays= lastBalance?.CasualUsedDays ?? 0,
+                CasualTotalDays = lastBalance?.CasualTotalDays ?? 0,
+                CasualUsedDays = lastBalance?.CasualUsedDays ?? 0,
                 CasualRemainingDays = lastBalance?.CasualRemainingDays ?? 0,
-                
+                RegularRemainingAfter = regRemaining,
+                CasualRemainingAfter = casRemaining
             };
-
-            // الاعتيادي
-            int regTotal = lastBalance?.TotalDays ?? 0;
-            int regUsed = lastBalance?.UsedDays ?? 0;
-            int regBefore = regTotal - regUsed;
-
-            data.RegularRemainingAfter = regBefore;
-
-            // العارضة
-            int casTotal = lastBalance?.CasualTotalDays ?? 0;
-            int casUsed = lastBalance?.CasualUsedDays ?? 0;
-            int casBefore = casTotal - casUsed;
-
-            data.CasualRemainingAfter = casBefore;
-
-            //// خصم حسب نوع الإجازة الحالية
-            //if (data.LeaveTypeId == 2 || data.LeaveTypeId == 5)
-            //{
-                //data.RegularRemainingAfter = Math.Max(regBefore - actualDays, 0);
-            //}
-            //else if (data.LeaveTypeId == 1)
-            //{
-            //    data.CasualRemainingAfter = Math.Max(casBefore - actualDays, 0);
-            //}
-
 
             return View("PrintNew", data);
         }
