@@ -210,7 +210,33 @@ namespace YourProjectName.Areas.Employee.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(EmployeeLeaveVM model, IFormFile AttachmentFile)
         {
-            
+            // ==================================================
+            // ❌ منع أخذ اعتيادي في اليوم التالي للعارضة
+            // ==================================================
+            // ==================================================
+            // ❌ منع أخذ اعتيادي في اليوم التالي للعارضة
+            // ==================================================
+            if (model.LeaveTypeId == 2) // اعتيادي
+            {
+                var lastCasualLeave = _context.HrEmployeeLeaves
+                    .Where(x => x.EmployeeId == model.EmployeeId
+                             && x.LeaveTypeId == 1   // عارضة
+                             && x.IsActive)
+                    .OrderByDescending(x => x.EndDate)
+                    .FirstOrDefault();
+
+                if (lastCasualLeave != null && lastCasualLeave.EndDate.HasValue)
+                {
+                    DateOnly blockedDate = lastCasualLeave.EndDate.Value.AddDays(1);
+
+                    if (model.StartDate == blockedDate)
+                    {
+                        TempData["ErrorMessage"] = "❌ لا يمكن أخذ إجازة اعتيادي في اليوم التالي مباشرة لإجازة عارضة.";
+                        ReloadViewBags(model);
+                        return View(model);
+                    }
+                }
+            }
             string attachmentPath = null;
 
             if (AttachmentFile != null && AttachmentFile.Length > 0)
@@ -435,8 +461,25 @@ namespace YourProjectName.Areas.Employee.Controllers
 
             return View("PrintNew", data);
         }
+        private void ReloadViewBags(EmployeeLeaveVM model)
+        {
+            var employees = _context.HrEmployees
+                .Where(e => e.IsActive)
+                .Select(e => new
+                {
+                    e.Id,
+                    Display = e.NameAr + " (" + e.EmpCode + ")"
+                }).ToList();
 
-        [HttpPost]
+            ViewBag.EmployeeOptions = new SelectList(employees, "Id", "Display");
+
+            ViewBag.LeaveTypeId = new SelectList(
+                _context.HrLeaveTypes.Where(a => a.IsActive),
+                "Id",
+                "NameAr",
+                model.LeaveTypeId);
+        }
+        // [HttpPost]
         //public IActionResult DirectManagerAction(int id, bool isApproved,string type)
         //{
         //    var leave = _context.HrEmployeeLeaves.FirstOrDefault(x => x.Id == id);
@@ -486,16 +529,26 @@ namespace YourProjectName.Areas.Employee.Controllers
 
             DateOnly today = DateOnly.FromDateTime(DateTime.Now);
 
-            // منع الموافقة او الرفض لو اليوم > تاريخ الاجازة
-            if (today > leave.StartDate)
+
+            if (!leave.StartDate.HasValue)
+            {
+                return Json(new { success = false, message = "❌ تاريخ بداية الإجازة غير محدد" });
+            }
+
+            DateOnly startDate = leave.StartDate.Value;
+            DateOnly lastAllowedDate = startDate.AddDays(2); // اليومين التاليين بعد بداية الإجازة
+
+            // ==================================================
+            // السماح قبل الإجازة أو يومها واليومين التاليين
+            // ==================================================
+            if (today > lastAllowedDate) // بعد اليومين المسموحين
             {
                 return Json(new
                 {
                     success = false,
-                    message = "لا يمكن الموافقة أو الرفض بعد موعد بداية الإجازة."
+                    message = "❌ لا يمكن الموافقة على الإجازة بعد اليومين التاليين لبداية الإجازة."
                 });
             }
-
             // في حالة مسموح
             if (type == "direct")
             {
