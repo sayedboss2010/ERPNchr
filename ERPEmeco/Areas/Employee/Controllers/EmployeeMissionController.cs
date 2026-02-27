@@ -167,7 +167,18 @@ namespace ERPNchr.Areas.Employee.Controllers
                 ModelState.AddModelError("", "⚠️ هذا الموظف لديه مأمورية تتداخل مع نفس الفترة.");
                 return View(model);
             }
+            bool existsMissionSameDay = _context.HrEmployeeOfficialMissions
+    .Any(m => m.EmployeeId == model.EmployeeId
+           && m.IsActive
+           && m.StartDate <= model.EndDate
+           && m.EndDate >= model.StartDate);
 
+            if (existsMissionSameDay)
+            {
+                ModelState.AddModelError("", "⚠️ هذا الموظف لديه مأمورية في نفس اليوم.");
+                FillViewBags();
+                return View(model);
+            }
             // إنشاء المعرف الجديد
             long HrEmployeeMission_ID = _context.Database
                 .SqlQueryRaw<long>("SELECT NEXT VALUE FOR dbo.HR_EmployeeOfficialMission_SEQ")

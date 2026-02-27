@@ -127,7 +127,27 @@ namespace ERPNchr.Areas.Employee.Controllers
             {
                 int permissionMonth = model.DateOfPermission.Value.Month;
                 int permissionYear = model.DateOfPermission.Value.Year;
-
+                bool existsPermissionSameDay = _context.HrEmployeePermissions
+    .Any(p => p.EmployeeId == model.EmployeeId
+           && p.DateOfPermission.HasValue
+           && p.DateOfPermission.Value >= model.DateOfPermission.Value
+           && p.DateOfPermission.Value <= model.DateOfPermission.Value
+           && p.IsActive);
+                var Emplist = (from e in _context.HrEmployees
+                               where e.IsActive == true
+                               select new
+                               {
+                                   e.Id,
+                                   e.NameAr,
+                                   Display = e.NameAr + " (" + e.EmpCode + ")"
+                               }).ToList();
+                if (existsPermissionSameDay)
+                {
+                    ModelState.AddModelError("", "⚠️ هذا الموظف لديه إذن في نفس اليوم.");
+                    ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
+                    ViewBag.PermissionType = new SelectList(_context.PermissionsTypes, "Id", "NameAr");
+                    return View(model);
+                }
                 bool exists = _context.HrEmployeePermissions
                                       .Any(p => p.EmployeeId == model.EmployeeId
                                              && p.PermissionTypeId == model.PermissionTypeId
@@ -138,21 +158,14 @@ namespace ERPNchr.Areas.Employee.Controllers
 
                 if (exists)
                 {
-                    var Emplist = (from e in _context.HrEmployees
-                                   where e.IsActive == true
-                                   select new
-                                   {
-                                       e.Id,
-                                       e.NameAr,
-                                       Display = e.NameAr + " (" + e.EmpCode + ")"
-                                   }).ToList();
-
+                    
                     ViewBag.EmployeeOptions = new SelectList(Emplist, "Id", "Display");
                     ViewBag.PermissionType = new SelectList(_context.PermissionsTypes, "Id", "NameAr");
 
                     ModelState.AddModelError("", "⚠️ هذا الموظف لديه إذن من نفس النوع في نفس الشهر.");
                     return View(model);
                 }
+
             }
             else
             {

@@ -210,9 +210,7 @@ namespace YourProjectName.Areas.Employee.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(EmployeeLeaveVM model, IFormFile AttachmentFile)
         {
-            // ==================================================
-            // ❌ منع أخذ اعتيادي في اليوم التالي للعارضة
-            // ==================================================
+            
             // ==================================================
             // ❌ منع أخذ اعتيادي في اليوم التالي للعارضة
             // ==================================================
@@ -237,6 +235,55 @@ namespace YourProjectName.Areas.Employee.Controllers
                     }
                 }
             }
+            // ==================================================
+            // ❌ منع عمل أكثر من إجازة في نفس اليوم
+            // ==================================================
+            var hasLeaveSameDay = _context.HrEmployeeLeaves
+                .Where(x => x.EmployeeId == model.EmployeeId
+                         && x.IsActive
+                         // لو عندك حالة موافقة / رفض
+                         && x.DepartmentManagerApproval != false) // عدليها حسب اسم الحقل عندك
+                .Any(x =>
+                    model.StartDate <= x.EndDate &&
+                    model.EndDate >= x.StartDate
+                );
+
+            if (hasLeaveSameDay)
+            {
+                TempData["ErrorMessage"] = "❌ لا يمكن إنشاء أكثر من إجازة في نفس اليوم إلا إذا تم رفض السابقة.";
+                ReloadViewBags(model);
+                return View(model);
+            }
+            // تحقق من وجود مأمورية تتداخل مع الإجازة
+            bool hasMissionConflict = _context.HrEmployeeOfficialMissions
+                .Any(m => m.EmployeeId == model.EmployeeId
+                       && m.IsActive
+                       && m.StartDate <= model.EndDate
+                       && m.EndDate >= model.StartDate);
+
+            if (hasMissionConflict)
+            {
+                TempData["ErrorMessage"] = "❌ لا يمكن إنشاء الإجازة، الموظف لديه مأمورية تتداخل مع نفس الفترة.";
+                ReloadViewBags(model);
+                return View(model);
+            }
+
+            // تحقق من وجود إذن في نفس اليوم
+            bool hasPermissionConflict = _context.HrEmployeePermissions
+                .Any(p => p.EmployeeId == model.EmployeeId
+                       && p.DateOfPermission.HasValue
+                       && model.StartDate <= p.DateOfPermission.Value
+                       && model.EndDate >= p.DateOfPermission.Value
+                       && p.IsActive);
+
+            if (hasPermissionConflict)
+            {
+                TempData["ErrorMessage"] = "❌ لا يمكن إنشاء الإجازة، الموظف لديه إذن في نفس اليوم.";
+                ReloadViewBags(model);
+                return View(model);
+            }
+
+
             string attachmentPath = null;
 
             if (AttachmentFile != null && AttachmentFile.Length > 0)
